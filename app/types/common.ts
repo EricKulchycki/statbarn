@@ -1,1 +1,1 @@
-export type DayAbbrev = 'MON' | 'TUE' | 'WED' | 'THR' | 'FRI' | 'SAT' | 'SUN';
+export type DayAbbrev = 'MON' | 'TUE' | 'WED' | 'THR' | 'FRI' | 'SAT' | 'SUN'

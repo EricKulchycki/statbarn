@@ -28,7 +28,7 @@ module.exports = {
     // React
     {
       files: ["**/*.{js,jsx,ts,tsx}"],
-      plugins: ["react", "jsx-a11y"],
+      plugins: ["react", "jsx-a11y", "react-hooks"],
       extends: [
         "plugin:react/recommended",
         "plugin:react/jsx-runtime",
@@ -67,6 +67,8 @@ module.exports = {
         },
       },
       extends: [
+        "prettier",
+        "plugin:prettier/recommended",
         "plugin:@typescript-eslint/recommended",
         "plugin:import/recommended",
         "plugin:import/typescript",

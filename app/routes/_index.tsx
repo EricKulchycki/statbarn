@@ -1,30 +1,30 @@
-import type { MetaFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
+import type { MetaFunction } from '@remix-run/node'
+import { json } from '@remix-run/node'
 
-import { getTodaysGames, GetTodaysGamesResponse } from "~/data/games";
-import { useLoaderData } from "@remix-run/react";
-import { GameBanner } from "~/components/GameBanner";
+import { useLoaderData } from '@remix-run/react'
+import { GameBanner } from '~/components/GameBanner'
+import { getTodaysGames, GetTodaysGamesResponse } from '~/data/games'
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "54Fighting" },
-    { name: "description", content: "NHL Stat Lines" },
-  ];
-};
+    { title: '54Fighting' },
+    { name: 'description', content: 'NHL Stat Lines' },
+  ]
+}
 
 export async function loader() {
-  const res = await getTodaysGames();
-  const games: GetTodaysGamesResponse = await res.json();
+  const res = await getTodaysGames()
+  const games: GetTodaysGamesResponse = await res.json()
 
-  return json({ games });
+  return json({ games })
 }
 
 export default function Index() {
-  const { games } = useLoaderData<typeof loader>();
+  const { games } = useLoaderData<typeof loader>()
 
   return (
     <div className="flex h-screen">
       <GameBanner gamesThisWeek={games.gameWeek} />
     </div>
-  );
+  )
 }

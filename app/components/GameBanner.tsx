@@ -1,16 +1,18 @@
-import { NHLGameDay } from "~/types/game";
-import { TodaysGames } from "./TodaysGames";
+import { NHLGameDay } from '~/types/game'
+import { TodaysGames } from './TodaysGames'
 
 interface Props {
-    gamesThisWeek: NHLGameDay[]
+  gamesThisWeek: NHLGameDay[]
 }
 
 export function GameBanner(props: Props) {
-    const { gamesThisWeek } = props;
+  const { gamesThisWeek } = props
 
-    return (
-        <div className="flex">
-            {gamesThisWeek.map(gw => <TodaysGames key={gw.date} games={gw.games} />)}
-        </div>
-    )
+  return (
+    <div className="flex">
+      {gamesThisWeek.map((gw) => (
+        <TodaysGames key={gw.date} games={gw.games} />
+      ))}
+    </div>
+  )
 }

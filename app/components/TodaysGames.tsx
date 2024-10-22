@@ -8,7 +8,7 @@ interface Props {
 export function TodaysGames(props: Props) {
     return <div className="py-2 flex w-full h-fit bg-slate-900">
         {props.games.map(g => <BannerGame key={g.id} game={g} />)}
-        <div className="border-solid border-r-2" />
+        <div className="border-solid border-r-2 border-slate-700" />
     </div>
 }
 

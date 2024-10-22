@@ -7,7 +7,7 @@ interface Props {
 
 export function TodaysGames(props: Props) {
   return (
-    <div className="py-2 flex w-full h-fit bg-slate-900">
+    <div className="flex min-w-max">
       {props.games.map((g) => (
         <BannerGame key={g.id} game={g} />
       ))}
@@ -23,19 +23,29 @@ interface BannerGameProps {
 function BannerGame(props: BannerGameProps) {
   const { game } = props
   return (
-    <div className="px-2">
-      <div className="flex justify-between">
+    <div className="px-2 min-w-fit">
+      <GameTeam>
+        <img className="size-6" src={game.awayTeam.logo} alt="away team logo" />
         <TeamName>{game.awayTeam.abbrev}</TeamName>
-        <b>{game.awayTeam.score}</b>
-      </div>
-      <div className="flex justify-between">
+        <Score>{game.awayTeam.score}</Score>
+      </GameTeam>
+      <GameTeam>
+        <img className="size-6" src={game.homeTeam.logo} alt="home team logo" />
         <TeamName>{game.homeTeam.abbrev}</TeamName>
-        <b>{game.homeTeam.score}</b>
-      </div>
+        <Score>{game.homeTeam.score}</Score>
+      </GameTeam>
     </div>
   )
 }
 
+function GameTeam(props: PropsWithChildren) {
+  return <div className="flex justify-between">{props.children}</div>
+}
+
 function TeamName(props: PropsWithChildren) {
-  return <p className="text-slate-400 pr-2">{props.children}</p>
+  return <div className="text-slate-400 px-2">{props.children}</div>
+}
+
+function Score(props: PropsWithChildren) {
+  return <b className="ml-auto">{props.children}</b>
 }

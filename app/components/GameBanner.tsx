@@ -9,7 +9,7 @@ export function GameBanner(props: Props) {
   const { gamesThisWeek } = props
 
   return (
-    <div className="flex">
+    <div className="p-2 bg-slate-900 flex w-full h-fit overflow-scroll">
       {gamesThisWeek.map((gw) => (
         <TodaysGames key={gw.date} games={gw.games} />
       ))}

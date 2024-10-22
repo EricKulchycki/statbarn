@@ -23,7 +23,7 @@ export default function Index() {
   const { games } = useLoaderData<typeof loader>()
 
   return (
-    <div className="flex h-screen">
+    <div>
       <GameBanner gamesThisWeek={games.gameWeek} />
     </div>
   )

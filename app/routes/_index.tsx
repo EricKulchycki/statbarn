@@ -1,9 +1,9 @@
 import type { MetaFunction } from '@remix-run/node'
 import { json } from '@remix-run/node'
-
 import { useLoaderData } from '@remix-run/react'
+
 import { GameBanner } from '~/components/GameBanner'
-import { getTodaysGames, GetTodaysGamesResponse } from '~/data/games'
+import { getTodaysGames } from '~/data/games'
 
 export const meta: MetaFunction = () => {
   return [
@@ -13,14 +13,17 @@ export const meta: MetaFunction = () => {
 }
 
 export async function loader() {
-  const res = await getTodaysGames()
-  const games: GetTodaysGamesResponse = await res.json()
+  const games = await getTodaysGames()
 
   return json({ games })
 }
 
 export default function Index() {
-  const { games } = useLoaderData<typeof loader>()
+  const gameFetcher = useLoaderData<typeof loader>()
+
+  const games = gameFetcher?.games
+
+  if (!games) return null
 
   return (
     <div>

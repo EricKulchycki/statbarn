@@ -82,7 +82,11 @@ function TeamName(props: PropsWithChildren<{ isWinning: boolean }>) {
 }
 
 function Score(props: PropsWithChildren) {
-  return <b className="ml-auto">{props.children}</b>
+  return (
+    <b className="ml-auto text-slate-50 dark:text-slate-300">
+      {props.children}
+    </b>
+  )
 }
 
 interface GameDateProps {

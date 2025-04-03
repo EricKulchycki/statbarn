@@ -14,3 +14,12 @@ export interface NHLTeam {
   radioLink: string
   score: number
 }
+
+export interface TeamLite {
+  id: number
+  franchiseId: number
+  fullName: string
+  leagueId: number
+  rawTricode: string
+  triCode: string
+}

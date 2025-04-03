@@ -1,11 +1,11 @@
 import type { MetaFunction } from '@remix-run/node'
 import { json } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
+import { calculateSeasonELO } from 'lib/elo'
 import { ELO } from '~/components/ELO'
 
 import { GameBanner } from '~/components/GameBanner'
 import { getTodaysGames } from '~/data/games'
-import { fetchGamesForTeam } from '~/data/team-games.fetch'
 import { getTeams } from '~/data/teams'
 
 export const meta: MetaFunction = () => {
@@ -17,13 +17,11 @@ export const meta: MetaFunction = () => {
 
 export async function loader() {
   const games = await getTodaysGames()
-  await getTeams()
-  const seasonGames = await fetchGamesForTeam(
-    games.gameWeek[0].games[0].homeTeam,
-    '20232024'
-  )
+  const teams = await getTeams()
 
-  return json({ games, seasonGames })
+  calculateSeasonELO('20232024', teams)
+
+  return json({ games })
 }
 
 export default function Index() {

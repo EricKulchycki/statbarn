@@ -22,4 +22,5 @@ export interface TeamLite {
   leagueId: number
   rawTricode: string
   triCode: string
+  logo?: string
 }

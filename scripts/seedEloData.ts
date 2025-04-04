@@ -1,32 +1,8 @@
-import mongoose, { Schema, Document, Model } from 'mongoose'
 import { Database } from '../lib/db'
-import { calculateSeasonELO, SeasonELO } from 'lib/elo'
+import { calculateSeasonELO } from 'lib/elo'
+import { SeasonELOModel } from 'models/elo'
 import { getTeams } from '~/data/teams'
-
-const seasonSchema: Schema = new Schema({
-  startYear: { type: Number, required: true },
-  endYear: { type: Number, required: true },
-})
-
-const eloDataSchema: Schema = new Schema(
-  {
-    abbrev: { type: String, required: true },
-    elo: { type: Number, required: true },
-    season: { type: seasonSchema, required: true },
-  },
-  {
-    collection: 'seasonelo',
-  }
-)
-
-eloDataSchema.index({ abbrev: 1, season: 1 }, { unique: true })
-
-interface SeasonELODocument extends Document {}
-
-// Create the model
-const SeasonELOModel: Model<SeasonELODocument> =
-  mongoose.model<SeasonELODocument>('seasonelo', eloDataSchema)
-
+import { SeasonELO } from '~/types/elo'
 ;(async () => {
   const db = Database.getInstance()
 

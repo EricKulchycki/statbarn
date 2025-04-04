@@ -1,6 +1,7 @@
 import _ from 'lodash'
 
 import { fetchGamesForTeam } from '~/data/team-games.fetch'
+import { SeasonELO } from '~/types/elo'
 import { NHLGame } from '~/types/game'
 import { TeamLite } from '~/types/team'
 import { Season } from '~/types/time'
@@ -9,15 +10,6 @@ const K = 40
 
 interface ELOResults {
   [abbrev: string]: number
-}
-
-export interface SeasonELO {
-  abbrev: string
-  elo: number
-  season: {
-    startYear: number
-    endYear: number
-  }
 }
 
 export async function calculateSeasonELO(
@@ -69,48 +61,42 @@ export async function calculateSeasonELO(
 function calcHomeTeamELO(game: NHLGame, elos: ELOResults) {
   return (
     elos[game.homeTeam.abbrev] +
-    K * (didHomeTeamWin(game) - calculateHomeExpectedResult(game, elos))
+    K *
+      (didTeamWin(game, 'homeTeam') -
+        calculateExpectedResult(game, elos, 'homeTeam'))
   )
 }
 
 function calcAwayTeamELO(game: NHLGame, elos: ELOResults) {
   return (
     elos[game.awayTeam.abbrev] +
-    K * (didAwayTeamWin(game) - calculateAwayExpectedResult(game, elos))
+    K *
+      (didTeamWin(game, 'awayTeam') -
+        calculateExpectedResult(game, elos, 'awayTeam'))
   )
 }
 
-function calculateHomeExpectedResult(game: NHLGame, elos: ELOResults) {
+function calculateExpectedResult(
+  game: NHLGame,
+  elos: ELOResults,
+  teamKey: 'homeTeam' | 'awayTeam'
+): number {
+  const opponentKey = teamKey === 'homeTeam' ? 'awayTeam' : 'homeTeam'
   return (
     1 /
     (1 +
       Math.pow(
         10,
-        (elos[game.awayTeam.abbrev] - elos[game.homeTeam.abbrev]) / 750
+        (elos[game[opponentKey].abbrev] - elos[game[teamKey].abbrev]) / 400
       ))
   )
 }
 
-function calculateAwayExpectedResult(game: NHLGame, elos: ELOResults) {
-  return (
-    1 /
-    (1 +
-      Math.pow(
-        10,
-        (elos[game.homeTeam.abbrev] - elos[game.awayTeam.abbrev]) / 750
-      ))
-  )
-}
-
-function didHomeTeamWin(game: NHLGame): 1 | 0 {
-  if (game.homeTeam.score > game.awayTeam.score) {
-    return 1
-  }
-  return 0
-}
-
-function didAwayTeamWin(game: NHLGame): 1 | 0 {
-  if (game.homeTeam.score < game.awayTeam.score) {
+function didTeamWin(game: NHLGame, teamKey: 'homeTeam' | 'awayTeam'): 1 | 0 {
+  if (
+    game[teamKey].score >
+    game[teamKey === 'homeTeam' ? 'awayTeam' : 'homeTeam'].score
+  ) {
     return 1
   }
   return 0

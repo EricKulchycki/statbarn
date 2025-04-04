@@ -5,17 +5,31 @@ import { NHLGame } from '~/types/game'
 import { TeamLite } from '~/types/team'
 import { Season } from '~/types/time'
 
-const K = 25
+const K = 40
 
 interface ELOResults {
   [abbrev: string]: number
 }
 
-export async function calculateSeasonELO(season: Season, teams: TeamLite[]) {
+export interface SeasonELO {
+  abbrev: string
+  elo: number
+  season: {
+    startYear: number
+    endYear: number
+  }
+}
+
+export async function calculateSeasonELO(
+  season: Season,
+  teams: TeamLite[],
+  lastSeasonData: SeasonELO[] = []
+) {
   const elos: ELOResults = {}
 
   teams.forEach((team) => {
-    elos[team.triCode] = 1500
+    elos[team.triCode] =
+      lastSeasonData.find((elo) => elo.abbrev === team.triCode)?.elo ?? 1500
   })
 
   const gamesDA = await Promise.all(
@@ -36,7 +50,20 @@ export async function calculateSeasonELO(season: Season, teams: TeamLite[]) {
     elos[game.awayTeam.abbrev] = calcAwayTeamELO(game, elos)
   })
 
-  console.log(_.pickBy(elos, (elo) => elo !== 1500))
+  const elosList: SeasonELO[] = Object.keys(elos)
+    .map((key) => {
+      return {
+        abbrev: key,
+        elo: elos[key],
+        season: {
+          startYear: parseInt(season.substring(0, 4)),
+          endYear: parseInt(season.substring(4, 8)),
+        },
+      }
+    })
+    .filter((elo) => elo.elo !== 1500)
+
+  return _.orderBy(elosList, 'elo')
 }
 
 function calcHomeTeamELO(game: NHLGame, elos: ELOResults) {
@@ -59,7 +86,7 @@ function calculateHomeExpectedResult(game: NHLGame, elos: ELOResults) {
     (1 +
       Math.pow(
         10,
-        (elos[game.awayTeam.abbrev] - elos[game.homeTeam.abbrev]) / 400
+        (elos[game.awayTeam.abbrev] - elos[game.homeTeam.abbrev]) / 750
       ))
   )
 }
@@ -70,7 +97,7 @@ function calculateAwayExpectedResult(game: NHLGame, elos: ELOResults) {
     (1 +
       Math.pow(
         10,
-        (elos[game.homeTeam.abbrev] - elos[game.awayTeam.abbrev]) / 400
+        (elos[game.homeTeam.abbrev] - elos[game.awayTeam.abbrev]) / 750
       ))
   )
 }

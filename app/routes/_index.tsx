@@ -19,7 +19,8 @@ export async function loader() {
   const games = await getTodaysGames()
   const teams = await getTeams()
 
-  calculateSeasonELO('20232024', teams)
+  const elos = await calculateSeasonELO('20142015', teams)
+  console.log(elos)
 
   return json({ games })
 }

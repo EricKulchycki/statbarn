@@ -6,7 +6,7 @@ import { NHLGame } from '~/types/game'
 import { TeamLite } from '~/types/team'
 import { Season } from '~/types/time'
 
-const K = 40
+const K = 32
 
 interface ELOResults {
   [abbrev: string]: number

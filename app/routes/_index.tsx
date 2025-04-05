@@ -6,6 +6,7 @@ import { getCurrentNHLSeason } from 'utils/currentSeason'
 import { ELO } from '~/components/ELO'
 
 import { GameBanner } from '~/components/GameBanner'
+import { GamePredictions } from '~/components/GamePredictions'
 import { getTodaysGames } from '~/data/games'
 import { getLatestEloData } from '~/data/latest-elo.get'
 import { getTeams } from '~/data/teams'
@@ -43,7 +44,21 @@ export default function Index() {
   return (
     <div>
       <GameBanner gamesThisWeek={games.gameWeek} />
-      <ELO elos={elos} teams={teams} />
+      <div className="flex flex-col md:flex-row">
+        <ELO elos={elos} teams={teams} />
+        <div>
+          <GamePredictions
+            dayLabel="Today"
+            todaysGames={games.gameWeek[0]}
+            elos={elos}
+          />
+          <GamePredictions
+            dayLabel="Tomorrow"
+            todaysGames={games.gameWeek[1]}
+            elos={elos}
+          />
+        </div>
+      </div>
     </div>
   )
 }

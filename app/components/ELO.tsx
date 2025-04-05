@@ -9,17 +9,19 @@ interface Props {
 }
 
 export function ELO(props: Props) {
-  console.log(props.teams)
   return (
-    <div className="text-white border-2 border-gray-500 rounded-lg p-4 m-8 w-1/4">
+    <div className="p-4 m-8 w-1/6 max-h-fit">
       <h2 className="text-lg font-semibold mb-4">
         ELO Ratings - {getCurrentNHLSeason()}
       </h2>
       {_.orderBy(props.elos, 'elo', 'desc').map((elo) => {
         const team = props.teams.find((team) => team.triCode === elo.abbrev)
         return (
-          <div key={elo.abbrev} className="flex items-center mb-2">
-            <div className="w-1/2 flex items-center">
+          <div
+            key={elo.abbrev}
+            className="flex items-center justify-between mb-2 bg-gray-800 p-2 rounded-xl"
+          >
+            <div className="flex-1 flex items-center">
               <img
                 src={team?.logo}
                 alt={team?.triCode}

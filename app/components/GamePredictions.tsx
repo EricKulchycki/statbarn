@@ -22,8 +22,8 @@ function GamePredictions({
   }
 
   return (
-    <div className="p-4 m-8 max-h-fit max-w-60">
-      <h2 className="text-lg font-semibold mb-4 text-center">
+    <div className="p-4 m-8 max-h-fit max-w-80">
+      <h2 className="text-lg font-semibold mb-4">
         Game Predictions for {dayLabel}
       </h2>
       <div className="flex flex-col gap-3">

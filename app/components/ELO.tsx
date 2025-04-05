@@ -15,6 +15,9 @@ export function ELO(props: Props) {
         ELO Ratings - {getCurrentNHLSeason()}
       </h2>
       {_.orderBy(props.elos, 'elo', 'desc').map((elo) => {
+        if (elo.abbrev === 'ARI') {
+          return null
+        }
         const team = props.teams.find((team) => team.triCode === elo.abbrev)
         return (
           <div
@@ -30,7 +33,7 @@ export function ELO(props: Props) {
               <p className="mr-4">{elo.abbrev}</p>
               <div className="h-[1px] border-[0.5px] w-full mr-2" />
             </div>
-            <b className="justify-self-end">{elo.elo.toFixed(0)} pts</b>
+            <b className="justify-self-end">{elo.elo?.toFixed(0)} pts</b>
           </div>
         )
       })}

@@ -38,6 +38,9 @@ export async function calculateSeasonELO(
   const seasonGames = gamesDA.flat().filter((game) => game.gameType === 2)
 
   _.orderBy(seasonGames, 'startTimeUTC').forEach((game) => {
+    if (game.startTimeUTC > new Date().toISOString()) {
+      return
+    }
     elos[game.homeTeam.abbrev] = calcHomeTeamELO(game, elos)
     elos[game.awayTeam.abbrev] = calcAwayTeamELO(game, elos)
   })
@@ -59,18 +62,32 @@ export async function calculateSeasonELO(
 }
 
 function calcHomeTeamELO(game: NHLGame, elos: ELOResults) {
+  const goalDiff = Math.abs(game.awayTeam.score - game.homeTeam.score)
+  let adjustedK = K
+  if (goalDiff) {
+    adjustedK = K * (1 + goalDiff * 0.1) // Adjust K based on goal difference
+    adjustedK = adjustedK > 100 ? 100 : adjustedK // Cap K at 100
+  }
+
   return (
     elos[game.homeTeam.abbrev] +
-    K *
+    adjustedK *
       (didTeamWin(game, 'homeTeam') -
         calculateExpectedResult(game, elos, 'homeTeam'))
   )
 }
 
 function calcAwayTeamELO(game: NHLGame, elos: ELOResults) {
+  const goalDiff = Math.abs(game.awayTeam.score - game.homeTeam.score)
+  let adjustedK = K
+  if (goalDiff) {
+    adjustedK = K * (1 + goalDiff * 0.18) // Adjust K based on goal difference
+    adjustedK = adjustedK > 100 ? 100 : adjustedK // Cap K at 100
+  }
+
   return (
     elos[game.awayTeam.abbrev] +
-    K *
+    adjustedK *
       (didTeamWin(game, 'awayTeam') -
         calculateExpectedResult(game, elos, 'awayTeam'))
   )
@@ -82,14 +99,17 @@ function calculateExpectedResult(
   teamKey: 'homeTeam' | 'awayTeam'
 ): number {
   const opponentKey = teamKey === 'homeTeam' ? 'awayTeam' : 'homeTeam'
-  return (
-    1 /
-    (1 +
-      Math.pow(
-        10,
-        (elos[game[opponentKey].abbrev] - elos[game[teamKey].abbrev]) / 400
-      ))
-  )
+  const homeAdvFactor = 150 // home ice advantage
+  let opponentElo = elos[game[opponentKey].abbrev]
+  if (opponentKey === 'homeTeam') {
+    opponentElo += homeAdvFactor // add home ice advantage
+  }
+  let teamElo = elos[game[teamKey].abbrev]
+  if (teamKey === 'homeTeam') {
+    teamElo += homeAdvFactor // add home ice advantage
+  }
+  const ratingDiff = opponentElo - teamElo
+  return 1 / (1 + Math.pow(10, ratingDiff / 400))
 }
 
 function didTeamWin(game: NHLGame, teamKey: 'homeTeam' | 'awayTeam'): 1 | 0 {

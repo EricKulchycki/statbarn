@@ -13,7 +13,7 @@ import { getTeams } from '~/data/teams'
 
 export const meta: MetaFunction = () => {
   return [
-    { title: '54Fighting' },
+    { title: 'bethow' },
     { name: 'description', content: 'NHL Stat Lines' },
   ]
 }

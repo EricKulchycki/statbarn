@@ -43,10 +43,23 @@ function GamePredictions({
           const lossClassName = 'border-b-red-600 border-b-2 pb-1'
           const winClassName = 'border-b-green-600 border-b-2 pb-1'
 
+          let predictionCorrect = false
+          if (homeWinProbability > awayWinProbability) {
+            predictionCorrect = game.homeTeam.score > game.awayTeam.score
+          } else {
+            predictionCorrect = game.awayTeam.score > game.homeTeam.score
+          }
+
+          const border = predictionCorrect
+            ? 'border-green-600 border-2'
+            : 'border-red-600 border-2'
+
+          const isGameOver = new Date(game.startTimeUTC) < new Date()
+
           return (
             <div
               key={`${game.homeTeam.abbrev}-${game.awayTeam.abbrev}`}
-              className="bg-gray-800 p-2 rounded-xl"
+              className={`bg-gray-800 p-2 rounded-xl ${isGameOver ? border : ''}`}
             >
               <div className="flex items-center justify-around">
                 <div

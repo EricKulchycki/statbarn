@@ -13,7 +13,7 @@ import { getTeams } from '~/data/teams'
 
 export const meta: MetaFunction = () => {
   return [
-    { title: 'bethow' },
+    { title: 'bet how' },
     { name: 'description', content: 'NHL Stat Lines' },
   ]
 }

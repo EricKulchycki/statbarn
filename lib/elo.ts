@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { getStartOfDay } from 'utils/currentSeason'
 
 import { fetchGamesForTeam } from '~/data/team-games.fetch'
 import { SeasonELO } from '~/types/elo'
@@ -15,7 +16,8 @@ interface ELOResults {
 export async function calculateSeasonELO(
   season: Season,
   teams: TeamLite[],
-  lastSeasonData: SeasonELO[] = []
+  lastSeasonData: SeasonELO[] = [],
+  date: Date = new Date()
 ) {
   const elos: ELOResults = {}
 
@@ -38,7 +40,11 @@ export async function calculateSeasonELO(
   const seasonGames = gamesDA.flat().filter((game) => game.gameType === 2)
 
   _.orderBy(seasonGames, 'startTimeUTC').forEach((game) => {
-    if (game.startTimeUTC > new Date().toISOString()) {
+    if (
+      new Date(game.startTimeUTC) > getStartOfDay(new Date()) ||
+      new Date(game.startTimeUTC) > date ||
+      game.gameState !== 'OFF'
+    ) {
       return
     }
     elos[game.homeTeam.abbrev] = calcHomeTeamELO(game, elos)

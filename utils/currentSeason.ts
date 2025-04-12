@@ -12,3 +12,26 @@ export function getCurrentNHLSeason(): string {
     return `${currentYear - 1}${currentYear}`
   }
 }
+
+export function getYesterdayDate(): Date {
+  const now = new Date()
+  const yesterday = new Date(now)
+  yesterday.setDate(now.getDate() - 1) // Subtract one day
+  return yesterday
+}
+
+export function getYesterdayDateReadable(): string {
+  const now = new Date()
+  const yesterday = new Date(now)
+  yesterday.setDate(now.getDate() - 1) // Subtract one day
+
+  const year = yesterday.getFullYear()
+  const month = String(yesterday.getMonth() + 1).padStart(2, '0') // Months are 0-based
+  const day = String(yesterday.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
+export function getStartOfDay(date: Date = new Date()): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+}

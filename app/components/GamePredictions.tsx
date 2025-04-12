@@ -1,5 +1,6 @@
 import { SeasonELO } from '~/types/elo'
 import { NHLGameDay } from '~/types/game'
+import { Live } from './Live'
 
 const calculateWinProbability = (homeELO: number, awayELO: number): number => {
   const eloDifference = homeELO - awayELO
@@ -22,7 +23,7 @@ function GamePredictions({
   }
 
   return (
-    <div className="p-4 m-8 max-h-fit max-w-80">
+    <div className="p-4 m-8 max-h-fit">
       <h2 className="text-lg font-semibold mb-4">
         Game Predictions for {dayLabel}
       </h2>
@@ -56,6 +57,8 @@ function GamePredictions({
 
           const isGameOver = new Date(game.startTimeUTC) < new Date()
 
+          const isLive = game.gameState === 'LIVE'
+
           return (
             <div
               key={`${game.homeTeam.abbrev}-${game.awayTeam.abbrev}`}
@@ -76,7 +79,10 @@ function GamePredictions({
                   />
                   <p>{(awayWinProbability * 100).toFixed(0)}%</p>
                 </div>
-                <p>@</p>
+                <div className="flex flex-col items-center gap-2">
+                  <p>@</p>
+                  {isLive && <Live />}
+                </div>
                 <div
                   className={
                     homeWinProbability > awayWinProbability

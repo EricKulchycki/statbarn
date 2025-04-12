@@ -2,12 +2,16 @@ import type { MetaFunction } from '@remix-run/node'
 import { json } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
 import { calculateSeasonELO } from 'lib/elo'
-import { getCurrentNHLSeason } from 'utils/currentSeason'
+import {
+  getCurrentNHLSeason,
+  getYesterdayDate,
+  getYesterdayDateReadable,
+} from 'utils/currentSeason'
 import { ELO } from '~/components/ELO'
 
 import { GameBanner } from '~/components/GameBanner'
 import { GamePredictions } from '~/components/GamePredictions'
-import { getTodaysGames } from '~/data/games'
+import { getGamesByDate, getTodaysGames } from '~/data/games'
 import { getLatestEloData } from '~/data/latest-elo.get'
 import { getTeams } from '~/data/teams'
 
@@ -20,6 +24,7 @@ export const meta: MetaFunction = () => {
 
 export async function loader() {
   const games = await getTodaysGames()
+  const yesterdaysGames = await getGamesByDate(getYesterdayDateReadable())
   const teams = await getTeams()
   const lastSeasonElos = await getLatestEloData()
 
@@ -29,14 +34,23 @@ export async function loader() {
     lastSeasonElos
   )
 
-  return json({ games, elos, teams })
+  const yesterdayElos = await calculateSeasonELO(
+    getCurrentNHLSeason(),
+    teams,
+    lastSeasonElos,
+    getYesterdayDate()
+  )
+
+  return json({ games, elos, teams, yesterdaysGames, yesterdayElos })
 }
 
 export default function Index() {
   const gameFetcher = useLoaderData<typeof loader>()
 
   const games = gameFetcher?.games
+  const yesterdaysGames = gameFetcher?.yesterdaysGames
   const elos = gameFetcher?.elos
+  const yesterdayElos = gameFetcher?.yesterdayElos
   const teams = gameFetcher?.teams
 
   if (!games) return null
@@ -46,7 +60,12 @@ export default function Index() {
       <GameBanner gamesThisWeek={games.gameWeek} />
       <div className="flex flex-col md:flex-row">
         <ELO elos={elos} teams={teams} />
-        <div>
+        <div className="flex">
+          <GamePredictions
+            dayLabel="Yesterday"
+            todaysGames={yesterdaysGames}
+            elos={yesterdayElos}
+          />
           <GamePredictions
             dayLabel="Today"
             todaysGames={games.gameWeek[0]}

@@ -14,3 +14,12 @@ export async function getTodaysGames() {
   const games: GetTodaysGamesResponse = await res.json()
   return games
 }
+
+interface GetGamesByDateResponse extends NHLGameDay {}
+
+export async function getGamesByDate(date: string) {
+  const dt = DateTime.fromISO(date)
+  const res = await fetch(`https://api-web.nhle.com/v1/score/${dt.toISODate()}`)
+  const games: GetGamesByDateResponse = await res.json()
+  return games
+}

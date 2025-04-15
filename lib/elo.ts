@@ -1,4 +1,5 @@
 import _ from 'lodash'
+// import { PredictionModel } from 'models/prediction'
 import { getStartOfDay } from 'utils/currentSeason'
 
 import { fetchGamesForTeam } from '~/data/team-games.fetch'
@@ -7,17 +8,29 @@ import { NHLGame } from '~/types/game'
 import { TeamLite } from '~/types/team'
 import { Season } from '~/types/time'
 
+export const calculateWinProbability = (
+  homeELO: number,
+  awayELO: number
+): number => {
+  const eloDifference = homeELO - awayELO
+  return 1 / (1 + Math.pow(10, -eloDifference / 400))
+}
+
 const K = 32
 
 interface ELOResults {
   [abbrev: string]: number
 }
 
+/* 
+  date is used to limit to a certain date within the season
+*/
 export async function calculateSeasonELO(
   season: Season,
   teams: TeamLite[],
   lastSeasonData: SeasonELO[] = [],
-  date: Date = new Date()
+  date: Date = new Date(),
+  model: 'realtime' | 'v1' = 'realtime'
 ) {
   const elos: ELOResults = {}
 
@@ -39,7 +52,7 @@ export async function calculateSeasonELO(
   // only regular season games
   const seasonGames = gamesDA.flat().filter((game) => game.gameType === 2)
 
-  _.orderBy(seasonGames, 'startTimeUTC').forEach((game) => {
+  _.orderBy(seasonGames, 'startTimeUTC').map((game) => {
     if (
       new Date(game.startTimeUTC) > getStartOfDay(new Date()) ||
       new Date(game.startTimeUTC) > date ||
@@ -49,7 +62,11 @@ export async function calculateSeasonELO(
     }
     elos[game.homeTeam.abbrev] = calcHomeTeamELO(game, elos)
     elos[game.awayTeam.abbrev] = calcAwayTeamELO(game, elos)
+
+    return createPrediction(game, elos, model)
   })
+
+  // await PredictionModel.insertMany(predictions.filter((p) => p != null))
 
   const elosList: SeasonELO[] = Object.keys(elos)
     .map((key) => {
@@ -65,6 +82,38 @@ export async function calculateSeasonELO(
     .filter((elo) => elo.elo !== 1500)
 
   return _.orderBy(elosList, 'elo')
+}
+
+function createPrediction(game: NHLGame, elos: ELOResults, model: string) {
+  const winProb = calculateWinProbability(
+    elos[game.homeTeam.abbrev],
+    elos[game.awayTeam.abbrev]
+  )
+
+  const gameWinner =
+    game.homeTeam.score > game.awayTeam.score
+      ? game.homeTeam.abbrev
+      : game.awayTeam.abbrev
+
+  const predictedWinner =
+    winProb > 0.5 ? game.homeTeam.abbrev : game.awayTeam.abbrev
+
+  return {
+    gameId: game.id,
+    homeTeam: game.homeTeam.abbrev,
+    awayTeam: game.awayTeam.abbrev,
+    predictedWinner,
+    homeTeamWinProbability: winProb,
+    awayTeamWinProbability: 1 - winProb,
+    gameDate: new Date(game.startTimeUTC),
+    modelVersion: model,
+    result: {
+      homeTeamScore: game.homeTeam.score,
+      awayTeamScore: game.awayTeam.score,
+      winner: gameWinner,
+      correctPrediction: predictedWinner === gameWinner,
+    },
+  }
 }
 
 function calcHomeTeamELO(game: NHLGame, elos: ELOResults) {

@@ -1,16 +1,14 @@
 import { SeasonELO } from '~/types/elo'
 import { NHLGameDay } from '~/types/game'
 import { Live } from './Live'
-
-const calculateWinProbability = (homeELO: number, awayELO: number): number => {
-  const eloDifference = homeELO - awayELO
-  return 1 / (1 + Math.pow(10, -eloDifference / 400))
-}
+import { PredictionDocument } from 'models/prediction'
+import { calculateGamePrediction } from 'lib/predictions'
 
 interface GamePredictionsProps {
   dayLabel: string
   todaysGames: NHLGameDay
   elos: SeasonELO[]
+  predictions?: PredictionDocument[]
 }
 
 function GamePredictions({
@@ -29,17 +27,8 @@ function GamePredictions({
       </h2>
       <div className="flex flex-col gap-3">
         {todaysGames.games.map((game) => {
-          const homeTeamELO =
-            elos.find((team) => team.abbrev === game.homeTeam.abbrev)?.elo || 0
-          const awayTeamELO =
-            elos.find((team) => team.abbrev === game.awayTeam.abbrev)?.elo || 0
-
-          const homeWinProbability = calculateWinProbability(
-            homeTeamELO,
-            awayTeamELO
-          )
-
-          const awayWinProbability = 1 - homeWinProbability
+          const { homeWinProbability, awayWinProbability } =
+            calculateGamePrediction(elos, game)
 
           const lossClassName = 'border-b-red-600 border-b-2 pb-1'
           const winClassName = 'border-b-green-600 border-b-2 pb-1'

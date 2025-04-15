@@ -13,6 +13,7 @@ import { GameBanner } from '~/components/GameBanner'
 import { GamePredictions } from '~/components/GamePredictions'
 import { getGamesByDate, getTodaysGames } from '~/data/games'
 import { getLatestEloData } from '~/data/latest-elo.get'
+import { getPredictions } from '~/data/predictions'
 import { getTeams } from '~/data/teams'
 
 export const meta: MetaFunction = () => {
@@ -28,6 +29,8 @@ export async function loader() {
   const teams = await getTeams()
   const lastSeasonElos = await getLatestEloData()
 
+  const yesterdaysPredictions = await getPredictions(getYesterdayDate())
+
   const elos = await calculateSeasonELO(
     getCurrentNHLSeason(),
     teams,
@@ -41,7 +44,14 @@ export async function loader() {
     getYesterdayDate()
   )
 
-  return json({ games, elos, teams, yesterdaysGames, yesterdayElos })
+  return json({
+    games,
+    elos,
+    teams,
+    yesterdaysGames,
+    yesterdayElos,
+    yesterdaysPredictions,
+  })
 }
 
 export default function Index() {

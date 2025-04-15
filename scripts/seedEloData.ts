@@ -1,6 +1,7 @@
 import { Database } from '../lib/db'
 import { calculateSeasonELO } from 'lib/elo'
 import { SeasonELOModel } from 'models/elo'
+import { PredictionModel } from 'models/prediction'
 import { getTeams } from '~/data/teams'
 import { SeasonELO } from '~/types/elo'
 ;(async () => {
@@ -9,6 +10,9 @@ import { SeasonELO } from '~/types/elo'
   try {
     // Connect to the database
     await db.connect()
+
+    await SeasonELOModel.deleteMany({})
+    await PredictionModel.deleteMany({})
 
     const teams = await getTeams()
 
@@ -19,7 +23,9 @@ import { SeasonELO } from '~/types/elo'
       const seedData: SeasonELO[] = await calculateSeasonELO(
         `${season}${season + 1}`,
         teams,
-        lastSeasonData
+        lastSeasonData,
+        new Date(),
+        'v1'
       )
       lastSeasonData = seedData
       season += 1

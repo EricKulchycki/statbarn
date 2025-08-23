@@ -9,6 +9,13 @@ interface GameBannerProps {
 export function GameBanner(props: GameBannerProps) {
   const { gamesThisWeek } = props
 
+  if (
+    !gamesThisWeek ||
+    gamesThisWeek.every((day: NHLGameDay) => day.numberOfGames === 0)
+  ) {
+    return null
+  }
+
   return (
     <div className="p-2 flex w-full h-fit overflow-x-scroll overflow-y-hidden">
       {gamesThisWeek.map((gw) => (

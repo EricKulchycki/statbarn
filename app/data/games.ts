@@ -1,12 +1,12 @@
 import { DateTime } from 'luxon'
-import { NHLGameDay } from '~/types/game'
+import { NHLGameDay, NHLGameWeek } from '~/types/game'
 
-interface GetTodaysGamesResponse {
-  gameWeek: NHLGameDay[]
-  numberOfGames: number
-}
+interface GetTodaysGamesResponse extends NHLGameWeek {}
 
-export async function getTodaysGames() {
+export async function getThisWeeksGames() {
+  /*
+    Fetch the NHL schedule for the next 7 days, starting from today
+  */
   const dt = DateTime.now()
   const res = await fetch(
     `https://api-web.nhle.com/v1/schedule/${dt.toISODate()}`
@@ -17,7 +17,7 @@ export async function getTodaysGames() {
 
 interface GetGamesByDateResponse extends NHLGameDay {}
 
-export async function getGamesByDate(date: string) {
+export async function getDailyScoresByDate(date: string) {
   const dt = DateTime.fromISO(date)
   const res = await fetch(`https://api-web.nhle.com/v1/score/${dt.toISODate()}`)
   const games: GetGamesByDateResponse = await res.json()

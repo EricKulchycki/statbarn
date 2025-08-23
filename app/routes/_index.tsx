@@ -1,90 +1,105 @@
 import type { MetaFunction } from '@remix-run/node'
 import { json } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
-import { calculateSeasonELO } from 'lib/elo'
-import {
-  getCurrentNHLSeason,
-  getYesterdayDate,
-  getYesterdayDateReadable,
-} from 'utils/currentSeason'
+import { eloService } from '~/services/elo.service'
+import { gameService } from '~/services/game.service'
 import { ELO } from '~/components/ELO'
-
 import { GameBanner } from '~/components/GameBanner'
 import { GamePredictions } from '~/components/GamePredictions'
-import { getGamesByDate, getTodaysGames } from '~/data/games'
-import { getLatestEloData } from '~/data/latest-elo.get'
-import { getPredictions } from '~/data/predictions'
 import { getTeams } from '~/data/teams'
+import { APP_CONFIG } from '~/constants'
+import { Prediction } from 'models/prediction'
 
 export const meta: MetaFunction = () => {
   return [
-    { title: 'bet how' },
-    { name: 'description', content: 'NHL Stat Lines' },
+    { title: APP_CONFIG.name },
+    { name: 'description', content: APP_CONFIG.description },
   ]
 }
 
 export async function loader() {
-  const games = await getTodaysGames()
-  const yesterdaysGames = await getGamesByDate(getYesterdayDateReadable())
-  const teams = await getTeams()
-  const lastSeasonElos = await getLatestEloData()
+  try {
+    // Fetch data using service layer
+    const [thisWeeksGames, teams, latestElos] = await Promise.all([
+      gameService.getThisWeeksGames(),
+      getTeams(),
+      eloService.getLatestElos(),
+      // gameService.getPredictionsForDate(getYesterdayDate()),
+    ])
 
-  const yesterdaysPredictions = await getPredictions(getYesterdayDate())
+    return json({
+      thisWeeksGames,
+      teams,
+      yesterdaysGames: thisWeeksGames[0] || [],
+      latestElos,
+      yesterdaysPredictions: [],
+    })
+  } catch (error) {
+    // Log error for debugging
+    console.error('Error in index loader:', error)
 
-  const elos = await calculateSeasonELO(
-    getCurrentNHLSeason(),
-    teams,
-    lastSeasonElos
-  )
-
-  const yesterdayElos = await calculateSeasonELO(
-    getCurrentNHLSeason(),
-    teams,
-    lastSeasonElos,
-    getYesterdayDate()
-  )
-
-  return json({
-    games,
-    elos,
-    teams,
-    yesterdaysGames,
-    yesterdayElos,
-    yesterdaysPredictions,
-  })
+    // Return error response that can be handled by error boundary
+    throw new Response(
+      JSON.stringify({
+        message: 'Failed to load game data',
+        status: 500,
+      }),
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+  }
 }
 
 export default function Index() {
-  const gameFetcher = useLoaderData<typeof loader>()
+  const data = useLoaderData<typeof loader>()
 
-  const games = gameFetcher?.games
-  const yesterdaysGames = gameFetcher?.yesterdaysGames
-  const elos = gameFetcher?.elos
-  const yesterdayElos = gameFetcher?.yesterdayElos
-  const teams = gameFetcher?.teams
+  const {
+    thisWeeksGames,
+    yesterdaysGames,
+    latestElos,
+    teams,
+    yesterdaysPredictions,
+  } = data
 
-  if (!games) return null
+  // Transform predictions to include proper date objects
+  const transformedPredictions = yesterdaysPredictions?.map(
+    (prediction: Prediction) => ({
+      ...prediction,
+      gameDate: new Date(prediction.gameDate),
+    })
+  )
 
   return (
-    <div>
-      <GameBanner gamesThisWeek={games.gameWeek} />
-      <div className="flex flex-col md:flex-row">
-        <ELO elos={elos} teams={teams} />
-        <div className="flex">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <GameBanner gamesThisWeek={thisWeeksGames} />
+
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* ELO Rankings */}
+        <div className="lg:col-span-1">
+          <ELO elos={latestElos} teams={teams} />
+        </div>
+
+        {/* Game Predictions */}
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
           <GamePredictions
             dayLabel="Yesterday"
             todaysGames={yesterdaysGames}
-            elos={yesterdayElos}
+            elos={latestElos}
+            predictions={transformedPredictions}
           />
           <GamePredictions
             dayLabel="Today"
-            todaysGames={games.gameWeek[0]}
-            elos={elos}
+            todaysGames={thisWeeksGames[0]}
+            elos={latestElos}
           />
           <GamePredictions
             dayLabel="Tomorrow"
-            todaysGames={games.gameWeek[1]}
-            elos={elos}
+            todaysGames={thisWeeksGames[1]}
+            elos={latestElos}
           />
         </div>
       </div>

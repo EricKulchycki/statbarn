@@ -1,24 +1,31 @@
 import { Database } from 'lib/db'
-import { PredictionModel } from 'models/prediction'
+import { Prediction, PredictionModel } from 'models/prediction'
 
-export async function getPredictions(date: Date) {
-  await Database.getInstance().connect()
+export async function getPredictions(date: Date): Promise<Prediction[]> {
+  const db = Database.getInstance()
+  await db.connect()
 
   const startOfDay = new Date(date)
   startOfDay.setHours(0, 0, 0, 0)
   const endOfDay = new Date(date)
   endOfDay.setHours(23, 59, 59, 999)
 
-  console.log({ date, startOfDay, endOfDay })
-
   const predictions = await PredictionModel.find({
     gameDate: {
       $gte: startOfDay,
       $lt: endOfDay,
     },
-  })
+  }).exec()
 
-  console.log(predictions)
-
-  return { predictions: predictions.map((prediction) => prediction.toObject()) }
+  return predictions.map((prediction) => ({
+    gameId: prediction.gameId,
+    homeTeamWinProbability: prediction.homeTeamWinProbability,
+    awayTeamWinProbability: prediction.awayTeamWinProbability,
+    gameDate: prediction.gameDate,
+    predictedWinner: prediction.predictedWinner,
+    result: prediction.result,
+    modelVersion: prediction.modelVersion,
+    homeTeam: prediction.homeTeam,
+    awayTeam: prediction.awayTeam,
+  }))
 }

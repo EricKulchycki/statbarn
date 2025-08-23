@@ -1,9 +1,9 @@
-import { Database } from '../lib/db'
-import { calculateSeasonELO } from 'lib/elo'
-import { SeasonELOModel } from 'models/elo'
-import { PredictionModel } from 'models/prediction'
-import { getTeams } from '~/data/teams'
-import { SeasonELO } from '~/types/elo'
+import { Database } from '../lib/db.js'
+import { calculateSeasonELO } from '../lib/elo.js'
+import { SeasonELOModel } from '../models/elo.js'
+import { PredictionModel } from '../models/prediction.js'
+import { getTeams } from '../app/data/teams.js'
+import { SeasonELO } from '../app/types/elo.js'
 ;(async () => {
   const db = Database.getInstance()
 
@@ -17,9 +17,9 @@ import { SeasonELO } from '~/types/elo'
     const teams = await getTeams()
 
     // Seed data
-    let season = 2020
+    let season = 2021
     let lastSeasonData: SeasonELO[] = []
-    while (season < 2024) {
+    while (season < 2025) {
       const seedData: SeasonELO[] = await calculateSeasonELO(
         `${season}${season + 1}`,
         teams,

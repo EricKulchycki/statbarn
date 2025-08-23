@@ -1,42 +1,62 @@
-import { SeasonELODocument, SeasonELOModel } from 'models/elo'
+import { GameELOModel } from 'models/gameElo'
 import { Database } from '../../lib/db'
-import { SeasonELO } from '~/types/elo'
 
-export async function getLatestEloData(): Promise<SeasonELO[]> {
+export interface LatestELO {
+  abbrev: string
+  elo: number
+  season: number
+}
+
+export async function getLatestEloData(): Promise<LatestELO[]> {
   const db = Database.getInstance()
 
   try {
-    // Connect to the database
     await db.connect()
 
-    // Get the current year
+    // Get last season string, e.g. '20242025'
     const currentYear = new Date().getFullYear()
+    const lastSeason = Number(`${currentYear - 1}${currentYear}`)
 
-    // Fetch the latest ELO data by season
-    const latestSeason: SeasonELODocument[] = await SeasonELOModel.find()
-      .where('season.endYear')
-      .equals(currentYear - 1)
-      .sort({ 'season.endYear': -1, elo: -1 }) // Sort by the latest season
-      .exec()
+    // Find all teams that played last season
+    const teams = await GameELOModel.distinct('homeTeam.abbrev', {
+      season: lastSeason,
+    })
 
-    if (!latestSeason.length) {
-      console.log('No ELO data found.')
-      return []
-    }
+    // For each team, get their most recent gameELO entry for last season
+    const latestElos = await Promise.all(
+      teams.map(async (abbrev: string) => {
+        const latestGame = await GameELOModel.findOne({
+          $or: [{ 'homeTeam.abbrev': abbrev }, { 'awayTeam.abbrev': abbrev }],
+          season: lastSeason,
+        })
+          .sort({ gameDate: -1 })
+          .exec()
+        if (!latestGame) {
+          return null
+        }
+        if (latestGame.homeTeam.abbrev === abbrev) {
+          return {
+            abbrev,
+            elo: latestGame.homeTeam.eloAfter,
+            season: lastSeason,
+          }
+        }
+        if (latestGame.awayTeam.abbrev === abbrev) {
+          return {
+            abbrev,
+            elo: latestGame.awayTeam.eloAfter,
+            season: lastSeason,
+          }
+        }
+        throw new Error('Team abbrev not found in latest game')
+      })
+    )
 
-    return latestSeason.map((elo) => ({
-      abbrev: elo.abbrev,
-      elo: elo.elo,
-      season: {
-        startYear: elo.season.startYear,
-        endYear: elo.season.endYear,
-      },
-    }))
+    return latestElos.filter((elo) => elo != null)
   } catch (error) {
     console.error('Error fetching latest ELO data:', error)
     throw error
   } finally {
-    // Disconnect from the database
     db.disconnect()
   }
 }

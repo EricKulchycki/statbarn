@@ -1,8 +1,8 @@
-import { SeasonELO } from '~/types/elo'
 import { NHLGame } from '~/types/game'
 import { calculateWinProbability } from './elo'
+import { LatestELO } from '~/data/latest-elo.get'
 
-export function calculateGamePrediction(elos: SeasonELO[], game: NHLGame) {
+export function calculateGamePrediction(elos: LatestELO[], game: NHLGame) {
   const homeTeamELO =
     elos.find((team) => team.abbrev === game.homeTeam.abbrev)?.elo || 0
   const awayTeamELO =

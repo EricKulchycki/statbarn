@@ -40,7 +40,25 @@ const predictionSchema: Schema = new Schema(
 )
 
 const PredictionModel: Model<PredictionDocument> =
+  mongoose.models.Prediction ||
   mongoose.model<PredictionDocument>('Prediction', predictionSchema)
 
-export type { PredictionDocument }
+interface Prediction {
+  gameId: number
+  homeTeam: string
+  awayTeam: string
+  homeTeamWinProbability: number
+  awayTeamWinProbability: number
+  predictedWinner: string
+  gameDate: Date
+  modelVersion: string
+  result?: {
+    homeTeamScore: number
+    awayTeamScore: number
+    winner: string
+    correctPrediction: boolean
+  }
+}
+
+export type { PredictionDocument, Prediction }
 export { PredictionModel }

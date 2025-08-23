@@ -1,6 +1,16 @@
 import { DayAbbrev } from './common'
 import { NHLTeam } from './team'
 
+export interface NHLGameWeek {
+  nextStartDate: string
+  previousStartStart: string
+  gameWeek: NHLGameDay[]
+  preSeasonStartDate?: string
+  regularSeasonStartDate?: string
+  regularSeasonEndDate?: string
+  playoffEndDate?: string
+}
+
 export interface NHLGameDay {
   date: string
   dayAbbrev: DayAbbrev

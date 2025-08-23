@@ -18,7 +18,7 @@ export const calculateWinProbability = (
 
 const K = 32
 
-interface ELOResults {
+export interface ELOResults {
   [abbrev: string]: number
 }
 
@@ -84,7 +84,11 @@ export async function calculateSeasonELO(
   return _.orderBy(elosList, 'elo')
 }
 
-function createPrediction(game: NHLGame, elos: ELOResults, model: string) {
+export function createPrediction(
+  game: NHLGame,
+  elos: ELOResults,
+  model: string
+) {
   const winProb = calculateWinProbability(
     elos[game.homeTeam.abbrev],
     elos[game.awayTeam.abbrev]

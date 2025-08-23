@@ -6,6 +6,10 @@ import {
   Scripts,
   ScrollRestoration,
 } from '@remix-run/react'
+import { ErrorBoundary } from '~/components/ui/ErrorBoundary'
+import { Header } from '~/components/layout/Header'
+import { Footer } from '~/components/layout/Footer'
+import { ClientThemeProvider } from '~/components/providers/ThemeProvider'
 
 import './tailwind.css'
 
@@ -31,8 +35,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
-        {children}
+      <body className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+        <ErrorBoundary>
+          <ClientThemeProvider>
+            <div className="flex flex-col min-h-screen">
+              <Header />
+              <main className="flex-1">
+                {children}
+              </main>
+              <Footer />
+            </div>
+          </ClientThemeProvider>
+        </ErrorBoundary>
         <ScrollRestoration />
         <Scripts />
       </body>

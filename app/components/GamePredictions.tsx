@@ -1,23 +1,41 @@
-import { SeasonELO } from '~/types/elo'
-import { NHLGameDay } from '~/types/game'
+import { NHLGame, NHLGameDay } from '~/types/game'
 import { Live } from './Live'
-import { PredictionDocument } from 'models/prediction'
+import { Prediction } from 'models/prediction'
 import { calculateGamePrediction } from 'lib/predictions'
+import { LatestELO } from '~/data/latest-elo.get'
 
 interface GamePredictionsProps {
   dayLabel: string
   todaysGames: NHLGameDay
-  elos: SeasonELO[]
-  predictions?: PredictionDocument[]
+  elos: LatestELO[]
+  predictions?: Prediction[]
 }
 
 function GamePredictions({
   dayLabel,
   todaysGames,
   elos,
+  predictions = [],
 }: GamePredictionsProps) {
   if (!todaysGames.games.length) {
     return <p>No games scheduled for today.</p>
+  }
+
+  const getGamePrediction = (game: NHLGame) => {
+    if (predictions.length > 0) {
+      const prediction = predictions.find(
+        (prediction) => prediction.gameId === game.id
+      )
+      console.log({
+        home: prediction?.homeTeamWinProbability,
+        away: prediction?.awayTeamWinProbability,
+      })
+      return {
+        homeWinProbability: prediction?.homeTeamWinProbability || 0,
+        awayWinProbability: prediction?.awayTeamWinProbability || 0,
+      }
+    }
+    return calculateGamePrediction(elos, game)
   }
 
   return (
@@ -28,7 +46,7 @@ function GamePredictions({
       <div className="flex flex-col gap-3">
         {todaysGames.games.map((game) => {
           const { homeWinProbability, awayWinProbability } =
-            calculateGamePrediction(elos, game)
+            getGamePrediction(game)
 
           const lossClassName = 'border-b-red-600 border-b-2 pb-1'
           const winClassName = 'border-b-green-600 border-b-2 pb-1'

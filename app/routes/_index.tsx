@@ -8,7 +8,6 @@ import { GameBanner } from '~/components/GameBanner'
 import { GamePredictions } from '~/components/GamePredictions'
 import { getTeams } from '~/data/teams'
 import { APP_CONFIG } from '~/constants'
-import { Prediction } from 'models/prediction'
 
 export const meta: MetaFunction = () => {
   return [
@@ -57,21 +56,7 @@ export async function loader() {
 export default function Index() {
   const data = useLoaderData<typeof loader>()
 
-  const {
-    thisWeeksGames,
-    yesterdaysGames,
-    latestElos,
-    teams,
-    yesterdaysPredictions,
-  } = data
-
-  // Transform predictions to include proper date objects
-  const transformedPredictions = yesterdaysPredictions?.map(
-    (prediction: Prediction) => ({
-      ...prediction,
-      gameDate: new Date(prediction.gameDate),
-    })
-  )
+  const { thisWeeksGames, yesterdaysGames, latestElos, teams } = data
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -89,7 +74,7 @@ export default function Index() {
             dayLabel="Yesterday"
             todaysGames={yesterdaysGames}
             elos={latestElos}
-            predictions={transformedPredictions}
+            predictions={[]}
           />
           <GamePredictions
             dayLabel="Today"

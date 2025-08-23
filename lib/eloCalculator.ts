@@ -1,6 +1,6 @@
 import _ from 'lodash'
-import { GameELOModel } from '../models/gameElo'
-import { PredictionModel } from '../models/prediction'
+import { GameELO, GameELOModel } from '../models/gameElo'
+import { Prediction, PredictionModel } from '../models/prediction'
 import { SeasonELOModel } from '../models/elo'
 import { fetchGamesForTeam } from '../app/data/team-games.fetch'
 import { SeasonELO } from '~/types/elo'
@@ -9,8 +9,8 @@ import { TeamLite } from '~/types/team'
 import { Season } from '~/types/time'
 
 export interface ELOCalculationResult {
-  gameElo: any
-  prediction: any
+  gameElo: GameELO
+  prediction: Prediction
   newElos: { [abbrev: string]: number }
 }
 
@@ -154,8 +154,8 @@ export async function processSeasonGames(
   teams: TeamLite[],
   initialElos: TeamELOState = {}
 ): Promise<{
-  gameElos: any[]
-  predictions: any[]
+  gameElos: GameELO[]
+  predictions: Prediction[]
   finalElos: SeasonELO[]
 }> {
   // Initialize ELOs for all teams
@@ -189,8 +189,8 @@ export async function processSeasonGames(
 
   console.log(`Processing ${uniqueGames.length} games for season ${season}`)
 
-  const gameElos: any[] = []
-  const predictions: any[] = []
+  const gameElos: GameELO[] = []
+  const predictions: Prediction[] = []
 
   // Process each game chronologically
   for (const game of uniqueGames) {

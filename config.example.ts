@@ -27,7 +27,7 @@ export const config = {
   nhl: {
     currentSeason: '2023-2024',
     seasonStartMonth: 10, // October
-    seasonEndMonth: 6,    // June
+    seasonEndMonth: 6, // June
   },
 
   // ELO Configuration

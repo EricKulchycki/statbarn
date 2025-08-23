@@ -80,3 +80,36 @@ export interface GameELODocument extends Document {
 
 export const GameELOModel: Model<GameELODocument> =
   mongoose.model<GameELODocument>('gameelo', gameEloSchema)
+
+export type GameELO = {
+  gameId: number
+  season: number
+  gameDate: Date
+  homeTeam: {
+    abbrev: string
+    eloBefore: number
+    eloAfter: number
+    score: number
+  }
+  awayTeam: {
+    abbrev: string
+    eloBefore: number
+    eloAfter: number
+    score: number
+  }
+  eloChange: {
+    homeTeam: number
+    awayTeam: number
+  }
+  kFactor: number
+  homeAdvantage: number
+  expectedResult: {
+    homeTeam: number
+    awayTeam: number
+  }
+  actualResult: {
+    homeTeam: number
+    awayTeam: number
+  }
+  modelVersion: string
+}

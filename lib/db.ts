@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { DB_CONFIG } from '~/constants'
 
 class Database {
   private static instance: Database
@@ -20,8 +21,8 @@ class Database {
     }
 
     try {
-      await mongoose.connect('mongodb://0.0.0.0:27017/', {
-        dbName: 'local',
+      await mongoose.connect(DB_CONFIG.connectionString, {
+        dbName: DB_CONFIG.dbName,
       })
       this.connection = mongoose.connection
       console.log('Connected to the database.')

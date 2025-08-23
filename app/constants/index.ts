@@ -5,12 +5,7 @@ export const APP_CONFIG = {
   version: '1.0.0',
 } as const
 
-// NHL Season constants
-export const NHL_CONFIG = {
-  currentSeason: '2023-2024',
-  seasonStartMonth: 10, // October
-  seasonEndMonth: 6,    // June
-} as const
+console.log(process.env.MONGODB_URI)
 
 // API constants
 export const API_CONFIG = {

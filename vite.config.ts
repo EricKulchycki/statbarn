@@ -9,6 +9,9 @@ declare module '@remix-run/node' {
 }
 
 export default defineConfig({
+  server: {
+    hmr: true,
+  },
   plugins: [
     remix({
       future: {

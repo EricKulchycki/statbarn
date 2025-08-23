@@ -1,6 +1,7 @@
 {
   "name": "54fighting",
   "private": true,
+  "type": "module",
   "sideEffects": false,
   "scripts": {
     "build": "remix vite:build",
@@ -16,10 +17,11 @@
     "analyze:elo": "tsx scripts/analyzeEloProgression.ts"
   },
   "dependencies": {
-    "@remix-run/node": "^2.13.1",
-    "@remix-run/react": "^2.13.1",
-    "@remix-run/serve": "^2.13.1",
+    "@remix-run/node": "^2.16.7",
+    "@remix-run/react": "^2.16.7",
+    "@remix-run/serve": "^2.16.7",
     "@vercel/node": "^5.3.13",
+    "@vercel/remix": "^2.16.7",
     "isbot": "^4.1.0",
     "lodash": "^4.17.21",
     "luxon": "^3.5.0",
@@ -28,7 +30,7 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@remix-run/dev": "^2.13.1",
+    "@remix-run/dev": "^2.16.7",
     "@types/lodash": "^4.17.16",
     "@types/luxon": "^3.4.2",
     "@types/react": "^18.2.20",

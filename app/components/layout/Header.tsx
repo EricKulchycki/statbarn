@@ -1,4 +1,3 @@
-import React from 'react'
 import { APP_CONFIG } from '~/constants'
 import { CompactThemeToggle } from '~/components/ui/ThemeToggle'
 
@@ -8,7 +7,9 @@ interface HeaderProps {
 
 export function Header({ className = '' }: HeaderProps) {
   return (
-    <header className={`bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors duration-200 ${className}`}>
+    <header
+      className={`bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors duration-200 ${className}`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and Brand */}
@@ -34,22 +35,10 @@ export function Header({ className = '' }: HeaderProps) {
               Home
             </a>
             <a
-              href="/standings"
-              className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-            >
-              Standings
-            </a>
-            <a
               href="/predictions"
               className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
             >
               Predictions
-            </a>
-            <a
-              href="/live"
-              className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-            >
-              Live
             </a>
           </nav>
 
@@ -57,7 +46,7 @@ export function Header({ className = '' }: HeaderProps) {
           <div className="flex items-center space-x-4">
             {/* Theme toggle */}
             <CompactThemeToggle />
-            
+
             {/* Settings button */}
             <button className="p-2 rounded-md text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
               <span className="sr-only">Settings</span>

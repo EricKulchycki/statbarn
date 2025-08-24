@@ -1,4 +1,3 @@
-import React from 'react'
 import { useTheme } from '~/hooks/useTheme'
 
 interface ThemeToggleProps {
@@ -6,7 +5,10 @@ interface ThemeToggleProps {
   showLabel?: boolean
 }
 
-export function ThemeToggle({ className = '', showLabel = false }: ThemeToggleProps) {
+export function ThemeToggle({
+  className = '',
+  showLabel = false,
+}: ThemeToggleProps) {
   const { theme, resolvedTheme, toggleTheme } = useTheme()
 
   const getIcon = () => {
@@ -27,7 +29,7 @@ export function ThemeToggle({ className = '', showLabel = false }: ThemeTogglePr
         </svg>
       )
     }
-    
+
     if (resolvedTheme === 'dark') {
       return (
         <svg
@@ -45,7 +47,7 @@ export function ThemeToggle({ className = '', showLabel = false }: ThemeTogglePr
         </svg>
       )
     }
-    
+
     return (
       <svg
         className="w-5 h-5"
@@ -85,11 +87,7 @@ export function ThemeToggle({ className = '', showLabel = false }: ThemeTogglePr
     >
       <div className="flex items-center space-x-2">
         {getIcon()}
-        {showLabel && (
-          <span className="text-sm font-medium">
-            {getLabel()}
-          </span>
-        )}
+        {showLabel && <span className="text-sm font-medium">{getLabel()}</span>}
       </div>
     </button>
   )
@@ -117,7 +115,7 @@ export function CompactThemeToggle({ className = '' }: { className?: string }) {
         </svg>
       )
     }
-    
+
     if (resolvedTheme === 'dark') {
       return (
         <svg
@@ -135,7 +133,7 @@ export function CompactThemeToggle({ className = '' }: { className?: string }) {
         </svg>
       )
     }
-    
+
     return (
       <svg
         className="w-4 h-4"

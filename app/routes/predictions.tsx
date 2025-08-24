@@ -1,5 +1,4 @@
-import { json, MetaFunction, useLoaderData } from '@remix-run/react'
-import { useState } from 'react'
+import { json, Link, MetaFunction, useLoaderData } from '@remix-run/react'
 import { APP_CONFIG } from '~/constants'
 import { getTeams } from '~/data/teams'
 
@@ -21,8 +20,6 @@ export async function loader() {
 export default function PredictionsPage() {
   const { teams } = useLoaderData<typeof loader>()
 
-  const [selectedTeam, setSelectedTeam] = useState<string | null>(null)
-
   return (
     <div className="max-w-5xl mx-auto py-8">
       <h1 className="text-2xl font-bold mb-6">Team Predictions</h1>
@@ -33,19 +30,17 @@ export default function PredictionsPage() {
           return (
             <button
               key={team.triCode}
-              className={`p-4 rounded-lg shadow hover:bg-slate-700 transition ${
-                selectedTeam === team.triCode ? 'bg-slate-700' : 'bg-slate-800'
-              }`}
-              onClick={() => setSelectedTeam(team.triCode)}
+              className={`p-4 rounded-lg shadow hover:bg-slate-700 transition bg-slate-800`}
             >
-              {team.logo && (
-                <img
-                  src={team.logo}
-                  alt={team.triCode}
-                  className="h-10 mx-auto mb-2"
-                />
-              )}
-              <div className="font-semibold text-center">{team.fullName}</div>
+              <Link to={`/predictions/${team.triCode}`} key={team.triCode}>
+                {team.logo && (
+                  <img
+                    src={team.logo}
+                    alt={team.triCode}
+                    className="h-10 mx-auto mb-2"
+                  />
+                )}
+              </Link>
             </button>
           )
         })}

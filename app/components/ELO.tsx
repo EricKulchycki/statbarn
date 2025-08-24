@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { getCurrentNHLSeason } from 'utils/currentSeason'
 import { LatestELO } from '~/data/latest-elo.get'
 import { TeamLite } from '~/types/team'
 
@@ -11,9 +10,7 @@ interface Props {
 export function ELO(props: Props) {
   return (
     <div className="p-4 mb-8">
-      <h2 className="text-lg font-semibold mb-4">
-        {getCurrentNHLSeason()} ELO Ratings
-      </h2>
+      <h2 className="text-lg font-semibold mb-4">Power Rankings</h2>
       {_.orderBy(props.elos, 'elo', 'desc').map((elo) => {
         if (elo.abbrev === 'ARI') {
           return null

@@ -5,8 +5,6 @@ export const APP_CONFIG = {
   version: '1.0.0',
 } as const
 
-console.log(process.env.MONGODB_URI)
-
 // API constants
 export const API_CONFIG = {
   baseUrl: process.env.API_BASE_URL || 'http://localhost:3000',

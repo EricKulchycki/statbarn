@@ -106,14 +106,12 @@ export default function Index() {
         </div>
 
         {/* Game Predictions */}
-        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <GamePredictions
-            scheduleData={currentSchedule}
-            upcomingPredictions={deserializeELOCalculationResults(
-              upcomingPredictions
-            )}
-          />
-        </div>
+        <GamePredictions
+          scheduleData={currentSchedule}
+          upcomingPredictions={deserializeELOCalculationResults(
+            upcomingPredictions
+          )}
+        />
       </div>
     </div>
   )

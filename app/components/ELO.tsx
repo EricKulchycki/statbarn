@@ -10,7 +10,7 @@ interface Props {
 
 export function ELO(props: Props) {
   return (
-    <div className="p-4 my-8">
+    <div className="p-4 mb-8">
       <h2 className="text-lg font-semibold mb-4">
         {getCurrentNHLSeason()} ELO Ratings
       </h2>

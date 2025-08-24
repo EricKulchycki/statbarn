@@ -8,6 +8,12 @@ import { GameBanner } from '~/components/GameBanner'
 import { GamePredictions } from '~/components/GamePredictions'
 import { getTeams } from '~/data/teams'
 import { APP_CONFIG } from '~/constants'
+import { scheduleService } from '~/services/schedule.service'
+import {
+  GamePredictionsMap,
+  predictionsService,
+} from '~/services/predictions.service'
+import { JsonifyObject } from '~/types/misc'
 
 export const meta: MetaFunction = () => {
   return [
@@ -19,19 +25,24 @@ export const meta: MetaFunction = () => {
 export async function loader() {
   try {
     // Fetch data using service layer
-    const [thisWeeksGames, teams, latestElos] = await Promise.all([
-      gameService.getThisWeeksGames(),
-      getTeams(),
-      eloService.getLatestElos(),
-      // gameService.getPredictionsForDate(getYesterdayDate()),
-    ])
+    const [thisWeeksGames, teams, latestElos, currentSchedule] =
+      await Promise.all([
+        gameService.getThisWeeksGames(),
+        getTeams(),
+        eloService.getLatestElos(),
+        scheduleService.getCurrentSchedule(),
+      ])
+
+    const upcomingPredictions =
+      await predictionsService.getUpcomingGamePredictions(currentSchedule)
 
     return json({
       thisWeeksGames,
       teams,
       yesterdaysGames: thisWeeksGames[0] || [],
       latestElos,
-      yesterdaysPredictions: [],
+      currentSchedule,
+      upcomingPredictions,
     })
   } catch (error) {
     // Log error for debugging
@@ -56,7 +67,33 @@ export async function loader() {
 export default function Index() {
   const data = useLoaderData<typeof loader>()
 
-  const { thisWeeksGames, yesterdaysGames, latestElos, teams } = data
+  const {
+    thisWeeksGames,
+    currentSchedule,
+    latestElos,
+    teams,
+    upcomingPredictions,
+  } = data
+
+  function deserializeELOCalculationResults(
+    data: JsonifyObject<GamePredictionsMap>
+  ): GamePredictionsMap {
+    const result: GamePredictionsMap = {}
+    for (const [gameId, value] of Object.entries(data)) {
+      result[Number(gameId)] = {
+        ...value,
+        prediction: {
+          ...value.prediction,
+          gameDate: new Date(value.prediction.gameDate),
+        },
+        gameElo: {
+          ...value.gameElo,
+          gameDate: new Date(value.gameElo.gameDate),
+        },
+      }
+    }
+    return result
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -71,20 +108,10 @@ export default function Index() {
         {/* Game Predictions */}
         <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
           <GamePredictions
-            dayLabel="Yesterday"
-            todaysGames={yesterdaysGames}
-            elos={latestElos}
-            predictions={[]}
-          />
-          <GamePredictions
-            dayLabel="Today"
-            todaysGames={thisWeeksGames[0]}
-            elos={latestElos}
-          />
-          <GamePredictions
-            dayLabel="Tomorrow"
-            todaysGames={thisWeeksGames[1]}
-            elos={latestElos}
+            scheduleData={currentSchedule}
+            upcomingPredictions={deserializeELOCalculationResults(
+              upcomingPredictions
+            )}
           />
         </div>
       </div>

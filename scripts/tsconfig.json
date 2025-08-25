@@ -15,11 +15,9 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "baseUrl": "..",
+    "types": ["node"],
     "paths": {
       "~/*": ["app/*"],
-      "lib/*": ["lib/*"],
-      "models/*": ["models/*"],
-      "utils/*": ["utils/*"]
     }
   },
   "include": [

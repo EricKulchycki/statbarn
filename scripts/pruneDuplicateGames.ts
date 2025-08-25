@@ -1,5 +1,5 @@
-import { Database } from '../lib/db'
-import { PredictionModel } from '../models/prediction'
+import { Database } from '../src/lib/db'
+import { PredictionModel } from '../src/models/prediction'
 ;(async () => {
   const db = Database.getInstance()
 

@@ -1,9 +1,9 @@
-import { Database } from '../lib/db'
-import { getTeams } from '../app/data/teams'
-import { processMultipleSeasons } from '../lib/eloCalculator'
-import { GameELOModel } from '../models/gameElo'
-import { PredictionModel } from '../models/prediction'
-import { SeasonELOModel } from '../models/elo'
+import { Database } from '../src/lib/db'
+import { getTeams } from '../src/data/teams'
+import { processMultipleSeasons } from '../src/lib/eloCalculator'
+import { GameELOModel } from '../src/models/gameElo'
+import { PredictionModel } from '../src/models/prediction'
+import { SeasonELOModel } from '../src/models/elo'
 
 /**
  * Seed script for historical ELO data from the last 10 years

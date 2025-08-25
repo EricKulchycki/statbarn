@@ -1,288 +1,36 @@
-# 54Fighting - NHL Stats & Predictions
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-A Remix-based web application for NHL statistics, ELO ratings, and game predictions.
+## Getting Started
 
-## 🏗️ Project Structure
-
-```
-54Fighting/
-├── app/                          # Main application code
-│   ├── components/               # React components
-│   │   ├── ui/                  # Base UI components
-│   │   │   ├── ErrorBoundary.tsx
-│   │   │   └── LoadingSpinner.tsx
-│   │   ├── layout/              # Layout components
-│   │   │   ├── Header.tsx
-│   │   │   └── Footer.tsx
-│   │   └── features/            # Feature-specific components
-│   │       ├── ELO.tsx
-│   │       ├── GameBanner.tsx
-│   │       ├── GamePredictions.tsx
-│   │       └── Live.tsx
-│   ├── constants/               # App-wide constants
-│   │   └── index.ts
-│   ├── data/                    # Data fetching functions
-│   │   ├── games.ts
-│   │   ├── latest-elo.get.ts
-│   │   ├── predictions.ts
-│   │   ├── standings.ts
-│   │   ├── team-games.fetch.ts
-│   │   └── teams.ts
-│   ├── hooks/                   # Custom React hooks
-│   │   └── useAsyncData.ts
-│   ├── routes/                  # Remix routes
-│   │   └── _index.tsx
-│   ├── services/                # Business logic services
-│   │   ├── database.service.ts
-│   │   ├── elo.service.ts
-│   │   └── game.service.ts
-│   ├── types/                   # TypeScript type definitions
-│   │   ├── common.ts
-│   │   ├── elo.ts
-│   │   ├── errors.ts
-│   │   ├── game.ts
-│   │   ├── standings.ts
-│   │   ├── team.ts
-│   │   └── time.ts
-│   ├── utils/                   # Utility functions
-│   │   └── currentSeason.ts
-│   ├── entry.client.tsx
-│   ├── entry.server.tsx
-│   ├── root.tsx
-│   └── tailwind.css
-├── lib/                         # Core libraries
-│   ├── db.ts                   # Database connection
-│   ├── elo.ts                  # ELO calculation logic
-│   ├── eloCalculator.ts        # Comprehensive ELO processor
-│   └── predictions.ts          # Prediction algorithms
-├── models/                      # Database models
-│   ├── elo.ts                  # Season ELO data
-│   ├── gameElo.ts              # Individual game ELO changes
-│   └── prediction.ts           # Game predictions
-├── scripts/                     # Utility scripts
-│   ├── pruneDuplicateGames.ts
-│   ├── seedEloData.ts          # Basic ELO seeding
-│   ├── seedHistoricalElo.ts    # 10-year historical ELO seeding
-│   ├── seedCurrentSeasonElo.ts # Current season ELO updates
-│   └── analyzeEloProgression.ts # ELO data analysis
-└── docker/                      # Docker configuration
-    └── docker-compose.yml
-```
-
-## 🚀 Architecture Overview
-
-### Service Layer Pattern
-
-The application follows a service-oriented architecture where business logic is separated from UI components:
-
-- **DatabaseService**: Handles database connections and health checks
-- **EloService**: Manages ELO rating calculations and team rankings
-- **GameService**: Handles game data fetching and predictions
-
-### Error Handling
-
-Comprehensive error handling with:
-
-- Custom error types (`AppError`, `ValidationError`, `DatabaseError`, etc.)
-- Error boundaries for React components
-- Consistent error responses across the application
-
-### Type Safety
-
-- Full TypeScript implementation
-- Centralized type definitions
-- Runtime validation support
-
-### Component Architecture
-
-- **UI Components**: Reusable base components (ErrorBoundary, LoadingSpinner)
-- **Layout Components**: Header, Footer, and navigation
-- **Feature Components**: Domain-specific components (ELO, GamePredictions)
-
-## 🛠️ Development
-
-### Prerequisites
-
-- Node.js >= 20.0.0
-- MongoDB
-- Docker (optional)
-
-### Installation
-
-```bash
-npm install
-```
-
-### Development Server
+First, run the development server:
 
 ```bash
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-### Building
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-```bash
-npm run build
-npm start
-```
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-### Type Checking
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-```bash
-npm run typecheck
-```
+## Learn More
 
-### Linting
+To learn more about Next.js, take a look at the following resources:
 
-```bash
-npm run lint
-```
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-## 🏒 ELO Rating System
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-### Historical ELO Seeding
+## Deploy on Vercel
 
-The application includes a comprehensive ELO rating system that processes every NHL game from the last 10 years chronologically, ensuring proper ELO progression.
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-#### Available Scripts
-
-- **`npm run seed:historical`** - Process 10 years of historical data
-- **`npm run seed:current`** - Process current season data
-- **`npm run seed:update`** - Incremental update for current season
-- **`npm run analyze:elo`** - Analyze ELO progression and data quality
-
-#### How It Works
-
-1. **Chronological Processing**: Games are processed in chronological order to maintain ELO progression
-2. **Season Continuity**: ELOs from one season carry over to the next
-3. **Game-by-Game Tracking**: Each game records ELO changes, predictions, and outcomes
-4. **Data Validation**: Comprehensive checks ensure data quality and consistency
-
-#### Data Models
-
-- **`SeasonELO`**: Final ELO ratings for each team per season
-- **`GameELO`**: Detailed ELO changes for each individual game
-- **`Prediction`**: Game outcome predictions with accuracy tracking
-
-#### ELO Calculation Features
-
-- **Home Ice Advantage**: 150 ELO points for home teams
-- **Dynamic K-Factor**: Adjusts based on goal difference (blowout factor)
-- **Win Probability**: Calculates expected win probability for each team
-- **Prediction Accuracy**: Tracks prediction success rates
-
-#### Usage Examples
-
-```bash
-# Seed 10 years of historical data (one-time setup)
-npm run seed:historical
-
-# Process current season
-npm run seed:current
-
-# Update with new games (run periodically)
-npm run seed:update
-
-# Analyze data quality and progression
-npm run analyze:elo
-```
-
-#### Expected Output
-
-The seeding process will create:
-
-- **~12,000+ game ELO records** (10 years × ~1,230 games per season)
-- **~300+ season ELO records** (10 years × ~30 teams)
-- **~12,000+ predictions** with accuracy tracking
-- **Complete ELO progression** showing how team ratings evolved over time
-
-## 🔧 Key Features
-
-### ELO Rating System
-
-- Real-time team rating calculations
-- Season-based rating updates
-- Historical rating tracking
-
-### Game Predictions
-
-- Machine learning-based predictions
-- Historical performance analysis
-- Confidence scoring
-
-### Live Data
-
-- Real-time game updates
-- Live statistics
-- Performance metrics
-
-## 📊 Data Models
-
-### Core Entities
-
-- **Team**: NHL team information and metadata
-- **Game**: Game details, scores, and statistics
-- **EloData**: Team ELO ratings over time
-- **Prediction**: Game outcome predictions
-
-### Database Schema
-
-MongoDB with Mongoose ODM for flexible schema management and type safety.
-
-## 🎨 UI/UX
-
-### Design System
-
-- Tailwind CSS for styling
-- Responsive design patterns
-- Consistent component library
-
-### User Experience
-
-- Intuitive navigation
-- Real-time updates
-- Mobile-first approach
-
-## 🔒 Security & Performance
-
-### Security Features
-
-- Input validation
-- Error sanitization
-- Secure database connections
-
-### Performance Optimizations
-
-- Lazy loading
-- Efficient data fetching
-- Caching strategies
-
-## 🚀 Deployment
-
-### Docker Support
-
-```bash
-docker-compose up -d
-```
-
-### Environment Variables
-
-- `MONGODB_URI`: MongoDB connection string
-- `MONGODB_DB_NAME`: Database name
-- `API_BASE_URL`: API base URL
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## 📝 License
-
-This project is private and proprietary.
-
-## 🆘 Support
-
-For support and questions, please contact the development team.
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

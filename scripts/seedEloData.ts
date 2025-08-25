@@ -1,9 +1,9 @@
-import { Database } from '../lib/db.js'
-import { calculateSeasonELO } from '../lib/elo.js'
-import { SeasonELOModel } from '../models/elo.js'
-import { PredictionModel } from '../models/prediction.js'
-import { getTeams } from '../app/data/teams.js'
-import { SeasonELO } from '../app/types/elo.js'
+import { Database } from '../src/lib/db.js'
+import { calculateSeasonELO } from '../src/lib/elo.js'
+import { SeasonELOModel } from '../src/models/elo.js'
+import { PredictionModel } from '../src/models/prediction.js'
+import { getTeams } from '../src/data/teams.js'
+import { SeasonELO } from '../src/types/elo.js'
 ;(async () => {
   const db = Database.getInstance()
 

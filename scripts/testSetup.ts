@@ -1,4 +1,4 @@
-import { Database } from '../lib/db.js'
+import { Database } from '../src/lib/db.js'
 
 async function testSetup() {
   console.log('🧪 Testing basic setup...')

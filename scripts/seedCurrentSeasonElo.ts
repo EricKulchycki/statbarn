@@ -1,10 +1,10 @@
-import { Database } from '../lib/db'
-import { getTeams } from '../app/data/teams'
-import { processSeasonGames } from '../lib/eloCalculator'
-import { GameELOModel } from '../models/gameElo'
-import { PredictionModel } from '../models/prediction'
-import { SeasonELOModel } from '../models/elo'
-import { getCurrentNHLSeason } from '../utils/currentSeason'
+import { Database } from '../src/lib/db'
+import { getTeams } from '../src/data/teams'
+import { processSeasonGames } from '../src/lib/eloCalculator'
+import { GameELOModel } from '../src/models/gameElo'
+import { PredictionModel } from '../src/models/prediction'
+import { SeasonELOModel } from '../src/models/elo'
+import { getCurrentNHLSeason } from '../src/utils/currentSeason'
 
 /**
  * Seed script for current season ELO data

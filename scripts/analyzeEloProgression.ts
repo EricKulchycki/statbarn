@@ -1,7 +1,7 @@
-import { Database } from '../lib/db.js'
-import { GameELOModel } from '../models/gameElo.js'
-import { SeasonELOModel } from '../models/elo.js'
-import { PredictionModel } from '../models/prediction.js'
+import { Database } from '../src/lib/db.js'
+import { GameELOModel } from '../src/models/gameElo.js'
+import { SeasonELOModel } from '../src/models/elo.js'
+import { PredictionModel } from '../src/models/prediction.js'
 
 /**
  * Analyze ELO progression and data quality

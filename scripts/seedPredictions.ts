@@ -1,11 +1,11 @@
-import { fetchGamesForTeam } from '~/data/team-games.fetch'
-import { Database } from '../lib/db'
-import { getTeams } from '~/data/teams'
-import { NHLGame } from '~/types/game'
-import { calculateSeasonELO, createPrediction, ELOResults } from 'lib/elo'
-import { SeasonELOModel } from 'models/elo'
-import { getStartOfDay } from 'utils/currentSeason'
-import { PredictionModel } from 'models/prediction'
+import { fetchGamesForTeam } from '../src/data/team-games.fetch'
+import { Database } from '../src/lib/db'
+import { getTeams } from '../src/data/teams'
+import { NHLGame } from '../src/types/game'
+import { calculateSeasonELO, createPrediction, ELOResults } from '../src/lib/elo'
+import { SeasonELOModel } from '../src/models/elo'
+import { getStartOfDay } from '../src/utils/currentSeason'
+import { PredictionModel } from '../src/models/prediction'
 ;(async () => {
   const db = Database.getInstance()
 

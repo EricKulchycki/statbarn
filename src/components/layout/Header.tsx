@@ -37,7 +37,7 @@ export function Header({ className = '' }: HeaderProps) {
             </Link>
             <Link
               href="/predictions"
-              className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+              className="text-gray-500 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
             >
               Predictions
             </Link>

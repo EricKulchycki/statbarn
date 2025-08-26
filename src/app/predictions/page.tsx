@@ -3,8 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 export default async function PredictionsPage() {
-    const [teams] = await Promise.all([getTeams()])
-
+  const [teams] = await Promise.all([getTeams()])
 
   return (
     <div className="max-w-5xl mx-auto py-8">

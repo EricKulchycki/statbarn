@@ -1,3 +1,7 @@
 export default function Team() {
-  return <div>Team Page</div>
+  return (
+    <div className="flex justify-center">
+      <div>Peepee</div>
+    </div>
+  )
 }

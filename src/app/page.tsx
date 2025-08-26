@@ -1,4 +1,3 @@
-
 import { eloService } from '@/services/elo.service'
 import { gameService } from '@/services/game.service'
 import { ELO } from '@/components/ELO'
@@ -12,21 +11,20 @@ import {
 } from '@/services/predictions.service'
 import { Database } from '@/lib/db'
 
-
 export default async function Index() {
   const db = Database.getInstance()
   await db.connect()
 
   const [thisWeeksGames, teams, latestElos, currentSchedule] =
-      await Promise.all([
-        gameService.getThisWeeksGames(),
-        getTeams(),
-        eloService.getLatestElos(),
-        scheduleService.getCurrentSchedule(),
-      ])
+    await Promise.all([
+      gameService.getThisWeeksGames(),
+      getTeams(),
+      eloService.getLatestElos(),
+      scheduleService.getCurrentSchedule(),
+    ])
 
-    const upcomingPredictions =
-      await predictionsService.getUpcomingGamePredictions(currentSchedule)
+  const upcomingPredictions =
+    await predictionsService.getUpcomingGamePredictions(currentSchedule)
 
   function deserializeELOCalculationResults(
     data: GamePredictionsMap

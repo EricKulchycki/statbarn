@@ -79,7 +79,8 @@ export interface GameELODocument extends Document {
 }
 
 export const GameELOModel: Model<GameELODocument> =
-  mongoose.models.gameelo || mongoose.model<GameELODocument>('gameelo', gameEloSchema)
+  mongoose.models.gameelo ||
+  mongoose.model<GameELODocument>('gameelo', gameEloSchema)
 
 export type GameELO = {
   gameId: number

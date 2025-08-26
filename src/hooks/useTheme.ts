@@ -23,7 +23,10 @@ export function useTheme() {
     root.classList.remove('light', 'dark')
 
     if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
+        .matches
+        ? 'dark'
+        : 'light'
       setResolvedTheme(systemTheme)
       root.classList.add(systemTheme)
     } else {
@@ -39,7 +42,7 @@ export function useTheme() {
   useEffect(() => {
     if (theme === 'system') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-      
+
       const handleChange = (e: MediaQueryListEvent) => {
         setResolvedTheme(e.matches ? 'dark' : 'light')
         const root = window.document.documentElement
@@ -53,7 +56,7 @@ export function useTheme() {
   }, [theme])
 
   const toggleTheme = () => {
-    setTheme(current => {
+    setTheme((current) => {
       if (current === 'light') return 'dark'
       if (current === 'dark') return 'system'
       return 'light'

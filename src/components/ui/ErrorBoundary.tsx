@@ -12,7 +12,7 @@ interface ErrorBoundaryProps {
   onError?: (error: AppError) => void
 }
 
-type Error =  { message: string, code: string, statusCode: number }
+type Error = { message: string; code: string; statusCode: number }
 
 export class ErrorBoundary extends React.Component<
   ErrorBoundaryProps,
@@ -23,7 +23,7 @@ export class ErrorBoundary extends React.Component<
     this.state = { hasError: false, error: null }
   }
 
-  static getDerivedStateFromError(error:Error): ErrorBoundaryState {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     // Convert any error to our AppError format
     const appError: AppError = {
       message: error.message || 'An unexpected error occurred',
@@ -44,7 +44,7 @@ export class ErrorBoundary extends React.Component<
     }
 
     this.setState({ error: appError })
-    
+
     if (this.props.onError) {
       this.props.onError(appError)
     }

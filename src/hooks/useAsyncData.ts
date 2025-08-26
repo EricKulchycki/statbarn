@@ -26,11 +26,11 @@ export function useAsyncData<T>(
   const execute = useCallback(
     async (...args: unknown[]) => {
       try {
-        setState(prev => ({ ...prev, loading: true, error: null }))
+        setState((prev) => ({ ...prev, loading: true, error: null }))
         const result = await asyncFunction(...args)
-        setState(prev => ({ ...prev, data: result, loading: false }))
+        setState((prev) => ({ ...prev, data: result, loading: false }))
       } catch (error) {
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
           error: error as AppError,
           loading: false,

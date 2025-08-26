@@ -7,9 +7,7 @@ export interface LatestELO {
 }
 
 export async function getLatestEloData(): Promise<LatestELO[]> {
-
   try {
-
     // Get last season string, e.g. '20242025'
     const currentYear = new Date().getFullYear()
     const lastSeason = Number(`${currentYear - 1}${currentYear}`)

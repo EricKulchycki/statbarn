@@ -50,7 +50,11 @@ export function LoadingSpinner({
 }
 
 // Full page loading component with dark theme
-export function FullPageLoader({ message = 'Loading...' }: { message?: string }) {
+export function FullPageLoader({
+  message = 'Loading...',
+}: {
+  message?: string
+}) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
       <LoadingSpinner size="lg" />

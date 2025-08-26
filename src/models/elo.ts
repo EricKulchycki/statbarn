@@ -28,4 +28,5 @@ export interface SeasonELODocument extends Document {
 }
 
 export const SeasonELOModel: Model<SeasonELODocument> =
-  mongoose.models.seasonelo || mongoose.model<SeasonELODocument>('seasonelo', eloDataSchema)
+  mongoose.models.seasonelo ||
+  mongoose.model<SeasonELODocument>('seasonelo', eloDataSchema)

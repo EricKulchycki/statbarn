@@ -11,10 +11,10 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   // Ensure theme is applied on mount and hydration
   useEffect(() => {
     const root = document.documentElement
-    
+
     // Remove any existing theme classes
     root.classList.remove('light', 'dark')
-    
+
     // Apply the resolved theme
     if (resolvedTheme) {
       root.classList.add(resolvedTheme)

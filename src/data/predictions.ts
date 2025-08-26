@@ -1,10 +1,6 @@
-import { Database } from '@/lib/db'
 import { Prediction, PredictionModel } from '@/models/prediction'
 
 export async function getPredictions(date: Date): Promise<Prediction[]> {
-  const db = Database.getInstance()
-  await db.connect()
-
   const startOfDay = new Date(date)
   startOfDay.setHours(0, 0, 0, 0)
   const endOfDay = new Date(date)

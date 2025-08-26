@@ -10,9 +10,13 @@ import {
   GamePredictionsMap,
   predictionsService,
 } from '@/services/predictions.service'
+import { Database } from '@/lib/db'
 
 
 export default async function Index() {
+  const db = Database.getInstance()
+  await db.connect()
+
   const [thisWeeksGames, teams, latestElos, currentSchedule] =
       await Promise.all([
         gameService.getThisWeeksGames(),

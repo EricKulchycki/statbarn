@@ -1,5 +1,4 @@
 import { GameELOModel } from '@/models/gameElo'
-import { Database } from '@/lib/db'
 
 export interface LatestELO {
   abbrev: string
@@ -8,10 +7,8 @@ export interface LatestELO {
 }
 
 export async function getLatestEloData(): Promise<LatestELO[]> {
-  const db = Database.getInstance()
 
   try {
-    await db.connect()
 
     // Get last season string, e.g. '20242025'
     const currentYear = new Date().getFullYear()
@@ -56,7 +53,5 @@ export async function getLatestEloData(): Promise<LatestELO[]> {
   } catch (error) {
     console.error('Error fetching latest ELO data:', error)
     throw error
-  } finally {
-    db.disconnect()
   }
 }

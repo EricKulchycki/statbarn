@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@vercel/node": "^5.3.13",
     "isbot": "^4.1.0",
     "lodash": "^4.17.21",
     "luxon": "^3.5.0",

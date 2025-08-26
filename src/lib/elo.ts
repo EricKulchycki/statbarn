@@ -7,6 +7,7 @@ import { SeasonELO } from '@/types/elo'
 import { NHLGame } from '@/types/game'
 import { TeamLite } from '@/types/team'
 import { Season } from '@/types/time'
+import { LatestELO } from '@/data/latest-elo.get'
 
 export const calculateWinProbability = (
   homeELO: number,
@@ -28,7 +29,7 @@ export interface ELOResults {
 export async function calculateSeasonELO(
   season: Season,
   teams: TeamLite[],
-  lastSeasonData: SeasonELO[] = [],
+  lastSeasonData: LatestELO[] = [],
   date: Date = new Date(),
   model: 'realtime' | 'v1' = 'realtime'
 ) {

@@ -8,13 +8,13 @@ interface UseAsyncDataState<T> {
 }
 
 interface UseAsyncDataReturn<T> extends UseAsyncDataState<T> {
-  execute: (...args: any[]) => Promise<void>
+  execute: (...args: unknown[]) => Promise<void>
   reset: () => void
   refetch: () => Promise<void>
 }
 
 export function useAsyncData<T>(
-  asyncFunction: (...args: any[]) => Promise<T>,
+  asyncFunction: (...args: unknown[]) => Promise<T>,
   immediate = false
 ): UseAsyncDataReturn<T> {
   const [state, setState] = useState<UseAsyncDataState<T>>({
@@ -24,7 +24,7 @@ export function useAsyncData<T>(
   })
 
   const execute = useCallback(
-    async (...args: any[]) => {
+    async (...args: unknown[]) => {
       try {
         setState(prev => ({ ...prev, loading: true, error: null }))
         const result = await asyncFunction(...args)

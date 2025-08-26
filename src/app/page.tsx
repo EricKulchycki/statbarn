@@ -10,7 +10,6 @@ import {
   GamePredictionsMap,
   predictionsService,
 } from '@/services/predictions.service'
-import { JsonifyObject } from '@/types/misc'
 
 
 export default async function Index() {
@@ -26,7 +25,7 @@ export default async function Index() {
       await predictionsService.getUpcomingGamePredictions(currentSchedule)
 
   function deserializeELOCalculationResults(
-    data: JsonifyObject<GamePredictionsMap>
+    data: GamePredictionsMap
   ): GamePredictionsMap {
     const result: GamePredictionsMap = {}
     for (const [gameId, value] of Object.entries(data)) {

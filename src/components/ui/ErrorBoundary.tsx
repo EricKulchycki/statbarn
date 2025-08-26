@@ -12,6 +12,8 @@ interface ErrorBoundaryProps {
   onError?: (error: AppError) => void
 }
 
+type Error =  { message: string, code: string, statusCode: number }
+
 export class ErrorBoundary extends React.Component<
   ErrorBoundaryProps,
   ErrorBoundaryState
@@ -21,18 +23,18 @@ export class ErrorBoundary extends React.Component<
     this.state = { hasError: false, error: null }
   }
 
-  static getDerivedStateFromError(error: any): ErrorBoundaryState {
+  static getDerivedStateFromError(error:Error): ErrorBoundaryState {
     // Convert any error to our AppError format
     const appError: AppError = {
       message: error.message || 'An unexpected error occurred',
       code: error.code || 'UNKNOWN_ERROR',
       statusCode: error.statusCode || 500,
-      details: error.details || {},
     }
 
     return { hasError: true, error: appError }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   componentDidCatch(error: any, errorInfo: any) {
     const appError: AppError = {
       message: error.message || 'An unexpected error occurred',
@@ -106,12 +108,11 @@ export class ErrorBoundary extends React.Component<
 export function useErrorHandler() {
   const [error, setError] = React.useState<AppError | null>(null)
 
-  const handleError = React.useCallback((error: any) => {
+  const handleError = React.useCallback((error: Error) => {
     const appError: AppError = {
       message: error.message || 'An unexpected error occurred',
       code: error.code || 'UNKNOWN_ERROR',
       statusCode: error.statusCode || 500,
-      details: error.details || {},
     }
     setError(appError)
   }, [])

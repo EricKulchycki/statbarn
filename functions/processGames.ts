@@ -1,9 +1,9 @@
-import { GameELOModel } from '../models/gameElo'
-import { calculateGameELO, TeamELOState } from '../lib/eloCalculator'
-import { getStartOfDay } from 'utils/currentSeason'
-import { Database } from 'lib/db'
-import { gameService } from '~/services/game.service'
-import { eloService } from '~/services/elo.service'
+import { GameELOModel } from '../src/models/gameElo'
+import { calculateGameELO, TeamELOState } from '../src/lib/eloCalculator'
+import { getStartOfDay } from '../src/utils/currentSeason'
+import { Database } from '../src/lib/db'
+import { gameService } from '../src/services/game.service'
+import { eloService } from '../src/services/elo.service'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

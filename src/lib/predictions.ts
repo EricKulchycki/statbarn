@@ -1,6 +1,6 @@
-import { NHLGame } from '~/types/game'
+import { NHLGame } from '@/types/game'
 import { calculateWinProbability } from './elo'
-import { LatestELO } from '~/data/latest-elo.get'
+import { LatestELO } from '@/data/latest-elo.get'
 
 export function calculateGamePrediction(elos: LatestELO[], game: NHLGame) {
   const homeTeamELO =

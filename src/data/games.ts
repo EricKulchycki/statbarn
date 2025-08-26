@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { NHLGameDay, NHLGameWeek } from '@/types/game'
 
-interface GetTodaysGamesResponse extends NHLGameWeek {}
+type GetTodaysGamesResponse = NHLGameWeek
 
 export async function getThisWeeksGames() {
   /*
@@ -15,7 +15,7 @@ export async function getThisWeeksGames() {
   return games
 }
 
-interface GetGamesByDateResponse extends NHLGameDay {}
+type GetGamesByDateResponse = NHLGameDay
 
 export async function getDailyScoresByDate(date: string) {
   const dt = DateTime.fromISO(date)

@@ -40,7 +40,6 @@ const gameEloSchema: Schema = new Schema(
 )
 
 // Indexes for efficient querying
-gameEloSchema.index({ gameId: 1 }, { unique: true })
 gameEloSchema.index({ season: 1, gameDate: 1 })
 gameEloSchema.index({ 'homeTeam.abbrev': 1, gameDate: 1 })
 gameEloSchema.index({ 'awayTeam.abbrev': 1, gameDate: 1 })
@@ -82,22 +81,19 @@ export const GameELOModel: Model<GameELODocument> =
   mongoose.models.gameelo ||
   mongoose.model<GameELODocument>('gameelo', gameEloSchema)
 
+export type GameELOTeam = {
+  abbrev: string
+  eloBefore: number
+  eloAfter: number
+  score: number
+}
+
 export type GameELO = {
   gameId: number
   season: number
   gameDate: Date
-  homeTeam: {
-    abbrev: string
-    eloBefore: number
-    eloAfter: number
-    score: number
-  }
-  awayTeam: {
-    abbrev: string
-    eloBefore: number
-    eloAfter: number
-    score: number
-  }
+  homeTeam: GameELOTeam
+  awayTeam: GameELOTeam
   eloChange: {
     homeTeam: number
     awayTeam: number

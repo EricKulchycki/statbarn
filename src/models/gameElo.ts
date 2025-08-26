@@ -110,3 +110,19 @@ export type GameELO = {
   }
   modelVersion: string
 }
+
+export function toGameELO(doc: GameELODocument): GameELO {
+  return {
+    gameId: doc.gameId,
+    season: doc.season,
+    gameDate: doc.gameDate,
+    homeTeam: { ...doc.homeTeam },
+    awayTeam: { ...doc.awayTeam },
+    eloChange: { ...doc.eloChange },
+    kFactor: doc.kFactor,
+    homeAdvantage: doc.homeAdvantage,
+    expectedResult: { ...doc.expectedResult },
+    actualResult: { ...doc.actualResult },
+    modelVersion: doc.modelVersion,
+  }
+}

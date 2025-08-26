@@ -5,7 +5,7 @@ import { getCurrentNHLSeason } from '@/utils/currentSeason'
 import { ELO_CONFIG } from '../constants'
 import { createApiError } from '../types/errors'
 import { SeasonELO } from '@/types/elo'
-import { GameELO } from '@/models/gameElo'
+import { GameELO, toGameELO } from '@/models/gameElo'
 
 export class EloService {
   private static instance: EloService
@@ -32,7 +32,8 @@ export class EloService {
 
   async getLast10EloGames(abbrev: string): Promise<GameELO[]> {
     try {
-      return await getGameElosLast10(abbrev)
+      const last10 = await getGameElosLast10(abbrev)
+      return last10.map(toGameELO)
     } catch (error) {
       throw createApiError(
         'getLast10EloGames',

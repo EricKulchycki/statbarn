@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { LatestELO } from '@/data/latest-elo.get'
+import { LatestELO } from '@/data/gameElo'
 import { TeamLite } from '@/types/team'
 
 interface Props {

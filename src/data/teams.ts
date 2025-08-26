@@ -22,3 +22,11 @@ export async function getTeamById(id: number): Promise<TeamLite | null> {
   const team = teams.find((team) => team.id === id)
   return team || null
 }
+
+export async function getTeamByAbbrev(
+  abbrev: string
+): Promise<TeamLite | null> {
+  const teams = await getTeams()
+  const team = teams.find((team) => team.triCode === abbrev)
+  return team || null
+}

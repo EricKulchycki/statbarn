@@ -1,10 +1,11 @@
 import { calculateSeasonELO } from '@/lib/elo'
-import { getLatestEloData, LatestELO } from '@/data/latest-elo.get'
+import { getGameElosLast10, getLatestEloData, LatestELO } from '@/data/gameElo'
 import { getTeams } from '@/data/teams'
 import { getCurrentNHLSeason } from '@/utils/currentSeason'
 import { ELO_CONFIG } from '../constants'
 import { createApiError } from '../types/errors'
 import { SeasonELO } from '@/types/elo'
+import { GameELO } from '@/models/gameElo'
 
 export class EloService {
   private static instance: EloService
@@ -25,6 +26,17 @@ export class EloService {
       throw createApiError(
         'getLatestElos',
         `Failed to fetch latest ELO data: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
+    }
+  }
+
+  async getLast10EloGames(abbrev: string): Promise<GameELO[]> {
+    try {
+      return await getGameElosLast10(abbrev)
+    } catch (error) {
+      throw createApiError(
+        'getLast10EloGames',
+        `Failed to fetch last 10 ELO games: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }

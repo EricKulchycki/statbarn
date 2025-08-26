@@ -1,8 +1,12 @@
 import { getTeams } from '@/data/teams'
+import { Database } from '@/lib/db'
 import Image from 'next/image'
 import Link from 'next/link'
 
 export default async function PredictionsPage() {
+  const db = Database.getInstance()
+  await db.connect()
+
   const [teams] = await Promise.all([getTeams()])
 
   return (

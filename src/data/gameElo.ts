@@ -1,4 +1,4 @@
-import { GameELOModel } from '@/models/gameElo'
+import { GameELODocument, GameELOModel } from '@/models/gameElo'
 
 export interface LatestELO {
   abbrev: string
@@ -50,6 +50,23 @@ export async function getLatestEloData(): Promise<LatestELO[]> {
     return latestElos.filter((elo) => elo != null)
   } catch (error) {
     console.error('Error fetching latest ELO data:', error)
+    throw error
+  }
+}
+
+export async function getGameElosLast10(
+  abbrev: string
+): Promise<GameELODocument[]> {
+  try {
+    const games = await GameELOModel.find({
+      $or: [{ 'homeTeam.abbrev': abbrev }, { 'awayTeam.abbrev': abbrev }],
+    })
+      .sort({ gameDate: -1 })
+      .limit(10)
+      .exec()
+    return games
+  } catch (error) {
+    console.error(`Error fetching last 10 ELO games for ${abbrev}:`, error)
     throw error
   }
 }

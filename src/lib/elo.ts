@@ -7,7 +7,7 @@ import { SeasonELO } from '@/types/elo'
 import { NHLGame } from '@/types/game'
 import { TeamLite } from '@/types/team'
 import { Season } from '@/types/time'
-import { LatestELO } from '@/data/latest-elo.get'
+import { LatestELO } from '@/data/gameElo'
 
 export const calculateWinProbability = (
   homeELO: number,

@@ -19,7 +19,7 @@ export default async function Team({
   const last10Games = await eloService.getLast10EloGames(teamAbbrev)
 
   return (
-    <div className="bg-slate-800 p-6 rounded-lg  m-8">
+    <div className=" p-6 rounded-lg lg:m-8 sm:m-2">
       <div>
         <div className="flex items-center">
           <Image
@@ -33,7 +33,7 @@ export default async function Team({
             {team?.fullName || teamAbbrev}
           </h1>
         </div>
-        <div className="max-w-1/2">
+        <div className="lg:max-w-1/2 sm:max-w-full">
           <EloHistoryTable history={last10Games} teamAbbrev={teamAbbrev} />
         </div>
       </div>

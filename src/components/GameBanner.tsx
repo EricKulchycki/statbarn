@@ -1,13 +1,11 @@
 import { DateTime } from 'luxon'
 import { PropsWithChildren } from 'react'
 import { NHLGame, NHLGameDay } from '@/types/game'
+import { gameService } from '@/services/game.service'
 
-interface GameBannerProps {
-  gamesThisWeek: NHLGameDay[]
-}
+export async function GameBanner() {
 
-export function GameBanner(props: GameBannerProps) {
-  const { gamesThisWeek } = props
+  const gamesThisWeek = await gameService.getThisWeeksGames()
 
   if (
     !gamesThisWeek ||

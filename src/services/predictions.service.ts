@@ -13,7 +13,7 @@ export type GamePredictionsMap = { [gameId: number]: ELOCalculationResult }
 export class PredictionsService {
   private static instance: PredictionsService
 
-  private constructor() { }
+  private constructor() {}
 
   public static getInstance(): PredictionsService {
     if (!PredictionsService.instance) {

@@ -5,7 +5,7 @@ import { NHLGameWeek } from '@/types/game'
 export class ScheduleService {
   private static instance: ScheduleService
 
-  private constructor() { }
+  private constructor() {}
 
   public static getInstance(): ScheduleService {
     if (!ScheduleService.instance) {

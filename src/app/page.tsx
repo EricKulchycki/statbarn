@@ -10,6 +10,7 @@ import {
   predictionsService,
 } from '@/services/predictions.service'
 import { Database } from '@/lib/db'
+import { AllTeamsHistoryGraph } from '@/components/AllTeamsHistoryGraph'
 
 export default async function Index() {
   const db = Database.getInstance()
@@ -47,7 +48,7 @@ export default async function Index() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mb-8">
       <GameBanner gamesThisWeek={thisWeeksGames} />
 
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -63,6 +64,9 @@ export default async function Index() {
             upcomingPredictions
           )}
         />
+
+        {/* Graph With all Teams */}
+        <AllTeamsHistoryGraph historyByTeam={{}} />
       </div>
     </div>
   )

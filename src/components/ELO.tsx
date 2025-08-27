@@ -17,7 +17,7 @@ export function ELO(props: Props) {
 
   const rankings = _.orderBy(props.elos, 'elo', 'desc')
 
-  const visibleRankings = showAll ? rankings : rankings.slice(0, 10)
+  const visibleRankings = showAll ? rankings : rankings.slice(0, 15)
 
   return (
     <div className="p-4 mb-8">

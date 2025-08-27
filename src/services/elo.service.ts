@@ -1,5 +1,5 @@
 import { calculateSeasonELO } from '@/lib/elo'
-import { getGameElosLast10, getLatestEloData, LatestELO } from '@/data/gameElo'
+import { getGameElos, getLatestEloData, LatestELO } from '@/data/gameElo'
 import { getTeams } from '@/data/teams'
 import { getCurrentNHLSeason } from '@/utils/currentSeason'
 import { ELO_CONFIG } from '../constants'
@@ -30,9 +30,9 @@ export class EloService {
     }
   }
 
-  async getLast10EloGames(abbrev: string): Promise<GameELO[]> {
+  async getLastEloGames(abbrev: string, limit: number): Promise<GameELO[]> {
     try {
-      const last10 = await getGameElosLast10(abbrev)
+      const last10 = await getGameElos(abbrev, limit)
       return last10.map(toGameELO)
     } catch (error) {
       throw createApiError(

@@ -23,7 +23,7 @@ export const EloHistoryTable: React.FC<EloHistoryTableProps> = ({
 }) => {
   return (
     <div className="rounded-xl lg:p-6">
-      <h2 className="text-2xl font-bold mb-6">{teamAbbrev} ELO History</h2>
+      <h2 className="text-2xl font-bold mb-6">Last 10 Games</h2>
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>

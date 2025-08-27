@@ -54,19 +54,23 @@ export async function getLatestEloData(): Promise<LatestELO[]> {
   }
 }
 
-export async function getGameElosLast10(
-  abbrev: string
+export async function getGameElos(
+  abbrev: string,
+  limit: number
 ): Promise<GameELODocument[]> {
   try {
     const games = await GameELOModel.find({
       $or: [{ 'homeTeam.abbrev': abbrev }, { 'awayTeam.abbrev': abbrev }],
     })
       .sort({ gameDate: -1 })
-      .limit(10)
+      .limit(limit)
       .exec()
     return games
   } catch (error) {
-    console.error(`Error fetching last 10 ELO games for ${abbrev}:`, error)
+    console.error(
+      `Error fetching last ${limit} ELO games for ${abbrev}:`,
+      error
+    )
     throw error
   }
 }

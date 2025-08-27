@@ -3,6 +3,7 @@ import { getTeamByAbbrev } from '@/data/teams'
 import { eloService } from '@/services/elo.service'
 import { Database } from '@/lib/db'
 import { EloHistoryTable } from '@/components/ELOHistoryTable'
+import { ELOHistoryGraph } from '@/components/ELOHistoryGraph'
 
 export default async function Team({
   params,
@@ -16,7 +17,8 @@ export default async function Team({
 
   const team = await getTeamByAbbrev(teamAbbrev)
 
-  const last10Games = await eloService.getLast10EloGames(teamAbbrev)
+  const last10Games = await eloService.getLastEloGames(teamAbbrev, 10)
+  const last82Games = await eloService.getLastEloGames(teamAbbrev, 82)
 
   return (
     <div className=" p-6 rounded-lg lg:m-8 sm:m-2">
@@ -33,8 +35,13 @@ export default async function Team({
             {team?.fullName || teamAbbrev}
           </h1>
         </div>
-        <div className="lg:max-w-1/2 sm:max-w-full">
-          <EloHistoryTable history={last10Games} teamAbbrev={teamAbbrev} />
+        <div className="flex flex-wrap w-full">
+          <div className="lg:w-1/2 sm:max-w-full">
+            <EloHistoryTable history={last10Games} teamAbbrev={teamAbbrev} />
+          </div>
+          <div className="lg:w-1/2 sm:max-w-full">
+            <ELOHistoryGraph history={last82Games} teamAbbrev={teamAbbrev} />
+          </div>
         </div>
       </div>
     </div>

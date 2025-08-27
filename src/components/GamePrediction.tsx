@@ -1,8 +1,11 @@
+'use client'
+
 import { ELOCalculationResult } from '@/lib/eloCalculator'
 import React from 'react'
 import { formatPercentage } from '@/utils/percentage'
 import { NHLGame } from '@/types/game'
 import Image from 'next/image'
+import { useIsHydrated } from '@/hooks/useIsHydrated'
 
 interface GamePredictionProps {
   game: NHLGame
@@ -11,14 +14,16 @@ interface GamePredictionProps {
 
 export const GamePrediction = (props: GamePredictionProps) => {
   const { game, prediction } = props
+  const isHydrated = useIsHydrated()
 
   return (
     <div key={game.id} className="rounded-lg p-4 bg-slate-900">
       <div className="text-sm text-gray-400 mb-2">
-        {new Date(game.startTimeUTC).toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-        })}
+        {isHydrated &&
+          new Date(game.startTimeUTC).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
       </div>
       <div className="font-semibold flex items-start">
         <div className="flex flex-col">

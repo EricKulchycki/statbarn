@@ -53,8 +53,12 @@ export function calculateGameELO(
   const awayActualResult = 1 - homeActualResult
 
   // Calculate ELO changes
+  const isInFuture = new Date(game.startTimeUTC) > new Date()
   const goalDiff = Math.abs(game.homeTeam.score - game.awayTeam.score)
-  const adjustedK = adjustKFactor(kFactor, goalDiff)
+  let adjustedK = kFactor
+  if (!isInFuture) {
+    adjustedK = adjustKFactor(kFactor, goalDiff)
+  }
 
   const homeEloChange = adjustedK * (homeActualResult - homeExpectedResult)
   const awayEloChange = adjustedK * (awayActualResult - awayExpectedResult)

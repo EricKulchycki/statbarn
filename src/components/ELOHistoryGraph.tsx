@@ -36,11 +36,13 @@ export const ELOHistoryGraph: React.FC<ELOHistoryGraphProps> = ({
   teamAbbrev,
 }) => {
   // Prepare data for recharts
-  const chartData = history.map((gameElo) => ({
-    date: new Date(gameElo.gameDate).toLocaleDateString(),
-    elo: getSelf(gameElo, teamAbbrev).eloAfter,
-    gameId: gameElo.gameId,
-  }))
+  const chartData = history
+    .map((gameElo) => ({
+      date: new Date(gameElo.gameDate).toLocaleDateString(),
+      elo: getSelf(gameElo, teamAbbrev).eloAfter,
+      gameId: gameElo.gameId,
+    }))
+    .reverse()
 
   return (
     <div className="rounded-xl lg:p-6 h-full">

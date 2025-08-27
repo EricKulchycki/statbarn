@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@heroui/react'
 import React from 'react'
+import { WinLossChip } from './ui/WinLoss'
 
 interface EloHistoryTableProps {
   history: GameELO[]
@@ -22,10 +23,10 @@ export const EloHistoryTable: React.FC<EloHistoryTableProps> = ({
   teamAbbrev,
 }) => {
   return (
-    <div className="rounded-xl lg:p-6">
+    <div className="rounded-xl lg:p-6 h-full">
       <h2 className="text-2xl font-bold mb-6">Last 10 Games</h2>
-      <div className="overflow-x-auto">
-        <Table>
+      <div className="overflow-x-auto h-full">
+        <Table className="h-full">
           <TableHeader>
             <TableColumn className="py-3 px- font-semibold rounded-tl-xl">
               Date
@@ -40,14 +41,14 @@ export const EloHistoryTable: React.FC<EloHistoryTableProps> = ({
               Win/Loss
             </TableColumn>
             <TableColumn className="py-3 px-4 font-semibold rounded-tr-xl">
-              ELO After
+              Rating After
             </TableColumn>
           </TableHeader>
           <TableBody>
             {history.map((gameElo) => {
               const isHome = gameElo.homeTeam.abbrev === teamAbbrev
               return (
-                <TableRow key={gameElo.gameId}>
+                <TableRow key={gameElo.gameId} className="hover:bg-slate-800">
                   <TableCell className="py-2 px-4 rounded-l-xl">
                     {new Date(gameElo.gameDate).toLocaleDateString(undefined, {
                       year: 'numeric',
@@ -67,12 +68,17 @@ export const EloHistoryTable: React.FC<EloHistoryTableProps> = ({
                     </span>
                   </TableCell>
                   <TableCell className="py-2 px-4">
-                    {isHome && gameElo.homeTeam.score > gameElo.awayTeam.score
-                      ? 'Win'
-                      : !isHome &&
-                          gameElo.awayTeam.score > gameElo.homeTeam.score
-                        ? 'Win'
-                        : 'Loss'}
+                    <WinLossChip
+                      val={
+                        isHome &&
+                        gameElo.homeTeam.score > gameElo.awayTeam.score
+                          ? 'win'
+                          : !isHome &&
+                              gameElo.awayTeam.score > gameElo.homeTeam.score
+                            ? 'win'
+                            : 'loss'
+                      }
+                    />
                   </TableCell>
                   <TableCell className="py-2 px-4 rounded-r-xl font-bold">
                     {getSelf(gameElo, teamAbbrev).eloAfter.toFixed(0)}

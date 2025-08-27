@@ -13,6 +13,19 @@ import {
 import { GameELO } from '@/models/gameElo'
 import { getSelf } from '@/utils/gameElo'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function CustomTooltip({ payload, active }: any) {
+  if (active) {
+    return (
+      <div className="">
+        <p className="label font-bold">{`Rating: ${payload[0].value.toFixed(0)}`}</p>
+      </div>
+    )
+  }
+
+  return null
+}
+
 interface ELOHistoryGraphProps {
   history: GameELO[]
   teamAbbrev: string
@@ -38,10 +51,7 @@ export const ELOHistoryGraph: React.FC<ELOHistoryGraphProps> = ({
             <CartesianGrid stroke="#1d293d" strokeDasharray="5 5" />
             <XAxis dataKey="date" tick={{ fontSize: 12 }} />
             <YAxis domain={['auto', 'auto']} tick={{ fontSize: 12 }} />
-            <Tooltip
-              labelFormatter={(d) => d}
-              formatter={(value: number) => value.toFixed(0)}
-            />
+            <Tooltip content={<CustomTooltip />} />
             <Line
               type="monotone"
               dataKey="elo"

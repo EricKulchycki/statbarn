@@ -92,7 +92,6 @@ export const AllTeamsHistoryGraph: React.FC<AllTeamsHistoryGraphProps> = ({
     '#6d28d9',
     '#fef08a',
     '#991b1b',
-    '#f3f4f6',
   ]
 
   const teamAbbrevs = Object.keys(historyByTeam)

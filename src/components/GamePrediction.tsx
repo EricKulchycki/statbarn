@@ -13,7 +13,7 @@ export const GamePrediction = (props: GamePredictionProps) => {
   const { game, prediction } = props
 
   return (
-    <div key={game.id} className="rounded-lg p-4 bg-slate-800">
+    <div key={game.id} className="rounded-lg p-4 bg-slate-900">
       <div className="text-sm text-gray-400 mb-2">
         {new Date(game.startTimeUTC).toLocaleTimeString([], {
           hour: '2-digit',

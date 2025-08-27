@@ -31,7 +31,7 @@ export function ELO(props: Props) {
         return (
           <div
             key={elo.abbrev}
-            className="flex items-center justify-between mb-2 bg-gray-800 p-2 rounded-xl"
+            className="flex items-center justify-between mb-2 bg-gray-900 p-2 rounded-xl"
           >
             <div className="flex items-center">
               <Image

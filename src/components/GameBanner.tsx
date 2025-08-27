@@ -4,7 +4,6 @@ import { NHLGame, NHLGameDay } from '@/types/game'
 import { gameService } from '@/services/game.service'
 
 export async function GameBanner() {
-
   const gamesThisWeek = await gameService.getThisWeeksGames()
 
   if (

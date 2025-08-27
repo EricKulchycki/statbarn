@@ -6,6 +6,7 @@ import { TeamLite } from '@/types/team'
 import Image from 'next/image'
 import { useState } from 'react'
 import { ShowAll } from './ShowAll'
+import { Divider } from '@heroui/react'
 
 interface Props {
   elos: LatestELO[]
@@ -32,7 +33,7 @@ export function ELO(props: Props) {
             key={elo.abbrev}
             className="flex items-center justify-between mb-2 bg-gray-800 p-2 rounded-xl"
           >
-            <div className="flex-1 flex items-center">
+            <div className="flex items-center">
               <Image
                 src={team?.logo ?? ''}
                 alt={team?.triCode ?? ''}
@@ -40,8 +41,9 @@ export function ELO(props: Props) {
                 width={32}
                 height={32}
               />
-              <p className="mr-4">{elo.abbrev}</p>
+              <p>{elo.abbrev}</p>
             </div>
+            <Divider className="flex-1 mx-4" />
             <b className="justify-self-end">{elo.elo?.toFixed(0)} pts</b>
           </div>
         )

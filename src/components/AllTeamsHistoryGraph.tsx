@@ -11,16 +11,21 @@ import {
   CartesianGrid,
   Legend,
 } from 'recharts'
-import { GameELO } from '@/models/gameElo'
+import { GameELO, GameELOSerialized } from '@/models/gameElo'
 import { getSelf } from '@/utils/gameElo'
+import { deserializeGameELOByTeam } from '@/utils/converters/gameElo'
 
 interface AllTeamsHistoryGraphProps {
-  historyByTeam: { [abbrev: string]: GameELO[] }
+  historyByTeamSerialized: { [abbrev: string]: GameELOSerialized[] }
 }
 
 export const AllTeamsHistoryGraph: React.FC<AllTeamsHistoryGraphProps> = ({
-  historyByTeam,
+  historyByTeamSerialized,
 }) => {
+  const historyByTeam: { [abbrev: string]: GameELO[] } =
+    deserializeGameELOByTeam(historyByTeamSerialized)
+
+  delete historyByTeam['ARI'] // Remove Arizona Coyotes if present
   // Build a set of all game dates (for x-axis)
   const allDatesSet = new Set<string>()
   Object.values(historyByTeam).forEach((history) => {
@@ -33,6 +38,7 @@ export const AllTeamsHistoryGraph: React.FC<AllTeamsHistoryGraphProps> = ({
   )
 
   // Build chart data: each entry is { date, [teamAbbrev]: elo, ... }
+  const lastEloByTeam: { [abbrev: string]: number | undefined } = {}
   const chartData = allDates.map((date) => {
     const entry: { date: string; [abbrev: string]: number | string } = { date }
     for (const [abbrev, history] of Object.entries(historyByTeam)) {
@@ -40,8 +46,14 @@ export const AllTeamsHistoryGraph: React.FC<AllTeamsHistoryGraphProps> = ({
         (g) => new Date(g.gameDate).toLocaleDateString() === date
       )
       if (game) {
-        entry[abbrev] = getSelf(game, abbrev).eloAfter
+        const elo = getSelf(game, abbrev).eloAfter
+        entry[abbrev] = elo
+        lastEloByTeam[abbrev] = elo
+      } else if (lastEloByTeam[abbrev] !== undefined) {
+        entry[abbrev] = lastEloByTeam[abbrev]
       }
+      // Optionally, set to INITIAL_ELO if you want a default starting value
+      // else entry[abbrev] = INITIAL_ELO;
     }
     return entry
   })
@@ -84,10 +96,6 @@ export const AllTeamsHistoryGraph: React.FC<AllTeamsHistoryGraphProps> = ({
   ]
 
   const teamAbbrevs = Object.keys(historyByTeam)
-
-  if (Object.entries(historyByTeam).length === 0) {
-    return null
-  }
 
   return (
     <div className="rounded-xl lg:p-6 h-full col-span-1 lg:col-span-3">

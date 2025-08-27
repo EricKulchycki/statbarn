@@ -111,6 +111,39 @@ export type GameELO = {
   modelVersion: string
 }
 
+export type GameELOSerialized = {
+  gameId: number
+  season: number
+  gameDate: string
+  homeTeam: {
+    abbrev: string
+    eloBefore: number
+    eloAfter: number
+    score: number
+  }
+  awayTeam: {
+    abbrev: string
+    eloBefore: number
+    eloAfter: number
+    score: number
+  }
+  eloChange: {
+    homeTeam: number
+    awayTeam: number
+  }
+  kFactor: number
+  homeAdvantage: number
+  expectedResult: {
+    homeTeam: number
+    awayTeam: number
+  }
+  actualResult: {
+    homeTeam: number
+    awayTeam: number
+  }
+  modelVersion: string
+}
+
 export function toGameELO(doc: GameELODocument): GameELO {
   return {
     gameId: doc.gameId,

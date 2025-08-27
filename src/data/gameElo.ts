@@ -1,4 +1,9 @@
-import { GameELODocument, GameELOModel } from '@/models/gameElo'
+import {
+  GameELO,
+  GameELODocument,
+  GameELOModel,
+  toGameELO,
+} from '@/models/gameElo'
 
 export interface LatestELO {
   abbrev: string
@@ -73,4 +78,37 @@ export async function getGameElos(
     )
     throw error
   }
+}
+
+export async function getGameElosByTeam(limit: number): Promise<{
+  [abbrev: string]: GameELO[]
+}> {
+  // Get all unique team abbreviations from home and away teams
+  const homeTeams = await GameELOModel.distinct('homeTeam.abbrev')
+  const awayTeams = await GameELOModel.distinct('awayTeam.abbrev')
+  const allTeams = Array.from(new Set([...homeTeams, ...awayTeams]))
+
+  const result: { [abbrev: string]: GameELO[] } = {}
+
+  // For each team, get their last 82 games (as home or away)
+  await Promise.all(
+    allTeams.map(async (abbrev) => {
+      const games = await GameELOModel.find({
+        $or: [{ 'homeTeam.abbrev': abbrev }, { 'awayTeam.abbrev': abbrev }],
+      })
+        .sort({ gameDate: -1 })
+        .limit(limit)
+        .lean()
+        .exec()
+
+      const gamesMapped = games.map(toGameELO)
+
+      result[abbrev] = gamesMapped.sort(
+        (a, b) =>
+          new Date(a.gameDate).getTime() - new Date(b.gameDate).getTime()
+      )
+    })
+  )
+
+  return result
 }

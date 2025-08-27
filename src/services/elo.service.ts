@@ -1,5 +1,10 @@
 import { calculateSeasonELO } from '@/lib/elo'
-import { getGameElos, getLatestEloData, LatestELO } from '@/data/gameElo'
+import {
+  getGameElos,
+  getGameElosByTeam,
+  getLatestEloData,
+  LatestELO,
+} from '@/data/gameElo'
 import { getTeams } from '@/data/teams'
 import { getCurrentNHLSeason } from '@/utils/currentSeason'
 import { ELO_CONFIG } from '../constants'
@@ -38,6 +43,19 @@ export class EloService {
       throw createApiError(
         'getLast10EloGames',
         `Failed to fetch last 10 ELO games: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
+    }
+  }
+
+  async getLeagueGameEloHistoryByTeam(): Promise<{
+    [abbrev: string]: GameELO[]
+  }> {
+    try {
+      return await getGameElosByTeam(82)
+    } catch (error) {
+      throw createApiError(
+        'getLeagueGameEloHistoryByTeam',
+        `Failed to fetch league game ELO history by team: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }

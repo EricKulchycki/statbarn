@@ -22,7 +22,7 @@ export const GamePrediction = (props: GamePredictionProps) => {
       </div>
       <div className="font-semibold flex items-start">
         <div className="flex flex-col">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col justify-center items-center gap-2">
             <Image
               alt="home team logo"
               src={game.awayTeam.logo}
@@ -46,8 +46,7 @@ export const GamePrediction = (props: GamePredictionProps) => {
         </div>
         <div className="mx-2 mt-1 text-gray-500">@</div>
         <div className="flex flex-col items-end">
-          <div className="flex items-center gap-2">
-            {game.homeTeam.abbrev}
+          <div className="flex flex-col justify-center items-center gap-2">
             <Image
               alt="away team logo"
               src={game.homeTeam.logo}
@@ -55,6 +54,7 @@ export const GamePrediction = (props: GamePredictionProps) => {
               width={32}
               height={32}
             />
+            {game.homeTeam.abbrev}
           </div>
           <div
             className={`${

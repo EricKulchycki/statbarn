@@ -2,7 +2,7 @@
 
 import _ from 'lodash'
 import { LatestELO } from '@/data/gameElo'
-import { TeamLite } from '@/types/team'
+import { Team } from '@/types/team'
 import Image from 'next/image'
 import { useState } from 'react'
 import { ShowAll } from './ShowAll'
@@ -10,7 +10,7 @@ import { Divider } from '@heroui/react'
 
 interface Props {
   elos: LatestELO[]
-  teams: TeamLite[]
+  teams: Team[]
 }
 
 export function ELO(props: Props) {

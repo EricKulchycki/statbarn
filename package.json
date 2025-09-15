@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
+    "seed:populateTeams": "tsx scripts/populateTeams.ts",
     "start": "next start",
     "lint": "eslint"
   },

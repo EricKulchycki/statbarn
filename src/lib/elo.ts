@@ -5,7 +5,7 @@ import { getStartOfDay } from '@/utils/currentSeason'
 import { fetchGamesForTeam } from '@/data/team-games.fetch'
 import { SeasonELO } from '@/types/elo'
 import { NHLGame } from '@/types/game'
-import { TeamLite } from '@/types/team'
+import { Team } from '@/types/team'
 import { Season } from '@/types/time'
 import { LatestELO } from '@/data/gameElo'
 
@@ -28,7 +28,7 @@ export interface ELOResults {
 */
 export async function calculateSeasonELO(
   season: Season,
-  teams: TeamLite[],
+  teams: Team[],
   lastSeasonData: LatestELO[] = [],
   date: Date = new Date(),
   model: 'realtime' | 'v1' = 'realtime'

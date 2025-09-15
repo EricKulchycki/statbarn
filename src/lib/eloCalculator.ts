@@ -5,7 +5,7 @@ import { SeasonELOModel } from '@/models/elo'
 import { fetchGamesForTeam } from '@/data/team-games.fetch'
 import { SeasonELO } from '@/types/elo'
 import { NHLGame } from '@/types/game'
-import { TeamLite } from '@/types/team'
+import { Team } from '@/types/team'
 import { Season } from '@/types/time'
 
 export interface ELOCalculationResult {
@@ -155,7 +155,7 @@ function adjustKFactor(baseK: number, goalDiff: number): number {
  */
 export async function processSeasonGames(
   season: Season,
-  teams: TeamLite[],
+  teams: Team[],
   initialElos: TeamELOState = {}
 ): Promise<{
   gameElos: GameELO[]
@@ -242,7 +242,7 @@ export async function processSeasonGames(
 export async function processMultipleSeasons(
   startSeason: number,
   endSeason: number,
-  teams: TeamLite[]
+  teams: Team[]
 ): Promise<void> {
   let currentElos: TeamELOState = {}
 

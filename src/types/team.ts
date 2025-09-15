@@ -15,7 +15,7 @@ export interface NHLTeam {
   score: number
 }
 
-export interface TeamLite {
+export interface Team {
   id: number
   franchiseId: number
   fullName: string

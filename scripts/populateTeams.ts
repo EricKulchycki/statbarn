@@ -3,6 +3,7 @@ import { GameELOModel } from '../src/models/gameElo'
 import { Database } from '../src/lib/db'
 import { Team } from '../src/types/team'
 import { TeamModel } from '../src/models/team'
+import { getTeams } from '../src/data/teams'
 
 async function fetchTeamInfo(teamId: string) {
   const url = `https://api.nhle.com/stats/rest/en/team/id/${teamId}`
@@ -11,16 +12,6 @@ async function fetchTeamInfo(teamId: string) {
     throw new Error(`Failed to fetch team ${teamId}: ${response.statusText}`)
   const data = await response.json()
   return data
-}
-
-async function fetchAllTeams() {
-  const url = 'https://api.nhle.com/stats/rest/en/team'
-  const response = await fetch(url)
-  if (!response.ok)
-    throw new Error(`Failed to fetch teams: ${response.statusText}`)
-  const data = await response.json()
-  // The teams array is usually at data.data or data.teams, adjust as needed
-  return data.data || data.teams || []
 }
 
 async function main() {
@@ -36,7 +27,7 @@ async function main() {
   const homeTeams = lastSeasonGames.map((game) => game.homeTeam.abbrev)
   const awayTeams = lastSeasonGames.map((game) => game.awayTeam.abbrev)
 
-  const allTeams = await fetchAllTeams()
+  const allTeams = await getTeams()
 
   const playedTeamIds: string[] = Array.from(
     new Set([...homeTeams, ...awayTeams])
@@ -51,7 +42,6 @@ async function main() {
   for (const team of playedTeams) {
     try {
       const teamInfo = await fetchTeamInfo(team.id)
-      console.log(teamInfo)
       // You may need to adjust the structure depending on the API response
       await TeamModel.updateOne(
         {

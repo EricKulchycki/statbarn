@@ -26,7 +26,5 @@ const teamSchema: Schema = new Schema(
   }
 )
 
-export const TeamModel: Model<TeamDocument> = mongoose.model<TeamDocument>(
-  'Team',
-  teamSchema
-)
+export const TeamModel: Model<TeamDocument> =
+  mongoose.models.Team || mongoose.model<TeamDocument>('Team', teamSchema)

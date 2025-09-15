@@ -1,15 +1,10 @@
-import { calculateSeasonELO } from '@/lib/elo'
 import {
   getGameElos,
   getGameElosByTeam,
   getLatestEloData,
   LatestELO,
 } from '@/data/gameElo'
-import { getTeams } from '@/data/teams'
-import { getCurrentNHLSeason } from '@/utils/currentSeason'
-import { ELO_CONFIG } from '../constants'
 import { createApiError } from '../types/errors'
-import { SeasonELO } from '@/types/elo'
 import { GameELO, toGameELO } from '@/models/gameElo'
 
 export class EloService {
@@ -58,58 +53,6 @@ export class EloService {
         `Failed to fetch league game ELO history by team: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
-  }
-
-  async calculateCurrentSeasonElos(): Promise<SeasonELO[]> {
-    try {
-      const teams = await getTeams()
-      const lastSeasonElos = await getLatestEloData()
-      const currentSeason = getCurrentNHLSeason()
-
-      return await calculateSeasonELO(currentSeason, teams, lastSeasonElos)
-    } catch (error) {
-      throw createApiError(
-        'calculateCurrentSeasonElos',
-        `Failed to calculate current season ELOs: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
-    }
-  }
-
-  async calculateElosForDate(date: Date): Promise<SeasonELO[]> {
-    try {
-      const teams = await getTeams()
-      const lastSeasonElos = await getLatestEloData()
-      const currentSeason = getCurrentNHLSeason()
-
-      return await calculateSeasonELO(
-        currentSeason,
-        teams,
-        lastSeasonElos,
-        date
-      )
-    } catch (error) {
-      throw createApiError(
-        'calculateElosForDate',
-        `Failed to calculate ELOs for date ${date.toISOString()}: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
-    }
-  }
-
-  calculateEloChange(
-    currentRating: number,
-    expectedScore: number,
-    actualScore: number
-  ): number {
-    const kFactor = ELO_CONFIG.kFactor
-    return Math.round(kFactor * (actualScore - expectedScore))
-  }
-
-  calculateExpectedScore(ratingA: number, ratingB: number): number {
-    return 1 / (1 + Math.pow(10, (ratingB - ratingA) / 400))
-  }
-
-  applyHomeAdvantage(rating: number): number {
-    return rating + ELO_CONFIG.homeAdvantage
   }
 }
 

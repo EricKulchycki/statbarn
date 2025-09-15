@@ -16,6 +16,7 @@ import { getSelf } from '@/utils/gameElo'
 import { deserializeGameELOByTeam } from '@/utils/converters/gameElo'
 import { Division, Team } from '@/types/team'
 import { Button } from '@heroui/react'
+import Image from 'next/image'
 
 interface AllTeamsHistoryGraphProps {
   teams: Team[]
@@ -128,8 +129,18 @@ export const AllTeamsHistoryGraph: React.FC<AllTeamsHistoryGraphProps> = ({
               padding: '0 8px',
               opacity: 1,
               fontWeight: 'normal',
+              display: 'flex',
             }}
           >
+            <Image
+              width={24}
+              height={24}
+              src={
+                teams.find((team) => team.triCode === entry.value)?.logo ?? ''
+              }
+              className="mr-1"
+              alt={entry.value}
+            />
             {entry.value}
           </li>
         ))}

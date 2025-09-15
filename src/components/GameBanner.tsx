@@ -2,6 +2,7 @@ import { DateTime } from 'luxon'
 import { PropsWithChildren } from 'react'
 import { NHLGame, NHLGameDay } from '@/types/game'
 import { gameService } from '@/services/game.service'
+import Image from 'next/image'
 
 export async function GameBanner() {
   const gamesThisWeek = await gameService.getThisWeeksGames()
@@ -15,9 +16,11 @@ export async function GameBanner() {
 
   return (
     <div className="p-2 flex w-full h-fit overflow-x-scroll overflow-y-hidden">
-      {gamesThisWeek.map((gw) => (
-        <TodaysGames key={gw.date} games={gw.games} date={gw.date} />
-      ))}
+      {gamesThisWeek
+        .filter((gw) => gw.numberOfGames > 0)
+        .map((gw) => (
+          <TodaysGames key={gw.date} games={gw.games} date={gw.date} />
+        ))}
     </div>
   )
 }
@@ -59,14 +62,26 @@ function BannerGame(props: BannerGameProps) {
         </b>
       </p>
       <GameTeam>
-        <img className="size-6" src={game.awayTeam.logo} alt="away team logo" />
+        <Image
+          width={24}
+          height={24}
+          className="size-6"
+          src={game.awayTeam.logo}
+          alt="away team logo"
+        />
         <TeamName isWinning={awayScore >= homeScore}>
           {game.awayTeam.abbrev}
         </TeamName>
         <Score>{game.awayTeam.score}</Score>
       </GameTeam>
       <GameTeam>
-        <img className="size-6" src={game.homeTeam.logo} alt="home team logo" />
+        <Image
+          width={24}
+          height={24}
+          className="size-6"
+          src={game.homeTeam.logo}
+          alt="home team logo"
+        />
         <TeamName isWinning={awayScore <= homeScore}>
           {game.homeTeam.abbrev}
         </TeamName>

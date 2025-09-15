@@ -81,7 +81,7 @@ async function main() {
   // Insert into DB (upsert to avoid duplicates)
   for (const team of playedTeams) {
     try {
-      const teamInfo = await fetchTeamInfo(team.id)
+      const teamInfo = await fetchTeamInfo(team.id.toString())
       // You may need to adjust the structure depending on the API response
       const confDiv = conferenceDivisionMap[team.triCode]
       if (!confDiv) {

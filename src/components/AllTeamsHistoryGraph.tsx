@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import {
   LineChart,
   Line,
@@ -14,22 +14,39 @@ import {
 import { GameELO, GameELOSerialized } from '@/models/gameElo'
 import { getSelf } from '@/utils/gameElo'
 import { deserializeGameELOByTeam } from '@/utils/converters/gameElo'
+import { Division, Team } from '@/types/team'
+import { Button } from '@heroui/react'
 
 interface AllTeamsHistoryGraphProps {
+  teams: Team[]
   historyByTeamSerialized: { [abbrev: string]: GameELOSerialized[] }
 }
 
 export const AllTeamsHistoryGraph: React.FC<AllTeamsHistoryGraphProps> = ({
+  teams,
   historyByTeamSerialized,
 }) => {
+  const [selectedDivision, setSelectedDivision] = useState<Division>(
+    Division.CENTRAL
+  )
+
   const historyByTeam: { [abbrev: string]: GameELO[] } =
     deserializeGameELOByTeam(historyByTeamSerialized)
 
   delete historyByTeam['ARI'] // Remove Arizona Coyotes if present
+
+  // Filter teams by selected division
+  const filteredTeams = teams.filter(
+    (team) => team.division === selectedDivision
+  )
+  const teamAbbrevs = Array.from(
+    new Set(filteredTeams.map((team) => team.triCode))
+  )
+
   // Build a set of all game dates (for x-axis)
   const allDatesSet = new Set<string>()
-  Object.values(historyByTeam).forEach((history) => {
-    history.forEach((gameElo) => {
+  teamAbbrevs.forEach((abbrev) => {
+    ;(historyByTeam[abbrev] || []).forEach((gameElo) => {
       allDatesSet.add(new Date(gameElo.gameDate).toLocaleDateString())
     })
   })
@@ -41,7 +58,8 @@ export const AllTeamsHistoryGraph: React.FC<AllTeamsHistoryGraphProps> = ({
   const lastEloByTeam: { [abbrev: string]: number | undefined } = {}
   const chartData = allDates.map((date) => {
     const entry: { date: string; [abbrev: string]: number | string } = { date }
-    for (const [abbrev, history] of Object.entries(historyByTeam)) {
+    for (const abbrev of teamAbbrevs) {
+      const history = historyByTeam[abbrev] || []
       const game = history.find(
         (g) => new Date(g.gameDate).toLocaleDateString() === date
       )
@@ -52,8 +70,6 @@ export const AllTeamsHistoryGraph: React.FC<AllTeamsHistoryGraphProps> = ({
       } else if (lastEloByTeam[abbrev] !== undefined) {
         entry[abbrev] = lastEloByTeam[abbrev]
       }
-      // Optionally, set to INITIAL_ELO if you want a default starting value
-      // else entry[abbrev] = INITIAL_ELO;
     }
     return entry
   })
@@ -92,14 +108,27 @@ export const AllTeamsHistoryGraph: React.FC<AllTeamsHistoryGraphProps> = ({
     '#6d28d9',
     '#fef08a',
     '#991b1b',
+    '#f3f4f6',
   ]
 
-  const teamAbbrevs = Object.keys(historyByTeam)
-
   return (
-    <div className="rounded-xl lg:p-6 h-full col-span-1 lg:col-span-3">
-      <h2 className="text-xl font-bold mb-6">All Teams ELO History</h2>
-      <div className="h-full bg-slate-900 p-2 rounded-2xl flex items-center">
+    <div className="rounded-xl lg:p-6 h-full">
+      <h2 className="text-2xl font-bold mb-6">
+        {selectedDivision.charAt(0).toUpperCase() + selectedDivision.slice(1)}{' '}
+        Division ELO History
+      </h2>
+      <div className="mb-4 flex gap-2">
+        {Object.values(Division).map((division) => (
+          <Button
+            key={division}
+            onPress={() => setSelectedDivision(division)}
+            variant={selectedDivision === division ? 'solid' : 'faded'}
+          >
+            {division.charAt(0).toUpperCase() + division.slice(1)}
+          </Button>
+        ))}
+      </div>
+      <div className="h-full w-full bg-slate-900 p-2 rounded-2xl flex items-center">
         <ResponsiveContainer width="100%" height={400}>
           <LineChart data={chartData}>
             <CartesianGrid stroke="#1d293d" strokeDasharray="5 5" />

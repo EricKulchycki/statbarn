@@ -22,7 +22,9 @@ export default async function Index() {
         <GamePredictionsWrapper />
 
         {/* Graph With all Teams */}
-        <AllTeamsHistoryGraphWrapper />
+        <div className="lg:col-span-3">
+          <AllTeamsHistoryGraphWrapper />
+        </div>
       </div>
     </div>
   )

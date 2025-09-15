@@ -9,6 +9,8 @@ export function toDomainTeam(doc: TeamDocument): Team {
     leagueId: doc.leagueId,
     rawTricode: doc.rawTricode,
     triCode: doc.triCode,
+    conference: doc.conference,
+    division: doc.division,
     logo: doc.logo,
   }
 }

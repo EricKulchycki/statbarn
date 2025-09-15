@@ -39,21 +39,66 @@ async function main() {
 
   console.log({ played: playedTeams.length, all: allTeams.length })
 
+  // Manual mapping for conference and division
+  const conferenceDivisionMap: {
+    [abbrev: string]: { conference: string; division: string }
+  } = {
+    ANA: { conference: 'western', division: 'pacific' },
+    ARI: { conference: 'western', division: 'central' },
+    BOS: { conference: 'eastern', division: 'atlantic' },
+    BUF: { conference: 'eastern', division: 'atlantic' },
+    CGY: { conference: 'western', division: 'pacific' },
+    CAR: { conference: 'eastern', division: 'metropolitan' },
+    CHI: { conference: 'western', division: 'central' },
+    COL: { conference: 'western', division: 'central' },
+    CBJ: { conference: 'eastern', division: 'metropolitan' },
+    DAL: { conference: 'western', division: 'central' },
+    DET: { conference: 'eastern', division: 'atlantic' },
+    EDM: { conference: 'western', division: 'pacific' },
+    FLA: { conference: 'eastern', division: 'atlantic' },
+    LAK: { conference: 'western', division: 'pacific' },
+    MIN: { conference: 'western', division: 'central' },
+    MTL: { conference: 'eastern', division: 'atlantic' },
+    NSH: { conference: 'western', division: 'central' },
+    NJD: { conference: 'eastern', division: 'metropolitan' },
+    NYI: { conference: 'eastern', division: 'metropolitan' },
+    NYR: { conference: 'eastern', division: 'metropolitan' },
+    OTT: { conference: 'eastern', division: 'atlantic' },
+    PHI: { conference: 'eastern', division: 'metropolitan' },
+    PIT: { conference: 'eastern', division: 'metropolitan' },
+    SJS: { conference: 'western', division: 'pacific' },
+    SEA: { conference: 'western', division: 'pacific' },
+    STL: { conference: 'western', division: 'central' },
+    TBL: { conference: 'eastern', division: 'atlantic' },
+    TOR: { conference: 'eastern', division: 'atlantic' },
+    VAN: { conference: 'western', division: 'pacific' },
+    VGK: { conference: 'western', division: 'pacific' },
+    WSH: { conference: 'eastern', division: 'metropolitan' },
+    UTA: { conference: 'western', division: 'central' },
+    WPG: { conference: 'western', division: 'central' },
+  }
+
+  // Insert into DB (upsert to avoid duplicates)
   for (const team of playedTeams) {
     try {
       const teamInfo = await fetchTeamInfo(team.id)
       // You may need to adjust the structure depending on the API response
+      const confDiv = conferenceDivisionMap[team.triCode]
+      if (!confDiv) {
+        console.warn(`No conference/division mapping for team: ${team.triCode}`)
+        continue
+      }
       await TeamModel.updateOne(
         {
           id: team.id,
-          franchiseId: team.franchiseId,
-          fullName: team.fullName,
-          leagueId: team.leagueId,
-          rawTricode: team.rawTricode,
-          triCode: team.triCode,
-          logo: team.logo,
         },
-        { $set: teamInfo },
+        {
+          $set: {
+            ...teamInfo,
+            conference: confDiv.conference,
+            division: confDiv.division,
+          },
+        },
         { upsert: true }
       )
       console.log(`Upserted team: ${team.id}`)

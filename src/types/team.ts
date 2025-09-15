@@ -22,5 +22,19 @@ export interface Team {
   leagueId: number
   rawTricode: string
   triCode: string
+  conference: Conference
+  division: Division
   logo?: string
+}
+
+export enum Conference {
+  EASTERN = 'eastern',
+  WESTERN = 'western',
+}
+
+export enum Division {
+  ATLANTIC = 'atlantic',
+  CENTRAL = 'central',
+  METROPOLITAN = 'metropolitan',
+  PACIFIC = 'pacific',
 }

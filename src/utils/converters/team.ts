@@ -1,7 +1,7 @@
 import { TeamDocument } from '@/models/team'
 import { Team } from '@/types/team'
 
-export function deserializeTeam(doc: TeamDocument): Team {
+export function toDomainTeam(doc: TeamDocument): Team {
   return {
     id: doc.id,
     franchiseId: doc.franchiseId,

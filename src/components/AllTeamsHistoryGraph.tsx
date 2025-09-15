@@ -29,6 +29,7 @@ export const AllTeamsHistoryGraph: React.FC<AllTeamsHistoryGraphProps> = ({
   const [selectedDivision, setSelectedDivision] = useState<Division>(
     Division.CENTRAL
   )
+  const [hoveredTeam, setHoveredTeam] = useState<string | null>(null)
 
   const historyByTeam: { [abbrev: string]: GameELO[] } =
     deserializeGameELOByTeam(historyByTeamSerialized)
@@ -111,6 +112,31 @@ export const AllTeamsHistoryGraph: React.FC<AllTeamsHistoryGraphProps> = ({
     '#f3f4f6',
   ]
 
+  // Legend item renderer with hover
+  const renderLegend = (props: unknown) => {
+    const { payload } = props as { payload: { value: string; color: string }[] }
+    return (
+      <ul className="flex flex-wrap gap-2">
+        {payload.map((entry) => (
+          <li
+            key={entry.value}
+            onMouseEnter={() => setHoveredTeam(entry.value)}
+            onMouseLeave={() => setHoveredTeam(null)}
+            style={{
+              color: entry.color,
+              cursor: 'pointer',
+              padding: '0 8px',
+              opacity: 1,
+              fontWeight: 'normal',
+            }}
+          >
+            {entry.value}
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
   return (
     <div className="rounded-xl lg:p-6 h-full">
       <h2 className="text-2xl font-bold mb-6">
@@ -135,16 +161,24 @@ export const AllTeamsHistoryGraph: React.FC<AllTeamsHistoryGraphProps> = ({
             <XAxis dataKey="date" tick={{ fontSize: 12 }} />
             <YAxis domain={['auto', 'auto']} tick={{ fontSize: 12 }} />
             <Tooltip />
-            <Legend />
+            <Legend content={renderLegend} />
             {teamAbbrevs.map((abbrev, idx) => (
               <Line
                 key={abbrev}
                 type="monotone"
                 dataKey={abbrev}
                 stroke={teamColors[idx % teamColors.length]}
-                strokeWidth={2}
+                strokeWidth={
+                  hoveredTeam === null ? 2 : hoveredTeam === abbrev ? 4 : 1
+                }
                 dot={false}
                 name={abbrev}
+                opacity={
+                  hoveredTeam === null ? 1 : hoveredTeam === abbrev ? 1 : 0.2
+                }
+                style={{
+                  transition: 'opacity 0.2s, stroke-width 0.2s',
+                }}
               />
             ))}
           </LineChart>

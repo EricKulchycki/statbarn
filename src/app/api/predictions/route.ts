@@ -1,5 +1,5 @@
 import { Database } from '@/lib/db'
-import { eloService } from '@/services/elo.service'
+import { predictionsService } from '@/services/predictions.service'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
@@ -8,7 +8,7 @@ export async function GET() {
     await db.connect()
     console.log('Executing creating gameElos (predictions) cron job...')
 
-    await eloService.createNextDayGameElosWithPredictions()
+    await predictionsService.createNextDayPredictions()
 
     return NextResponse.json({
       success: true,

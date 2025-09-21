@@ -19,7 +19,7 @@ export interface TeamELOState {
 }
 
 const K_FACTOR = 32
-const HOME_ADVANTAGE = 150
+const HOME_ADVANTAGE = 100
 const INITIAL_ELO = 1500
 
 /**

@@ -3,10 +3,11 @@ import {
   ELOCalculationResult,
   TeamELOState,
 } from '@/lib/eloCalculator'
-import { Prediction } from '@/models/prediction'
+import { Prediction, PredictionModel } from '@/models/prediction'
 import { createApiError } from '@/types/errors'
 import { NHLGame, NHLGameWeek } from '@/types/game'
 import { eloService } from './elo.service'
+import { scheduleService } from './schedule.service'
 
 export type GamePredictionsMap = { [gameId: number]: ELOCalculationResult }
 
@@ -88,6 +89,30 @@ export class PredictionsService {
     }
   }
 
+  async createNextDayPredictions() {
+    const tomorrow = this.getTomorrowDateString()
+
+    // 1. Get tomorrow's games
+    const gameWeek = await scheduleService.getScheduleByDate(tomorrow)
+    const games = gameWeek.gameWeek[0]?.games || []
+
+    // 2. Get latest ELOs for all teams
+    const latestElos = await eloService.getLatestElos()
+    const eloMap = Object.fromEntries(latestElos.map((e) => [e.abbrev, e.elo]))
+
+    for (const game of games) {
+      // 3. Calculate prediction using ELO logic
+      const { prediction } = calculateGameELO(game, eloMap)
+
+      // 4. Save prediction to DB
+      await PredictionModel.findOneAndUpdate(
+        { gameId: prediction.gameId },
+        prediction,
+        { upsert: true, new: true }
+      )
+    }
+  }
+
   private getYesterdayDateString(): string {
     const yesterday = new Date()
     yesterday.setDate(yesterday.getDate() - 1)
@@ -97,7 +122,8 @@ export class PredictionsService {
   private getTomorrowDateString(): string {
     const tomorrow = new Date()
     tomorrow.setDate(tomorrow.getDate() + 1)
-    return tomorrow.toISOString().split('T')[0]
+    tomorrow.setHours(0, 0, 0, 0)
+    return tomorrow.toISOString().slice(0, 10)
   }
 }
 

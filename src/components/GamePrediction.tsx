@@ -1,15 +1,15 @@
 'use client'
 
-import { ELOCalculationResult } from '@/lib/eloCalculator'
 import React from 'react'
 import { formatPercentage } from '@/utils/percentage'
 import { NHLGame } from '@/types/game'
 import Image from 'next/image'
 import { useIsHydrated } from '@/hooks/useIsHydrated'
+import { Prediction } from '@/models/prediction'
 
 interface GamePredictionProps {
   game: NHLGame
-  prediction?: ELOCalculationResult
+  prediction?: Prediction
 }
 
 export const GamePrediction = (props: GamePredictionProps) => {
@@ -39,14 +39,12 @@ export const GamePrediction = (props: GamePredictionProps) => {
           </div>
           <div
             className={`${
-              prediction?.prediction.predictedWinner === game.awayTeam.abbrev
+              prediction?.predictedWinner === game.awayTeam.abbrev
                 ? 'text-green-400'
                 : 'text-gray-500'
             }`}
           >
-            {formatPercentage(
-              prediction?.prediction.awayTeamWinProbability || 0
-            )}
+            {formatPercentage(prediction?.awayTeamWinProbability || 0)}
           </div>
         </div>
         <div className="mx-2 mt-1 text-gray-500">@</div>
@@ -63,14 +61,12 @@ export const GamePrediction = (props: GamePredictionProps) => {
           </div>
           <div
             className={`${
-              prediction?.prediction.predictedWinner === game.homeTeam.abbrev
+              prediction?.predictedWinner === game.homeTeam.abbrev
                 ? 'text-green-400'
                 : 'text-gray-500'
             }`}
           >
-            {formatPercentage(
-              prediction?.prediction.homeTeamWinProbability || 0
-            )}
+            {formatPercentage(prediction?.homeTeamWinProbability || 0)}
           </div>
         </div>
       </div>

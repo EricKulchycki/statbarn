@@ -8,6 +8,7 @@ import { createApiError } from '@/types/errors'
 import { NHLGame, NHLGameWeek } from '@/types/game'
 import { eloService } from './elo.service'
 import { scheduleService } from './schedule.service'
+import { toPredictionDomain } from '@/utils/converters/prediction'
 
 export type GamePredictionsMap = { [gameId: number]: ELOCalculationResult }
 
@@ -38,25 +39,21 @@ export class PredictionsService {
 
   async getUpcomingGamePredictions(
     scheduleData: NHLGameWeek
-  ): Promise<GamePredictionsMap> {
-    const latestElos = await eloService.getLatestElos()
-    const TeamELOState: TeamELOState = {}
-    for (const teamElo of latestElos) {
-      TeamELOState[teamElo.abbrev] = teamElo.elo
-    }
-
-    const gamePredictions: GamePredictionsMap = {}
+  ): Promise<Prediction[]> {
+    // Collect all gameIds for the week
+    const gameIds: number[] = []
     for (const day of scheduleData.gameWeek) {
       for (const game of day.games) {
-        const prediction = await this.createPredictionForGame(
-          game,
-          TeamELOState
-        )
-        gamePredictions[game.id] = prediction
+        gameIds.push(game.id)
       }
     }
 
-    return gamePredictions
+    // Fetch all predictions for these gameIds from the DB
+    const predictions = await PredictionModel.find({
+      gameId: { $in: gameIds },
+    }).exec()
+
+    return predictions.map(toPredictionDomain)
   }
 
   async createPredictionForGame(game: NHLGame, latestElos: TeamELOState) {

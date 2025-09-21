@@ -3,6 +3,10 @@
     {
       "path": "/api/predictions",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/outcomes/processYesterday",
+      "schedule": "0 3 * * *"
     }
   ]
 }

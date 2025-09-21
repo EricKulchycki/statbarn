@@ -25,12 +25,12 @@ const INITIAL_ELO = 1500
 /**
  * Calculate ELO for a single game
  */
-export function calculateGameELO(
+export async function calculateGameELO(
   game: NHLGame,
   currentElos: TeamELOState,
   kFactor: number = K_FACTOR,
   homeAdvantage: number = HOME_ADVANTAGE
-): ELOCalculationResult {
+): Promise<ELOCalculationResult> {
   const homeTeam = game.homeTeam.abbrev
   const awayTeam = game.awayTeam.abbrev
 
@@ -68,7 +68,7 @@ export function calculateGameELO(
   const awayEloAfter = awayEloBefore + awayEloChange
 
   // Create game ELO record
-  const gameElo = {
+  const gameElo: GameELO = {
     gameId: game.id,
     season: game.season,
     gameDate: new Date(game.startTimeUTC),
@@ -134,7 +134,10 @@ export function calculateGameELO(
 /**
  * Calculate expected result based on ELO difference
  */
-function calculateExpectedResult(teamElo: number, opponentElo: number): number {
+export function calculateExpectedResult(
+  teamElo: number,
+  opponentElo: number
+): number {
   const ratingDiff = opponentElo - teamElo
   return 1 / (1 + Math.pow(10, ratingDiff / 400))
 }
@@ -199,7 +202,7 @@ export async function processSeasonGames(
   // Process each game chronologically
   for (const game of uniqueGames) {
     try {
-      const result = calculateGameELO(game, currentElos)
+      const result = await calculateGameELO(game, currentElos)
 
       gameElos.push(result.gameElo)
       predictions.push(result.prediction)

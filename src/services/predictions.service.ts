@@ -73,11 +73,18 @@ export class PredictionsService {
     }
   }
 
-  async getPredictionsForGame(gameId: number): Promise<Prediction[]> {
+  async getPredictionsForGame(gameId: number): Promise<Prediction> {
     try {
-      // Implement logic to fetch predictions for a specific game
-      // Example: return await PredictionModel.find({ gameId }).exec()
-      return []
+      const predictionDocument = await PredictionModel.findOne({
+        filter: { gameId },
+      }).exec()
+      if (!predictionDocument) {
+        throw createApiError(
+          'getPredictionsForGame',
+          `No predictions found for game ${gameId}`
+        )
+      }
+      return toPredictionDomain(predictionDocument)
     } catch (error) {
       throw createApiError(
         'getPredictionsForGame',
@@ -99,7 +106,7 @@ export class PredictionsService {
 
     for (const game of games) {
       // 3. Calculate prediction using ELO logic
-      const { prediction } = calculateGameELO(game, eloMap)
+      const { prediction } = await calculateGameELO(game, eloMap)
 
       // 4. Save prediction to DB
       await PredictionModel.findOneAndUpdate(

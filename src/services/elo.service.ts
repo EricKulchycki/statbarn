@@ -1,4 +1,5 @@
 import {
+  createGameElo,
   getGameElos,
   getGameElosByTeam,
   getGameElosForDate,
@@ -63,6 +64,17 @@ export class EloService {
       throw createApiError(
         'getLastEloGamesForDate',
         `Failed to fetch last ELO games for date: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
+    }
+  }
+
+  async createGameElo(gameElo: GameELO): Promise<GameELO> {
+    try {
+      return await createGameElo(gameElo)
+    } catch (error) {
+      throw createApiError(
+        'createGameElo',
+        `Failed to create GameELO: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }

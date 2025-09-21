@@ -132,3 +132,13 @@ export async function getGameElosForDate(date: Date): Promise<GameELO[]> {
     throw error
   }
 }
+
+export async function createGameElo(gameElo: GameELO): Promise<GameELO> {
+  try {
+    const gameEloDocument = await GameELOModel.create(gameElo)
+    return toGameELO(gameEloDocument)
+  } catch (error) {
+    console.error('Error creating GameELO:', error)
+    throw error
+  }
+}

@@ -1,10 +1,9 @@
 'use client'
 
-import React, { Suspense, useState } from 'react'
+import React, { Suspense } from 'react'
 import { formatDate } from '@/utils/time'
 import { NHLGameWeek } from '@/types/game'
 import { GamePrediction } from './GamePrediction'
-import { ShowAll } from './ShowAll'
 import { PredictionsByDay } from './GamePredictions.server'
 import { useIsHydrated } from '@/hooks/useIsHydrated'
 import { groupPredictionsByDate } from '@/lib/predictions'
@@ -40,7 +39,7 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
   })
 
   return (
-    <div className="lg:col-span-2 my-4">
+    <div className="my-4">
       <h2 className="text-lg font-bold">Tomorrows Predictions</h2>
       <p className="text-sm text-gray-400">
         NHL game predictions are calculated automatically each night based on

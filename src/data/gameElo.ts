@@ -112,3 +112,23 @@ export async function getGameElosByTeam(limit: number): Promise<{
 
   return result
 }
+
+export async function getGameElosForDate(date: Date): Promise<GameELO[]> {
+  try {
+    const dateStr = date.toISOString().split('T')[0]
+
+    const allGames = await GameELOModel.find()
+      .sort({ gameDate: -1 })
+      .limit(100) // Fetch a large number to ensure we get all games
+      .exec()
+    const gamesOnDate = allGames.filter((game) => {
+      const gameDateStr = new Date(game.gameDate).toISOString().split('T')[0]
+      return gameDateStr === dateStr
+    })
+
+    return gamesOnDate.map(toGameELO)
+  } catch (error) {
+    console.error(`Error fetching ELO games for date ${date}:`, error)
+    throw error
+  }
+}

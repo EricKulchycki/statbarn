@@ -3,6 +3,7 @@ import { Database } from '@/lib/db'
 import { AllTeamsHistoryGraphWrapper } from '@/components/AllTeamsHistoryGraph.server'
 import { ELOWrapper } from '@/components/ELO.server'
 import { GamePredictionsWrapper } from '@/components/GamePredictions.server'
+import { YesterdaysGameOutcomes } from '@/components/YesterdaysGameOutcomes.server'
 
 export default async function Index() {
   const db = Database.getInstance()
@@ -19,7 +20,10 @@ export default async function Index() {
         </div>
 
         {/* Game Predictions */}
-        <GamePredictionsWrapper />
+        <div className="lg:col-span-2">
+          <YesterdaysGameOutcomes />
+          <GamePredictionsWrapper />
+        </div>
 
         {/* Graph With all Teams */}
         <div className="lg:col-span-3">

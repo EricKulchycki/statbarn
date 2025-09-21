@@ -59,6 +59,38 @@ export async function YesterdaysGameOutcomes() {
                   : game.awayTeam.abbrev}
               </span>
             </div>
+            {typeof game.expectedResult?.homeTeam === 'number' && (
+              <div className="mt-1 text-sm">
+                Prediction:{' '}
+                <span
+                  className={
+                    (game.homeTeam.score > game.awayTeam.score &&
+                      game.expectedResult.homeTeam >
+                        game.expectedResult.awayTeam) ||
+                    (game.awayTeam.score > game.homeTeam.score &&
+                      game.expectedResult.awayTeam >
+                        game.expectedResult.homeTeam)
+                      ? 'text-green-500 font-bold'
+                      : 'text-red-500 font-bold'
+                  }
+                >
+                  {(game.homeTeam.score > game.awayTeam.score &&
+                    game.expectedResult.homeTeam >
+                      game.expectedResult.awayTeam) ||
+                  (game.awayTeam.score > game.homeTeam.score &&
+                    game.expectedResult.awayTeam > game.expectedResult.homeTeam)
+                    ? 'Correct'
+                    : 'Incorrect'}
+                </span>
+                <span className="ml-2 text-gray-400">
+                  (Predicted:{' '}
+                  {game.expectedResult.homeTeam > game.expectedResult.awayTeam
+                    ? game.homeTeam.abbrev
+                    : game.awayTeam.abbrev}
+                  )
+                </span>
+              </div>
+            )}
           </div>
         ))}
       </div>

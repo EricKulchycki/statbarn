@@ -149,9 +149,9 @@ export const AllTeamsHistoryGraph: React.FC<AllTeamsHistoryGraphProps> = ({
   }
 
   return (
-    <div className="rounded-xl lg:p-6 h-full">
+    <div className="rounded-xl lg:p-6">
       <h2 className="text-2xl font-bold mb-6">
-        {selectedDivision.charAt(0).toUpperCase() + selectedDivision.slice(1)}{' '}
+        {selectedDivision.charAt(0).toUpperCase() + selectedDivision.slice(1)}
         Division ELO History
       </h2>
       <div className="mb-4 flex gap-2">

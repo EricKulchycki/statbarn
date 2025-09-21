@@ -111,12 +111,6 @@ export async function calculateGameELO(
     awayTeamWinProbability: awayExpectedResult,
     gameDate: new Date(game.startTimeUTC),
     modelVersion: 'v1',
-    result: {
-      homeTeamScore: game.homeTeam.score,
-      awayTeamScore: game.awayTeam.score,
-      winner: homeActualResult === 1 ? homeTeam : awayTeam,
-      correctPrediction: homeExpectedResult > 0.5 === (homeActualResult === 1),
-    },
   }
 
   // Update ELOs for next game

@@ -29,7 +29,9 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
 
   const allGames = scheduleData.gameWeek.flatMap((day) => day.games)
 
-  const visibleDays = Object.keys(predictionsByDay).slice(0, 2)
+  const visibleDays = Object.keys(predictionsByDay)
+    .sort((a, b) => (a < b ? 1 : -1))
+    .slice(0, 1)
 
   const visibleGames: PredictionsByDay = {}
   Object.entries(predictionsByDay).forEach(([day, predictions]) => {
@@ -40,7 +42,7 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
 
   return (
     <div className="my-4">
-      <h2 className="text-lg font-bold">Tomorrows Predictions</h2>
+      <h2 className="text-lg font-bold">Upcoming Game Predictions</h2>
       <p className="text-sm text-gray-400">
         NHL game predictions are calculated automatically each night based on
         the latest team statistics and ratings. Only predictions for upcoming

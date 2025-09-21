@@ -90,7 +90,7 @@ export class PredictionsService {
   }
 
   async createNextDayPredictions() {
-    const tomorrow = this.getTomorrowDateString()
+    const tomorrow = this.getTodayDateString()
 
     // 1. Get tomorrow's games
     const gameWeek = await scheduleService.getScheduleByDate(tomorrow)
@@ -119,11 +119,9 @@ export class PredictionsService {
     return yesterday.toISOString().split('T')[0]
   }
 
-  private getTomorrowDateString(): string {
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    tomorrow.setHours(0, 0, 0, 0)
-    return tomorrow.toISOString().slice(0, 10)
+  private getTodayDateString(): string {
+    const tomorrow = new Date().getTime()
+    return new Date(tomorrow).toISOString().slice(0, 10)
   }
 }
 

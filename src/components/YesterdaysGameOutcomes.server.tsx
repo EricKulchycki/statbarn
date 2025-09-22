@@ -4,8 +4,7 @@ import { DateTime } from 'luxon'
 import React from 'react'
 
 export async function YesterdaysGameOutcomes() {
-  // Get yesterday's date string (YYYY-MM-DD)
-  const yesterday = DateTime.now().minus({ days: 1 }).startOf('day')
+  const yesterday = DateTime.now().minus({ days: 1, hours: 12 }).startOf('day')
 
   // Fetch all gameElos for yesterday
   const gameElos = await eloService.getLastEloGamesForDate(yesterday.toJSDate())

@@ -15,11 +15,15 @@ import {
 interface GamePredictionsProps {
   scheduleData: NHLGameWeek
   predictions: SerializedPrediction[]
+  liveGames: {
+    [gameId: number]: { homeScore: number; awayScore: number; status: string }
+  }
 }
 
 export const GamePredictions: React.FC<GamePredictionsProps> = ({
   scheduleData,
   predictions,
+  liveGames,
 }) => {
   const isHydrated = useIsHydrated()
 
@@ -42,7 +46,7 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
 
   return (
     <div className="my-4">
-      <h2 className="text-lg font-bold">Upcoming Game Predictions</h2>
+      <h2 className="text-lg font-bold">Tomorrows Predictions</h2>
       <p className="text-sm text-gray-400">
         NHL game predictions are calculated automatically each night based on
         the latest team statistics and ratings. Only predictions for upcoming
@@ -64,12 +68,94 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
                 {predictions.map((prediction) => {
                   const game = allGames.find((g) => g.id === prediction.gameId)
                   if (!game) return null
+                  const live = liveGames[prediction.gameId]
+                  let predictionStatus = null
+
+                  const predictedWinner =
+                    prediction.homeTeamWinProbability >
+                    prediction.awayTeamWinProbability
+                      ? prediction.homeTeam
+                      : prediction.awayTeam
+
+                  const actualWinner =
+                    live.homeScore > live.awayScore
+                      ? prediction.homeTeam
+                      : live.awayScore > live.homeScore
+                        ? prediction.awayTeam
+                        : null
+
+                  // Show live prediction correctness
+                  if (live && live.status !== 'FINAL') {
+                    predictionStatus = (
+                      <span
+                        className={
+                          actualWinner === predictedWinner
+                            ? 'text-green-500 font-bold'
+                            : 'text-red-500 font-bold'
+                        }
+                      >
+                        {actualWinner === predictedWinner
+                          ? 'Correct so far'
+                          : 'Incorrect so far'}
+                      </span>
+                    )
+                  }
+                  // Show final result and correctness
+                  let finalStatus = null
+                  if (live && live.status === 'FINAL') {
+                    finalStatus = (
+                      <span
+                        className={
+                          actualWinner === predictedWinner
+                            ? 'text-green-500 font-bold'
+                            : 'text-red-500 font-bold'
+                        }
+                      >
+                        {actualWinner === predictedWinner
+                          ? 'Prediction Correct'
+                          : 'Prediction Incorrect'}
+                      </span>
+                    )
+                  }
                   return (
-                    <GamePrediction
-                      key={prediction.gameId}
-                      prediction={prediction}
-                      game={game}
-                    />
+                    <div key={prediction.gameId} className=" p-2">
+                      <div className="rounded-lg bg-slate-900 p-2 flex flex-col items-center">
+                        <GamePrediction prediction={prediction} game={game} />
+                        {live && (
+                          <div className="mt-1 text-xs flex flex-col items-center gap-2">
+                            <span className="ml-2 text-gray-400">
+                              ({live.status})
+                            </span>
+                            <div className="flex gap-2 items-center">
+                              <span className="bg-slate-800 rounded px-2 py-1">
+                                {game.awayTeam.abbrev}{' '}
+                                <span className="font-bold">
+                                  {live.awayScore}
+                                </span>
+                              </span>
+                              <span className="mx-1">vs</span>
+                              <span className="bg-slate-800 rounded px-2 py-1">
+                                {game.homeTeam.abbrev}{' '}
+                                <span className="font-bold">
+                                  {live.homeScore}
+                                </span>
+                              </span>
+                            </div>
+                            {predictionStatus && (
+                              <span className="ml-2">{predictionStatus}</span>
+                            )}
+                            {finalStatus && (
+                              <span className="ml-2">{finalStatus}</span>
+                            )}
+                          </div>
+                        )}
+                        {!live && finalStatus && (
+                          <div className="mt-1 text-xs flex flex-col items-center">
+                            {finalStatus}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   )
                 })}
               </div>

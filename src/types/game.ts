@@ -24,7 +24,7 @@ export interface NHLGame {
   easternUTCOffset: string
   gameCenterLink: string
   gameScheduleState: string
-  gameState: string
+  gameState: 'FUT' | 'LIVE' | 'FINAL' | 'CRIT'
   gameType: number
   id: number
   neutralSite: boolean

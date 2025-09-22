@@ -3,6 +3,7 @@ import { getDailyScoresByDate, getThisWeeksGames } from '@/data/games'
 import { getPredictions } from '@/data/predictions'
 import { createApiError, createNotFoundError } from '@/types/errors'
 import { NHLGame, NHLGameDay } from '@/types/game'
+import { DateTime } from 'luxon'
 
 export class GameService {
   private static instance: GameService
@@ -16,12 +17,12 @@ export class GameService {
     return GameService.instance
   }
 
-  async getThisWeeksGames(): Promise<NHLGameDay[]> {
+  async getThisWeeksGames(date?: DateTime): Promise<NHLGameDay[]> {
     /*
       Fetch the NHL schedule for the next 7 days, starting from today
     */
     try {
-      const games = await getThisWeeksGames()
+      const games = await getThisWeeksGames(date)
       if (!games) {
         throw createNotFoundError('Games', 'this week')
       }

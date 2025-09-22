@@ -5,7 +5,8 @@ import { gameService } from '@/services/game.service'
 import Image from 'next/image'
 
 export async function GameBanner() {
-  const gamesThisWeek = await gameService.getThisWeeksGames()
+  const today = DateTime.now()
+  const gamesThisWeek = await gameService.getThisWeeksGames(today)
 
   if (
     !gamesThisWeek ||

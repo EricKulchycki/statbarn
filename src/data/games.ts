@@ -3,13 +3,13 @@ import { NHLGameDay, NHLGameWeek } from '@/types/game'
 
 type GetTodaysGamesResponse = NHLGameWeek
 
-export async function getThisWeeksGames() {
+export async function getThisWeeksGames(date?: DateTime) {
   /*
     Fetch the NHL schedule for the next 7 days, starting from today
   */
-  const tomorrow = DateTime.now().plus({ days: 1 })
+  const datetime = date ? date : DateTime.now().plus({ days: 1 })
   const res = await fetch(
-    `https://api-web.nhle.com/v1/schedule/${tomorrow.toISODate()}`
+    `https://api-web.nhle.com/v1/schedule/${datetime.toISODate()}`
   )
   const games: GetTodaysGamesResponse = await res.json()
   return games

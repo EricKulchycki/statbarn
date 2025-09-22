@@ -4,14 +4,14 @@ import { predictionsService } from '@/services/predictions.service'
 import { Prediction } from '@/models/prediction'
 import { serializePrediction } from '@/utils/converters/prediction'
 import { gameService } from '@/services/game.service'
-import { getYesterdayDate } from '@/utils/currentSeason'
+import { DateTime } from 'luxon'
 
 export type PredictionsByDay = { [day: string]: Prediction[] }
 
 export async function fetchLiveGamesForClient() {
-  const todaysGames = await gameService.getGamesByDate(
-    getYesterdayDate().toISOString().slice(0, 10)
-  )
+  const today = DateTime.now().minus({ hours: 4 })
+
+  const todaysGames = await gameService.getGamesByDate(today.toISODate())
   const map: {
     [gameId: number]: { homeScore: number; awayScore: number; status: string }
   } = {}

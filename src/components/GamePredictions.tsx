@@ -46,7 +46,7 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
 
   return (
     <div className="my-4">
-      <h2 className="text-lg font-bold">Tomorrows Predictions</h2>
+      <h2 className="text-lg font-bold">Upcoming & Live Predictions</h2>
       <p className="text-sm text-gray-400">
         NHL game predictions are calculated automatically each night based on
         the latest team statistics and ratings. Only predictions for upcoming
@@ -119,7 +119,7 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
                   }
                   return (
                     <div key={prediction.gameId} className=" p-2">
-                      <div className="rounded-lg bg-slate-900 p-2 flex flex-col items-center">
+                      <div className="rounded-lg bg-gradient-to-br from-slate-800 to-slate-900 p-2 flex flex-col items-center">
                         <GamePrediction prediction={prediction} game={game} />
                         {live && (
                           <div className="mt-1 text-xs flex flex-col items-center gap-2">
@@ -127,14 +127,14 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
                               ({live.status})
                             </span>
                             <div className="flex gap-2 items-center">
-                              <span className="bg-slate-800 rounded px-2 py-1">
+                              <span className=" rounded px-2 py-1">
                                 {game.awayTeam.abbrev}{' '}
                                 <span className="font-bold">
                                   {live.awayScore}
                                 </span>
                               </span>
                               <span className="mx-1">vs</span>
-                              <span className="bg-slate-800 rounded px-2 py-1">
+                              <span className="rounded px-2 py-1">
                                 {game.homeTeam.abbrev}{' '}
                                 <span className="font-bold">
                                   {live.homeScore}

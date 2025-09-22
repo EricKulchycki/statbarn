@@ -17,7 +17,7 @@ export const GamePrediction = (props: GamePredictionProps) => {
   const isHydrated = useIsHydrated()
 
   return (
-    <div key={game.id} className="rounded-lg p-4 bg-slate-900">
+    <div key={game.id} className="rounded-lg p-4">
       <div className="text-sm text-gray-400 mb-2">
         {isHydrated &&
           new Date(game.startTimeUTC).toLocaleTimeString([], {

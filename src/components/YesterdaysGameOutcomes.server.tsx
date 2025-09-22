@@ -1,15 +1,14 @@
 import { eloService } from '@/services/elo.service'
 import { formatDate } from '@/utils/time'
+import { DateTime } from 'luxon'
 import React from 'react'
 
 export async function YesterdaysGameOutcomes() {
   // Get yesterday's date string (YYYY-MM-DD)
-  const yesterday = new Date()
-  yesterday.setDate(yesterday.getDate() - 1)
-  yesterday.setHours(0, 0, 0, 0)
+  const yesterday = DateTime.now().minus({ days: 1 }).startOf('day')
 
   // Fetch all gameElos for yesterday
-  const gameElos = await eloService.getLastEloGamesForDate(yesterday)
+  const gameElos = await eloService.getLastEloGamesForDate(yesterday.toJSDate())
 
   if (!gameElos || gameElos.length === 0) {
     return (

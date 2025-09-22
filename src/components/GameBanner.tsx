@@ -5,7 +5,7 @@ import { gameService } from '@/services/game.service'
 import Image from 'next/image'
 
 export async function GameBanner() {
-  const today = DateTime.now()
+  const today = DateTime.now().minus({ hours: 12 }) // offset generally accounts for server being ahead of NA local times
   const gamesThisWeek = await gameService.getThisWeeksGames(today)
 
   if (

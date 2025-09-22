@@ -56,7 +56,7 @@ function BannerGame(props: BannerGameProps) {
   const timezone = startTime.toFormat('ZZZZ')
 
   return (
-    <div className="px-2 min-w-fit">
+    <div className="px-2 w-fit">
       <p className="text-xs text-slate-300">
         <b>
           {startTime.toLocaleString(DateTime.TIME_24_SIMPLE)} {timezone}
@@ -118,7 +118,7 @@ function GameDate(props: GameDateProps) {
   const ldate = DateTime.fromISO(date)
 
   return (
-    <div className="text-slate-300 mr-2">
+    <div className="text-slate-300 mx-4 text-center font-bold">
       <p>{ldate.toFormat('MMM')}</p>
       <p>{ldate.toFormat('dd')}</p>
     </div>

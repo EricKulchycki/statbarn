@@ -4,6 +4,7 @@ import {
   GameELOModel,
   toGameELO,
 } from '@/models/gameElo'
+import { DateTime } from 'luxon'
 
 export interface LatestELO {
   abbrev: string
@@ -114,17 +115,12 @@ export async function getGameElosByTeam(limit: number): Promise<{
 }
 
 export async function getGameElosForDate(date: Date): Promise<GameELO[]> {
+  const dateStr = DateTime.fromJSDate(date).toISODate()
   try {
-    const dateStr = date.toISOString().split('T')[0]
-
-    const allGames = await GameELOModel.find()
+    const gamesOnDate = await GameELOModel.find({ gameDate: { $gt: dateStr } })
       .sort({ gameDate: -1 })
       .limit(100) // Fetch a large number to ensure we get all games
       .exec()
-    const gamesOnDate = allGames.filter((game) => {
-      const gameDateStr = new Date(game.gameDate).toISOString().split('T')[0]
-      return gameDateStr === dateStr
-    })
 
     return gamesOnDate.map(toGameELO)
   } catch (error) {

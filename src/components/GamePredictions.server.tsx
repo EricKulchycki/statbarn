@@ -29,7 +29,6 @@ export async function fetchLiveGamesForClient() {
 export async function GamePredictionsWrapper() {
   const requestHeaders = await headers()
   let localDate = requestHeaders.get('x-local-date')
-  console.log('Local Date from headers:', localDate)
 
   if (!localDate) {
     localDate = DateTime.now().toISODate() || ''

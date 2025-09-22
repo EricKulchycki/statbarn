@@ -34,8 +34,6 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
   const allGames = scheduleData.gameWeek.flatMap((day) => day.games)
 
   const visibleDays = Object.keys(predictionsByDay)
-    .sort((a, b) => (a < b ? 1 : -1))
-    .slice(0, 1)
 
   const visibleGames: PredictionsByDay = {}
   Object.entries(predictionsByDay).forEach(([day, predictions]) => {
@@ -77,12 +75,15 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
                       ? prediction.homeTeam
                       : prediction.awayTeam
 
-                  const actualWinner =
-                    live.homeScore > live.awayScore
-                      ? prediction.homeTeam
-                      : live.awayScore > live.homeScore
-                        ? prediction.awayTeam
-                        : null
+                  let actualWinner = null
+                  if (live && live.status !== 'FUT') {
+                    actualWinner =
+                      live.homeScore > live.awayScore
+                        ? prediction.homeTeam
+                        : live.awayScore > live.homeScore
+                          ? prediction.awayTeam
+                          : null
+                  }
 
                   // Show live prediction correctness
                   if (live && live.status !== 'FINAL') {
@@ -117,6 +118,15 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
                       </span>
                     )
                   }
+
+                  if (live && live.status === 'FUT') {
+                    predictionStatus = (
+                      <span className="text-blue-500 font-bold">
+                        Not Started
+                      </span>
+                    )
+                  }
+
                   return (
                     <div key={prediction.gameId} className="flex-1 p-2">
                       <div className="rounded-lg bg-gradient-to-br from-slate-800 to-slate-900 p-2 flex flex-col items-center">

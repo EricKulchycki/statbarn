@@ -2,12 +2,12 @@
 
 import { useEffect } from 'react'
 import { HeroUIProvider } from '@heroui/react'
+import { DateTime } from 'luxon'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    const today = new Date()
-    const localDate = today.toISOString().slice(0, 10)
-    document.cookie = `localDate=${localDate}; path=/; SameSite=Lax`
+    const today = DateTime.now()
+    document.cookie = `localDate=${today.toISODate()}; path=/; SameSite=Lax`
   }, [])
 
   return <HeroUIProvider>{children}</HeroUIProvider>

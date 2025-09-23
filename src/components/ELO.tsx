@@ -6,7 +6,6 @@ import { Team } from '@/types/team'
 import Image from 'next/image'
 import { useState } from 'react'
 import { ShowAll } from './ShowAll'
-import { Divider } from '@heroui/react'
 
 interface Props {
   elos: LatestELO[]
@@ -22,32 +21,43 @@ export function ELO(props: Props) {
 
   return (
     <div className="p-4 mb-8">
-      <h2 className="text-lg font-semibold mb-4">Power Rankings</h2>
-      {visibleRankings.map((elo) => {
-        if (elo.abbrev === 'ARI') {
-          return null
-        }
-        const team = props.teams.find((team) => team.triCode === elo.abbrev)
-        return (
-          <div
-            key={elo.abbrev}
-            className="flex items-center justify-between mb-2 bg-gradient-to-br from-slate-800 to-slate-900 p-2 rounded-xl"
-          >
-            <div className="flex items-center">
-              <Image
-                src={team?.logo ?? ''}
-                alt={team?.triCode ?? ''}
-                className="w-8 h-8 mr-2"
-                width={32}
-                height={32}
-              />
-              <p>{elo.abbrev}</p>
+      <h2 className="text-2xl font-bold mb-6 text-blue-400 tracking-wide">
+        Power Rankings
+      </h2>
+      <div className="flex flex-col gap-4">
+        {visibleRankings.map((elo, idx) => {
+          if (elo.abbrev === 'ARI') {
+            return null
+          }
+          const team = props.teams.find((team) => team.triCode === elo.abbrev)
+          return (
+            <div
+              key={elo.abbrev}
+              className="flex items-center justify-between bg-gradient-to-br from-slate-800 to-slate-900 shadow-md p-4 rounded-2xl  hover:scale-[1.02] transition-transform"
+            >
+              <div className="flex items-center gap-3">
+                <Image
+                  src={team?.logo ?? ''}
+                  alt={team?.triCode ?? ''}
+                  className="w-10 h-10 rounded-full border-2 border-slate-700 bg-white/10 shadow"
+                  width={40}
+                  height={40}
+                />
+                <div className="flex flex-col">
+                  <span className="font-bold text-lg text-slate-100 tracking-wide">
+                    {elo.abbrev}
+                  </span>
+                  <span className="text-xs text-gray-400">{elo.abbrev}</span>
+                </div>
+              </div>
+              <span className="px-3 py-1 rounded-full bg-slate-700 text-white font-bold text-md shadow">
+                {elo.elo?.toFixed(0)} pts
+              </span>
+              <span className="ml-2 text-xs text-gray-400">#{idx + 1}</span>
             </div>
-            <Divider className="flex-1 mx-4" />
-            <b className="justify-self-end">{elo.elo?.toFixed(0)} pts</b>
-          </div>
-        )
-      })}
+          )
+        })}
+      </div>
       <ShowAll showAll={showAll} setShowAll={setShowAll} />
     </div>
   )

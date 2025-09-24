@@ -7,9 +7,10 @@ import React from 'react'
 export async function YesterdaysGameOutcomes() {
   const h = await headers()
   const localDate = h.get('x-local-date')
-  const yesterday = DateTime.fromISO(localDate || '')
-    .minus({ days: 1 })
-    .startOf('day')
+  const yesterday =
+    localDate !== ''
+      ? DateTime.fromISO(localDate || '').minus({ days: 1 })
+      : DateTime.now().minus({ days: 1 })
 
   // Fetch all gameElos for yesterday
   const gameElos = await eloService.getLastEloGamesForDate(yesterday.toJSDate())

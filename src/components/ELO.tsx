@@ -33,7 +33,7 @@ export function ELO(props: Props) {
           return (
             <div
               key={elo.abbrev}
-              className="flex items-center justify-between bg-gradient-to-br from-slate-800 to-slate-900 shadow-md p-4 rounded-2xl  hover:scale-[1.02] transition-transform"
+              className="flex flex-wrap gap-2 items-center justify-between bg-gradient-to-br from-slate-800 to-slate-900 shadow-md p-4 rounded-2xl  hover:scale-[1.02] transition-transform"
             >
               <div className="flex items-center gap-3">
                 <Image
@@ -47,7 +47,6 @@ export function ELO(props: Props) {
                   <span className="font-bold text-lg text-slate-100 tracking-wide">
                     {elo.abbrev}
                   </span>
-                  <span className="text-xs text-gray-400">{elo.abbrev}</span>
                 </div>
               </div>
               <span className="px-3 py-1 rounded-full bg-slate-700 text-white font-bold text-md shadow">

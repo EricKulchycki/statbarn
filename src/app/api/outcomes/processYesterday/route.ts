@@ -3,18 +3,17 @@ import { Database } from '@/lib/db'
 import { scheduleService } from '@/services/schedule.service'
 import { calculateGameELO } from '@/lib/eloCalculator'
 import { eloService } from '@/services/elo.service'
+import { DateTime } from 'luxon'
 
 export async function GET() {
   const db = Database.getInstance()
   await db.connect()
   // Get yesterday's date as a Date object
-  const yesterday = new Date()
-  yesterday.setDate(yesterday.getDate() - 1)
-  yesterday.setHours(0, 0, 0, 0)
+  const yesterday = DateTime.now().minus({ days: 1 }).startOf('day')
 
   // 1. Get all games played yesterday (from eloService)
   const gameWeek = await scheduleService.getScheduleByDate(
-    yesterday.toISOString().slice(0, 10)
+    yesterday.toISODate()
   )
   const games = gameWeek.gameWeek[0]?.games || []
 

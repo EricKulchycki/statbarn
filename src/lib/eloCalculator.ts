@@ -72,6 +72,7 @@ export async function calculateGameELO(
     gameId: game.id,
     season: game.season,
     gameDate: new Date(game.startTimeUTC),
+    gameTimezone: game.venueTimezone,
     homeTeam: {
       abbrev: homeTeam,
       eloBefore: homeEloBefore,

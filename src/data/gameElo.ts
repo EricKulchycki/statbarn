@@ -114,6 +114,9 @@ export async function getGameElosByTeam(limit: number): Promise<{
   return result
 }
 
+/* date will always be localized, need to filter out games that happened technically
+ the day before due to their timezone
+*/
 export async function getGameElosForDate(date: Date): Promise<GameELO[]> {
   const dateStr = DateTime.fromJSDate(date).toISODate()
   try {
@@ -121,7 +124,14 @@ export async function getGameElosForDate(date: Date): Promise<GameELO[]> {
       gameDate: { $gt: dateStr },
     }).exec()
 
-    return gamesOnDate.map(toGameELO)
+    const filteredGames = gamesOnDate.filter((game) => {
+      const gameDate = DateTime.fromJSDate(game.gameDate)
+        .setZone(game.gameTimezone)
+        .toISODate()
+      return gameDate === dateStr
+    })
+
+    return filteredGames.map(toGameELO)
   } catch (error) {
     console.error(`Error fetching ELO games for date ${date}:`, error)
     throw error

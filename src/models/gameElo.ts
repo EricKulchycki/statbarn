@@ -5,6 +5,7 @@ const gameEloSchema: Schema = new Schema(
     gameId: { type: Number, required: true, unique: true },
     season: { type: Number, required: true },
     gameDate: { type: Date, required: true },
+    gameTimezone: { type: String },
     homeTeam: {
       abbrev: { type: String, required: true },
       eloBefore: { type: Number, required: true },
@@ -48,6 +49,7 @@ export interface GameELODocument extends Document {
   gameId: number
   season: number
   gameDate: Date
+  gameTimezone?: string
   homeTeam: {
     abbrev: string
     eloBefore: number
@@ -92,6 +94,7 @@ export type GameELO = {
   gameId: number
   season: number
   gameDate: Date
+  gameTimezone?: string
   homeTeam: GameELOTeam
   awayTeam: GameELOTeam
   eloChange: {
@@ -115,6 +118,7 @@ export type GameELOSerialized = {
   gameId: number
   season: number
   gameDate: string
+  gameTimezone?: string
   homeTeam: {
     abbrev: string
     eloBefore: number
@@ -149,6 +153,7 @@ export function toGameELO(doc: GameELODocument): GameELO {
     gameId: doc.gameId,
     season: doc.season,
     gameDate: doc.gameDate,
+    gameTimezone: doc.gameTimezone,
     homeTeam: { ...doc.homeTeam },
     awayTeam: { ...doc.awayTeam },
     eloChange: { ...doc.eloChange },

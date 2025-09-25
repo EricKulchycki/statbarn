@@ -1,7 +1,7 @@
 // App-wide constants
 export const APP_CONFIG = {
   name: 'Stat Barn',
-  description: 'NHL Stat Lines and Predictions',
+  description: 'NHL Game Predictions',
   version: '1.0.0',
 } as const
 

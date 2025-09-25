@@ -1,4 +1,5 @@
 import {
+  countSeasonsGames,
   createGameElo,
   getGameElos,
   getGameElosByTeam,
@@ -75,6 +76,17 @@ export class EloService {
       throw createApiError(
         'createGameElo',
         `Failed to create GameELO: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
+    }
+  }
+
+  async countSeasonsGames(season: number): Promise<number> {
+    try {
+      return await countSeasonsGames(season)
+    } catch (error) {
+      throw createApiError(
+        'getCompletedGamesForSeason',
+        `Failed to fetch completed games for season: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }

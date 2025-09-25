@@ -137,3 +137,13 @@ export async function createGameElo(gameElo: GameELO): Promise<GameELO> {
     throw error
   }
 }
+
+export async function countSeasonsGames(season: number): Promise<number> {
+  try {
+    const games = await GameELOModel.find({ season }).exec()
+    return games.length
+  } catch (error) {
+    console.error(`Error fetching all GameELOs for season ${season}:`, error)
+    throw error
+  }
+}

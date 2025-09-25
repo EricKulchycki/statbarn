@@ -1,12 +1,12 @@
+import { getTimezoneFromCookie } from '@/lib/time'
 import { eloService } from '@/services/elo.service'
 import { formatDate } from '@/utils/time'
 import { DateTime } from 'luxon'
-import { headers } from 'next/headers'
 import React from 'react'
 
 export async function YesterdaysGameOutcomes() {
-  const h = await headers()
-  const localDate = h.get('x-local-date')
+  const localTimezone = await getTimezoneFromCookie()
+  const localDate = DateTime.now().setZone(localTimezone).toISODate()
   const yesterday =
     localDate !== ''
       ? DateTime.fromISO(localDate || '').minus({ days: 1 })

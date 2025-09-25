@@ -1,4 +1,3 @@
-import { headers } from 'next/headers'
 import { scheduleService } from '@/services/schedule.service'
 import { GamePredictions } from './GamePredictions'
 import { predictionsService } from '@/services/predictions.service'
@@ -6,6 +5,7 @@ import { Prediction } from '@/models/prediction'
 import { serializePrediction } from '@/utils/converters/prediction'
 import { gameService } from '@/services/game.service'
 import { DateTime } from 'luxon'
+import { getTimezoneFromCookie } from '@/lib/time'
 
 export type PredictionsByDay = { [day: string]: Prediction[] }
 
@@ -27,15 +27,14 @@ export async function fetchLiveGamesForClient() {
 }
 
 export async function GamePredictionsWrapper() {
-  const requestHeaders = await headers()
-  let localDate = requestHeaders.get('x-local-date')
+  const localTimezone = await getTimezoneFromCookie()
 
-  if (!localDate) {
-    localDate = DateTime.now().toISODate() || ''
-  }
+  const localDate = DateTime.now().setZone(localTimezone).toISODate()
 
   // Gets the game week from the NHL API, which includes all games for the current week
-  const currentSchedule = await scheduleService.getScheduleByDate(localDate)
+  const currentSchedule = await scheduleService.getScheduleByDate(
+    localDate ?? ''
+  )
   // console.log('Current Schedule:', currentSchedule)
 
   const upcomingPredictions =

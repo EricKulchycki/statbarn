@@ -41,8 +41,8 @@ const gameEloSchema: Schema = new Schema(
 
 // Indexes for efficient querying
 gameEloSchema.index({ gameDate: -1 })
-gameEloSchema.index({ 'homeTeam.abbrev': 1, gameDate: -1 })
-gameEloSchema.index({ 'awayTeam.abbrev': 1, gameDate: -1 })
+gameEloSchema.index({ 'homeTeam.abbrev': 1, gameDate: 1 })
+gameEloSchema.index({ 'awayTeam.abbrev': 1, gameDate: 1 })
 
 export interface GameELODocument extends Document {
   gameId: number

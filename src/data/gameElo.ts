@@ -117,10 +117,9 @@ export async function getGameElosByTeam(limit: number): Promise<{
 export async function getGameElosForDate(date: Date): Promise<GameELO[]> {
   const dateStr = DateTime.fromJSDate(date).toISODate()
   try {
-    const gamesOnDate = await GameELOModel.find({ gameDate: { $gt: dateStr } })
-      .sort({ gameDate: -1 })
-      .limit(100) // Fetch a large number to ensure we get all games
-      .exec()
+    const gamesOnDate = await GameELOModel.find({
+      gameDate: { $gt: dateStr },
+    }).exec()
 
     return gamesOnDate.map(toGameELO)
   } catch (error) {

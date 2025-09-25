@@ -6,6 +6,7 @@ import { Team } from '@/types/team'
 import Image from 'next/image'
 import { useState } from 'react'
 import { ShowAll } from './ShowAll'
+import { useRouter } from 'next/navigation'
 
 interface Props {
   elos: LatestELO[]
@@ -13,11 +14,13 @@ interface Props {
 }
 
 export function ELO(props: Props) {
+  const router = useRouter()
+
   const [showAll, setShowAll] = useState(false)
 
   const rankings = _.orderBy(props.elos, 'elo', 'desc')
 
-  const visibleRankings = showAll ? rankings : rankings.slice(0, 15)
+  const visibleRankings = showAll ? rankings : rankings.slice(0, 10)
 
   return (
     <div className="p-4 mb-8">
@@ -33,7 +36,8 @@ export function ELO(props: Props) {
           return (
             <div
               key={elo.abbrev}
-              className="flex flex-wrap gap-2 items-center justify-between bg-gradient-to-br from-slate-800 to-slate-900 shadow-md p-4 rounded-2xl  hover:scale-[1.02] transition-transform"
+              className="flex flex-wrap gap-2 items-center justify-between bg-gradient-to-br from-slate-800 to-slate-900 shadow-md p-4 rounded-2xl  hover:scale-[1.02] transition-transform cursor-pointer"
+              onClick={() => router.push(`/historical/${elo.abbrev}`)}
             >
               <div className="flex items-center gap-3">
                 <Image

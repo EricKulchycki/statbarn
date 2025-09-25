@@ -1,10 +1,10 @@
 import { upsetService } from '@/services/upset.service'
 import { getTeams } from '@/data/teams'
-import { DateTime } from 'luxon'
 import Image from 'next/image'
 import { getTeamFullName, getTeamLogo } from '@/utils/team'
 import { eloService } from '@/services/elo.service'
 import { SeasonSelector } from './SeasonSelector'
+import { splitAtIndex } from '@/utils'
 
 export default async function SeasonUpsetSidebar({
   season,
@@ -32,7 +32,7 @@ export default async function SeasonUpsetSidebar({
   return (
     <aside className="w-full rounded-xl shadow-lg">
       <h2 className="text-3xl font-extrabold mb-6 tracking-tight pb-8">
-        This Season&apos;s Upsets
+        {splitAtIndex(season.toString(), 4).join('/')} Season Upsets
       </h2>
       <SeasonSelector currentSeason={season} />
       <div className="flex justify-between mb-6 gap-8">
@@ -79,7 +79,7 @@ export default async function SeasonUpsetSidebar({
           </div>
         </div>
       </div>
-      <div className="space-y-2">
+      {/* <div className="space-y-2">
         {seasonUpsets.slice(0, 20).map((upset) => (
           <div
             key={upset.gameId}
@@ -131,7 +131,7 @@ export default async function SeasonUpsetSidebar({
             </div>
           </div>
         ))}
-      </div>
+      </div> */}
     </aside>
   )
 }

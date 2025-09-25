@@ -17,7 +17,7 @@ export default async function UpsetTracker({
 
   return (
     <div className="flex gap-8 max-w-[70%] p-8 mx-auto">
-      <div className="flex-1">
+      <div className="w-5/8">
         <h2 className="text-3xl font-extrabold mb-6 tracking-tight">
           Recent Upsets
         </h2>

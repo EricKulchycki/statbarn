@@ -2,11 +2,11 @@
   "crons": [
     {
       "path": "/api/predictions",
-      "schedule": "0 3 * * *"
+      "schedule": "0 6 * * *"
     },
     {
       "path": "/api/outcomes/processYesterday",
-      "schedule": "0 3 * * *"
+      "schedule": "0 6 * * *"
     }
   ]
 }

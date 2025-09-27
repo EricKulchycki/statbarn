@@ -47,6 +47,12 @@ export function Header({ className = '' }: HeaderProps) {
               Upsets
             </Link>
             <Link
+              href="/model-confidence"
+              className="text-gray-500 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+            >
+              Confidence
+            </Link>
+            <Link
               href="/historical"
               className="text-gray-500 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
             >

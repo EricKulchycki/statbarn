@@ -15,3 +15,17 @@ export const getSelf = (gameElo: GameELO, teamAbbrev: string) => {
     return gameElo.awayTeam
   }
 }
+
+export const getPredictedWinnerFromGameELO = (gameElo: GameELO) => {
+  return gameElo.expectedResult.homeTeam > gameElo.expectedResult.awayTeam
+    ? gameElo.homeTeam.abbrev
+    : gameElo.awayTeam.abbrev
+}
+
+export const getActualWinnerFromGameELO = (gameElo: GameELO) => {
+  const actualWinner =
+    gameElo.homeTeam.score > gameElo.awayTeam.score
+      ? gameElo.homeTeam.abbrev
+      : gameElo.awayTeam.abbrev
+  return actualWinner
+}

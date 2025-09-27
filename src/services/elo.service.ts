@@ -1,6 +1,7 @@
 import {
   countSeasonsGames,
   createGameElo,
+  getAllGamesForSeason,
   getGameElos,
   getGameElosByTeam,
   getGameElosForDate,
@@ -9,6 +10,10 @@ import {
 } from '@/data/gameElo'
 import { createApiError } from '../types/errors'
 import { GameELO, toGameELO } from '@/models/gameElo'
+import {
+  getActualWinnerFromGameELO,
+  getPredictedWinnerFromGameELO,
+} from '@/utils/gameElo'
 
 export class EloService {
   private static instance: EloService
@@ -76,6 +81,35 @@ export class EloService {
       throw createApiError(
         'createGameElo',
         `Failed to create GameELO: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
+    }
+  }
+
+  async countSeasonsCorrectPredictions(season: number): Promise<number> {
+    try {
+      const games = await getAllGamesForSeason(season)
+      const correctPredictions = games.filter((game) => {
+        const predictedWinner = getPredictedWinnerFromGameELO(game)
+        const actualWinner = getActualWinnerFromGameELO(game)
+        return predictedWinner === actualWinner
+      })
+      return correctPredictions.length
+    } catch (error) {
+      throw createApiError(
+        'countSeasonsCorrectPredictions',
+        `Failed to count season's correct predictions: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
+    }
+  }
+
+  async getAllGameElosForSeason(season: number): Promise<GameELO[]> {
+    try {
+      const games = await getAllGamesForSeason(season)
+      return games
+    } catch (error) {
+      throw createApiError(
+        'getSeasonsGameElos',
+        `Failed to fetch season's game ELOs: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }

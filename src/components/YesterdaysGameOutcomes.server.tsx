@@ -1,6 +1,5 @@
 import { getTimezoneFromCookie } from '@/lib/time'
 import { eloService } from '@/services/elo.service'
-import { formatDate } from '@/utils/time'
 import { DateTime } from 'luxon'
 import React from 'react'
 
@@ -60,7 +59,9 @@ export async function YesterdaysGameOutcomes() {
             <div className="rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 shadow-md p-4 flex flex-col items-center">
               <div className="flex items-center justify-between w-full mb-2">
                 <span className="text-xs text-gray-400">
-                  {formatDate(game.gameDate)}
+                  {DateTime.fromJSDate(game.gameDate)
+                    .setZone(game.gameTimezone || localTimezone)
+                    .toLocaleString(DateTime.DATETIME_MED)}
                 </span>
               </div>
               <div className="flex items-center gap-4 w-full justify-center">

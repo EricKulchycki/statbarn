@@ -39,7 +39,9 @@ export function ConfidenceTrendChart(props: ConfidenceTrendChartProps) {
             stroke="#94a3b8"
             fontSize={12}
           />
-          <Tooltip formatter={(v) => `${Math.round(v * 100)}%`} />
+          <Tooltip
+            formatter={(v) => `${Math.round(Number(v.valueOf()) * 100)}%`}
+          />
           <Line
             type="monotone"
             dataKey="avgConfidence"

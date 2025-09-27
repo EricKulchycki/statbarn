@@ -52,15 +52,14 @@ function BannerGame(props: BannerGameProps) {
   const homeScore = game.homeTeam.score
   const awayScore = game.awayTeam.score
 
-  const startTime = DateTime.fromISO(game.startTimeUTC)
-  const timezone = startTime.toFormat('ZZZZ')
+  const startTime = DateTime.fromISO(game.startTimeUTC).setZone(
+    game.venueTimezone
+  )
 
   return (
     <div className="px-2 w-fit">
       <p className="text-xs text-slate-300">
-        <b>
-          {startTime.toLocaleString(DateTime.TIME_24_SIMPLE)} {timezone}
-        </b>
+        <b>{startTime.toLocaleString(DateTime.TIME_SIMPLE)}</b>
       </p>
       <GameTeam>
         <Image

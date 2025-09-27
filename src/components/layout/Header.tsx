@@ -17,13 +17,15 @@ export function Header({ className = '' }: HeaderProps) {
           {/* Logo and Brand */}
           <div className="flex items-center">
             <div className="flex-shrink-0 mr-2">
-              <Image
-                src="/statbarn_logo.png"
-                alt="App Logo"
-                width={200}
-                height={80}
-                priority
-              />
+              <Link href="/">
+                <Image
+                  src="/statbarn_logo.png"
+                  alt="App Logo"
+                  width={200}
+                  height={80}
+                  priority
+                />
+              </Link>
             </div>
             <div className="hidden md:block">
               <p className="text-sm text-gray-300 dark:text-gray-400 transition-colors duration-200">

@@ -134,6 +134,33 @@ export class ModelService {
 
     return leastConfidentTeam
   }
+
+  async getModelConfidenceTrend(
+    season: number
+  ): Promise<{ date: string; avgConfidence: number }[]> {
+    const seasonsGames = await this.eloService.getAllGameElosForSeason(season)
+    const dateConfidences: { [date: string]: number[] } = {}
+
+    for (const game of seasonsGames) {
+      const confidence = this.getPredictionConfidence(game)
+      const gameDate = game.gameDate.toISOString().split('T')[0] // YYYY-MM-DD
+      if (!dateConfidences[gameDate]) {
+        dateConfidences[gameDate] = []
+      }
+      dateConfidences[gameDate].push(confidence)
+    }
+
+    const trend: { date: string; avgConfidence: number }[] = []
+    for (const date in dateConfidences) {
+      const avgConfidence =
+        sum(dateConfidences[date]) / dateConfidences[date].length
+      trend.push({ date, avgConfidence })
+    }
+
+    // Sort by date ascending
+    trend.sort((a, b) => (a.date < b.date ? -1 : 1))
+    return trend
+  }
 }
 
 // Export singleton instance

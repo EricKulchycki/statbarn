@@ -1,6 +1,13 @@
 import { Database } from '@/lib/db'
 import { eloService } from '@/services/elo.service'
 import { modelService } from '@/services/model.service'
+import {
+  CheckCircleIcon,
+  ChartBarIcon,
+  ExclamationTriangleIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+} from '@heroicons/react/24/solid'
 
 export async function ConfidenceSummaryCard() {
   const db = Database.getInstance()
@@ -19,35 +26,51 @@ export async function ConfidenceSummaryCard() {
   const leastConfidentTeam = await modelService.getLeastConfidentTeam(20252026)
 
   return (
-    <div className="bg-slate-900 rounded-xl shadow-lg p-6 w-full max-w-md">
-      <h2 className="text-xl font-bold text-blue-300 mb-4">
+    <div className="bg-slate-900 rounded-xl shadow-lg p-6 w-full max-w-lg">
+      <h2 className="text-xl font-bold text-blue-300 mb-4 flex items-center gap-2">
+        <ChartBarIcon className="w-6 h-6 text-blue-400" />
         Model Confidence Summary
       </h2>
       <div className="flex flex-col gap-4">
         <div className="flex justify-between items-center">
-          <span className="text-slate-400">Avg. Confidence</span>
+          <span className="flex items-center gap-2 text-slate-400">
+            <ArrowTrendingUpIcon className="w-5 h-5 text-blue-400" />
+            Avg. Confidence
+          </span>
           <span className="text-2xl font-bold text-blue-400">
             {(avgConfidence * 100).toFixed(1)}%
           </span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-slate-400">Correct Predictions</span>
+          <span className="flex items-center gap-2 text-slate-400">
+            <CheckCircleIcon className="w-5 h-5 text-green-400" />
+            Correct Predictions
+          </span>
           <span className="font-bold text-green-400">
             {correctPredictions} / {totalGames}
           </span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-slate-400">High-Confidence Upsets</span>
+          <span className="flex items-center gap-2 text-slate-400">
+            <ExclamationTriangleIcon className="w-5 h-5 text-red-400" />
+            High-Confidence Upsets
+          </span>
           <span className="font-bold text-red-400">
             {highConfidenceUpsets.length}
           </span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-slate-400">Most Confident Team</span>
+          <span className="flex items-center gap-2 text-slate-400">
+            <ArrowTrendingUpIcon className="w-5 h-5 text-blue-300" />
+            Most Confident Team
+          </span>
           <span className="font-bold text-blue-200">{mostConfidentTeam}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-slate-400">Least Confident Team</span>
+          <span className="flex items-center gap-2 text-slate-400">
+            <ArrowTrendingDownIcon className="w-5 h-5 text-blue-300" />
+            Least Confident Team
+          </span>
           <span className="font-bold text-blue-200">{leastConfidentTeam}</span>
         </div>
       </div>

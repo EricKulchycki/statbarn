@@ -4,6 +4,7 @@ import {
   GameELOModel,
   toGameELO,
 } from '@/models/gameElo'
+import { getCurrentNHLSeason } from '@/utils/currentSeason'
 import { DateTime } from 'luxon'
 
 export interface LatestELO {
@@ -15,12 +16,13 @@ export interface LatestELO {
 export async function getLatestEloData(): Promise<LatestELO[]> {
   try {
     // Get last season string, e.g. '20242025'
-    const currentYear = new Date().getFullYear()
-    const lastSeason = Number(`${currentYear - 1}${currentYear}`)
+    const currentSeason = Number(getCurrentNHLSeason())
+
+    console.log(currentSeason)
 
     // Find all teams that played last season
     const teams = await GameELOModel.distinct('homeTeam.abbrev', {
-      season: lastSeason,
+      season: currentSeason,
     })
 
     // For each team, get their most recent gameELO entry for last season
@@ -28,7 +30,7 @@ export async function getLatestEloData(): Promise<LatestELO[]> {
       teams.map(async (abbrev: string) => {
         const latestGame = await GameELOModel.findOne({
           $or: [{ 'homeTeam.abbrev': abbrev }, { 'awayTeam.abbrev': abbrev }],
-          season: lastSeason,
+          season: currentSeason,
         })
           .sort({ gameDate: -1 })
           .exec()
@@ -39,14 +41,14 @@ export async function getLatestEloData(): Promise<LatestELO[]> {
           return {
             abbrev,
             elo: latestGame.homeTeam.eloAfter,
-            season: lastSeason,
+            season: currentSeason,
           }
         }
         if (latestGame.awayTeam.abbrev === abbrev) {
           return {
             abbrev,
             elo: latestGame.awayTeam.eloAfter,
-            season: lastSeason,
+            season: currentSeason,
           }
         }
         throw new Error('Team abbrev not found in latest game')

@@ -1,7 +1,9 @@
+import { DateTime } from 'luxon'
+
 export function getCurrentNHLSeason(): string {
-  const now = new Date()
-  const currentYear = now.getFullYear()
-  const currentMonth = now.getMonth() // 0 = January, 11 = December
+  const now = DateTime.now()
+  const currentYear = now.year
+  const currentMonth = now.month
 
   // NHL seasons typically start in October (month 9) and end in April/June of the following year
   if (currentMonth >= 9) {

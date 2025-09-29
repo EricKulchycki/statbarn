@@ -1,0 +1,1 @@
+export { YesterdaysGameOutcomes } from './server'

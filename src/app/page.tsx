@@ -3,7 +3,7 @@ import { Database } from '@/lib/db'
 // import { AllTeamsHistoryGraphWrapper } from '@/components/AllTeamsHistoryGraph.server'
 import { ELOWrapper } from '@/components/ELO.server'
 import { GamePredictionsWrapper } from '@/components/GamePredictions.server'
-import { YesterdaysGameOutcomes } from '@/components/YesterdaysGameOutcomes.server'
+import { YesterdaysGameOutcomes } from '@/components/YesterdaysGameOutcomes/server'
 
 export default async function Index() {
   const db = Database.getInstance()

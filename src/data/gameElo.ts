@@ -18,8 +18,6 @@ export async function getLatestEloData(): Promise<LatestELO[]> {
     // Get last season string, e.g. '20242025'
     const currentSeason = Number(getCurrentNHLSeason())
 
-    console.log(currentSeason)
-
     // Find all teams that played last season
     const teams = await GameELOModel.distinct('homeTeam.abbrev', {
       season: currentSeason,

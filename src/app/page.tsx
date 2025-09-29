@@ -1,4 +1,3 @@
-import { GameBanner } from '@/components/GameBanner'
 import { Database } from '@/lib/db'
 // import { AllTeamsHistoryGraphWrapper } from '@/components/AllTeamsHistoryGraph.server'
 import { ELOWrapper } from '@/components/ELO.server'
@@ -11,8 +10,6 @@ export default async function Index() {
 
   return (
     <div className="lg:max-w-7/10 mx-auto px-4 sm:px-6 lg:px-8 py-8 mb-8">
-      <GameBanner />
-
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* ELO Rankings */}
         <div className="lg:col-span-1">

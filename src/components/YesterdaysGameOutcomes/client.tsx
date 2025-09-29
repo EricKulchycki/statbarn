@@ -1,27 +1,19 @@
 'use client'
 
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { GameELO } from '@/models/gameElo'
 import {
   getActualWinnerFromGameELO,
   getPredictedWinnerFromGameELO,
 } from '@/utils/gameElo'
 import { DateTime } from 'luxon'
-import { useEffect, useState } from 'react'
 
 interface Props {
   gameElos: GameELO[]
 }
 
 export function YesterdaysGameOutcomes({ gameElos }: Props) {
-  const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    // Simple client-side check for screen width
-    const checkMobile = () => setIsMobile(window.innerWidth < 768)
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
+  const isMobile = useIsMobile()
 
   if (isMobile) {
     // Card grid for mobile

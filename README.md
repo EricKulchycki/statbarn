@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Reference
+
+https://hockeyanalytics.com/2016/07/elo-ratings-for-the-nhl/
 
 ## Getting Started
 

@@ -1,7 +1,7 @@
 import {
   calculateGameELO,
   ELOCalculationResult,
-  TeamELOState,
+  ELOsByTeam,
 } from '@/lib/eloCalculator'
 import { Prediction, PredictionModel } from '@/models/prediction'
 import { createApiError } from '@/types/errors'
@@ -56,7 +56,7 @@ export class PredictionsService {
     return predictions.map(toPredictionDomain)
   }
 
-  async createPredictionForGame(game: NHLGame, latestElos: TeamELOState) {
+  async createPredictionForGame(game: NHLGame, latestElos: ELOsByTeam) {
     return calculateGameELO(game, latestElos)
   }
 

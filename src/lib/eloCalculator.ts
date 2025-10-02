@@ -14,12 +14,12 @@ export interface ELOCalculationResult {
   newElos: { [abbrev: string]: number }
 }
 
-export interface TeamELOState {
+export interface ELOsByTeam {
   [abbrev: string]: number
 }
 
 const K_FACTOR = 32
-const HOME_ADVANTAGE = 100
+const HOME_ADVANTAGE = 65
 const INITIAL_ELO = 1500
 
 /**
@@ -27,7 +27,7 @@ const INITIAL_ELO = 1500
  */
 export async function calculateGameELO(
   game: NHLGame,
-  currentElos: TeamELOState,
+  currentElos: ELOsByTeam,
   kFactor: number = K_FACTOR,
   homeAdvantage: number = HOME_ADVANTAGE
 ): Promise<ELOCalculationResult> {
@@ -154,14 +154,14 @@ function adjustKFactor(baseK: number, goalDiff: number): number {
 export async function processSeasonGames(
   season: Season,
   teams: Team[],
-  initialElos: TeamELOState = {}
+  initialElos: ELOsByTeam = {}
 ): Promise<{
   gameElos: GameELO[]
   predictions: Prediction[]
   finalElos: SeasonELO[]
 }> {
   // Initialize ELOs for all teams
-  const currentElos: TeamELOState = { ...initialElos }
+  const currentElos: ELOsByTeam = { ...initialElos }
 
   // Set initial ELOs for teams that don't have them
   teams.forEach((team) => {
@@ -242,7 +242,7 @@ export async function processMultipleSeasons(
   endSeason: number,
   teams: Team[]
 ): Promise<void> {
-  let currentElos: TeamELOState = {}
+  let currentElos: ELOsByTeam = {}
 
   for (let season = startSeason; season <= endSeason; season++) {
     const seasonStr = `${season}${season + 1}` as Season
@@ -274,7 +274,7 @@ export async function processMultipleSeasons(
       currentElos = result.finalElos.reduce((acc, elo) => {
         acc[elo.abbrev] = elo.elo
         return acc
-      }, {} as TeamELOState)
+      }, {} as ELOsByTeam)
 
       console.log(`Season ${seasonStr} completed. Final ELOs:`, currentElos)
     } catch (error) {

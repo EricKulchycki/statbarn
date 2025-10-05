@@ -7,6 +7,7 @@ import {
 import { DateTime } from 'luxon'
 import React from 'react'
 import { YesterdaysGameOutcomes as YesterdaysGamesOutcomesClient } from './client'
+import { GameELO } from '@/models/gameElo'
 
 export async function YesterdaysGameOutcomes() {
   const localTimezone = await getTimezoneFromCookie()
@@ -17,7 +18,12 @@ export async function YesterdaysGameOutcomes() {
       : DateTime.now().minus({ days: 1 })
 
   // Fetch all gameElos for yesterday
-  const gameElos = await eloService.getLastEloGamesForDate(yesterday.toJSDate())
+  let gameElos: GameELO[] = []
+  try {
+    gameElos = await eloService.getLastEloGamesForDate(yesterday.toJSDate())
+  } catch (error) {
+    console.error('Error fetching yesterday ELO games:', error)
+  }
 
   if (!gameElos || gameElos.length === 0) {
     return (

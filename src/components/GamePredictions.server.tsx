@@ -6,13 +6,19 @@ import { serializePrediction } from '@/utils/converters/prediction'
 import { gameService } from '@/services/game.service'
 import { DateTime } from 'luxon'
 import { getTimezoneFromCookie } from '@/lib/time'
+import { NHLGame } from '@/types/game'
 
 export type PredictionsByDay = { [day: string]: Prediction[] }
 
 export async function fetchLiveGamesForClient() {
   const today = DateTime.now().minus({ hours: 4 })
 
-  const todaysGames = await gameService.getGamesByDate(today.toISODate())
+  let todaysGames: NHLGame[] = []
+  try {
+    todaysGames = await gameService.getGamesByDate(today.toISODate())
+  } catch (error) {
+    console.error('Error fetching today games for live updates:', error)
+  }
   const map: {
     [gameId: number]: { homeScore: number; awayScore: number; status: string }
   } = {}

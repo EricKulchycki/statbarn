@@ -11,6 +11,9 @@ import {
   deserializePrediction,
   SerializedPrediction,
 } from '@/utils/converters/prediction'
+import { getPredictedWinnerFromPrediction } from '@/utils/prediction'
+import { isLive } from '@/utils/game'
+import { PlayIcon } from '@heroicons/react/24/solid'
 
 interface GamePredictionsProps {
   scheduleData: NHLGameWeek
@@ -70,10 +73,7 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
                   let predictionStatus = null
 
                   const predictedWinner =
-                    prediction.homeTeamWinProbability >
-                    prediction.awayTeamWinProbability
-                      ? prediction.homeTeam
-                      : prediction.awayTeam
+                    getPredictedWinnerFromPrediction(prediction)
 
                   let actualWinner = null
                   if (live && live.status !== 'FUT') {
@@ -87,19 +87,27 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
 
                   // Show live prediction correctness
                   if (live && live.status !== 'FINAL') {
-                    predictionStatus = (
-                      <span
-                        className={
-                          actualWinner === predictedWinner
-                            ? 'text-green-500 font-bold'
-                            : 'text-red-500 font-bold'
-                        }
-                      >
-                        {actualWinner === predictedWinner
-                          ? 'Correct so far'
-                          : 'Incorrect so far'}
-                      </span>
-                    )
+                    if (live.awayScore === live.homeScore) {
+                      predictionStatus = (
+                        <span className="text-yellow-500 font-bold">
+                          Tied so far
+                        </span>
+                      )
+                    } else {
+                      predictionStatus = (
+                        <span
+                          className={
+                            actualWinner === predictedWinner
+                              ? 'text-green-500 font-bold'
+                              : 'text-red-500 font-bold'
+                          }
+                        >
+                          {actualWinner === predictedWinner
+                            ? 'Correct so far'
+                            : 'Incorrect so far'}
+                        </span>
+                      )
+                    }
                   }
                   // Show final result and correctness
                   let finalStatus = null
@@ -133,7 +141,13 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
                         <GamePrediction prediction={prediction} game={game} />
                         {live && (
                           <div className="mt-1 text-xs flex flex-col items-center gap-2">
-                            <span className="ml-2 text-gray-400">
+                            <span className="ml-2 text-gray-400 inline-flex">
+                              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                              {isLive(live.status as any) && (
+                                <span className="text-red-500 mr-1">
+                                  <PlayIcon className="size-4" />
+                                </span>
+                              )}
                               ({live.status})
                             </span>
                             <div className="flex gap-2 items-center">

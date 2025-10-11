@@ -86,7 +86,11 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
                   }
 
                   // Show live prediction correctness
-                  if (live && live.status !== 'FINAL') {
+                  if (
+                    live &&
+                    live.status !== 'FINAL' &&
+                    live.status !== 'OFF'
+                  ) {
                     if (live.awayScore === live.homeScore) {
                       predictionStatus = (
                         <span className="text-yellow-500 font-bold">
@@ -111,7 +115,10 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
                   }
                   // Show final result and correctness
                   let finalStatus = null
-                  if (live && live.status === 'FINAL') {
+                  if (
+                    live &&
+                    (live.status === 'FINAL' || live.status === 'OFF')
+                  ) {
                     finalStatus = (
                       <span
                         className={

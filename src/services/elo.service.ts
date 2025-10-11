@@ -46,8 +46,8 @@ export class EloService {
     gameType: GameType = GameType.REGULAR
   ): Promise<GameELO[]> {
     try {
-      const last10 = await getGameElos(abbrev, limit, gameType)
-      return last10.map(toGameELO)
+      const gameElos = await getGameElos(abbrev, limit, gameType)
+      return gameElos.map(toGameELO)
     } catch (error) {
       throw createApiError(
         'getLast10EloGames',

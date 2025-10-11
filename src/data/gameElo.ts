@@ -68,7 +68,7 @@ export async function getGameElos(
 ): Promise<GameELODocument[]> {
   try {
     const games = await GameELOModel.find({
-      gameType,
+      gameType: gameType.valueOf(),
       $or: [{ 'homeTeam.abbrev': abbrev }, { 'awayTeam.abbrev': abbrev }],
     })
       .sort({ gameDate: -1 })

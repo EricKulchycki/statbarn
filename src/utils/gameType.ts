@@ -1,15 +1,15 @@
+import { GameType } from '@/constants'
+
 // Helper to map NHL API gameType to your internal type
-export function mapNhlGameType(
-  type: number
-): 'preseason' | 'regular' | 'postseason' | 'unknown' {
+export function mapNhlGameType(type: number): GameType {
   switch (type) {
     case 1:
-      return 'preseason'
+      return GameType.PRESEASON
     case 2:
-      return 'regular'
+      return GameType.REGULAR
     case 3:
-      return 'postseason'
+      return GameType.POSTSEASON
     default:
-      return 'unknown'
+      return GameType.UNKNOWN
   }
 }

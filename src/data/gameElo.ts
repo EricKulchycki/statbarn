@@ -180,3 +180,28 @@ export async function countSeasonsGames(season: number): Promise<number> {
     throw error
   }
 }
+
+export async function getMatchupHistory(
+  teamA: string,
+  teamB: string,
+  limit: number = 10
+): Promise<GameELO[]> {
+  try {
+    const matchupGames = await GameELOModel.find({
+      $or: [
+        { 'homeTeam.abbrev': teamA, 'awayTeam.abbrev': teamB },
+        { 'homeTeam.abbrev': teamB, 'awayTeam.abbrev': teamA },
+      ],
+    })
+      .limit(limit)
+      .sort({ gameDate: -1 })
+      .exec()
+    return matchupGames.map(toGameELO)
+  } catch (error) {
+    console.error(
+      `Error fetching matchup history between ${teamA} and ${teamB}:`,
+      error
+    )
+    throw error
+  }
+}

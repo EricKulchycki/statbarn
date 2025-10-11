@@ -8,6 +8,7 @@ import { NHLGame } from '@/types/game'
 import { Team } from '@/types/team'
 import { Season } from '@/types/time'
 import { mapNhlGameType } from '@/utils/gameType'
+import { getMatchupHistory } from '@/data/gameElo'
 
 export interface ELOCalculationResult {
   gameElo: GameELO
@@ -22,6 +23,7 @@ export interface ELOsByTeam {
 const K_FACTOR = 32
 const HOME_ADVANTAGE = 65
 const INITIAL_ELO = 1500
+const MAX_MATCHUP_ADJUSTMENT = 15
 
 /**
  * Calculate ELO for a single game
@@ -39,9 +41,12 @@ export async function calculateGameELO(
   const homeEloBefore = currentElos[homeTeam] || INITIAL_ELO
   const awayEloBefore = currentElos[awayTeam] || INITIAL_ELO
 
+  const matchupFactor = await getLast5MatchupFactor(game)
+
   // Calculate expected results
-  const homeEloWithAdvantage = homeEloBefore + homeAdvantage
-  const awayElo = awayEloBefore
+  const homeEloWithAdvantage =
+    homeEloBefore + homeAdvantage + matchupFactor.homeFactor
+  const awayElo = awayEloBefore + matchupFactor.awayFactor
 
   const homeExpectedResult = calculateExpectedResult(
     homeEloWithAdvantage,
@@ -148,6 +153,37 @@ function adjustKFactor(baseK: number, goalDiff: number): number {
   // Adjust K based on goal difference (blowout factor)
   const adjustedK = baseK * (1 + goalDiff * 0.1)
   return Math.min(adjustedK, 100) // Cap at 100
+}
+
+export async function getLast5MatchupFactor(
+  game: NHLGame
+): Promise<{ homeFactor: number; awayFactor: number }> {
+  const homeAbbrev = game.homeTeam.abbrev
+  const awayAbbrev = game.awayTeam.abbrev
+  const last5Games = await getMatchupHistory(homeAbbrev, awayAbbrev, 5)
+
+  if (last5Games.length === 0) return { homeFactor: 0, awayFactor: 0 }
+
+  const homeWins = last5Games.filter(
+    (g) =>
+      (g.homeTeam.abbrev === homeAbbrev &&
+        g.homeTeam.score > g.awayTeam.score) ||
+      (g.awayTeam.abbrev === homeAbbrev && g.awayTeam.score > g.homeTeam.score)
+  ).length
+  const awayWins = last5Games.filter(
+    (g) =>
+      (g.homeTeam.abbrev === awayAbbrev &&
+        g.homeTeam.score > g.awayTeam.score) ||
+      (g.awayTeam.abbrev === awayAbbrev && g.awayTeam.score > g.homeTeam.score)
+  ).length
+
+  const totalGames = last5Games.length
+  const homeEloAdjustment =
+    (homeWins / totalGames - 0.5) * 2 * MAX_MATCHUP_ADJUSTMENT
+  const awayEloAdjustment =
+    (awayWins / totalGames - 0.5) * 2 * MAX_MATCHUP_ADJUSTMENT
+
+  return { homeFactor: homeEloAdjustment, awayFactor: awayEloAdjustment }
 }
 
 /**

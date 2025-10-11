@@ -58,7 +58,7 @@ export function Header({ className = '' }: HeaderProps) {
               href="/historical"
               className="text-gray-500 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
             >
-              Historical
+              Teams
             </Link>
           </nav>
 

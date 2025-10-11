@@ -47,7 +47,7 @@ export function MobileNav() {
         <span className="text-xs">Upsets</span>
       </div>
       <div
-        onClick={() => router.push('/teams')}
+        onClick={() => router.push('/historical')}
         className="flex flex-col items-center text-slate-300 hover:text-blue-400"
       >
         <UserGroupIcon className="w-6 h-6 mb-1" />

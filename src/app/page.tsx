@@ -9,7 +9,7 @@ export default async function Index() {
   await db.connect()
 
   return (
-    <div className="lg:max-w-7/10 mx-auto px-4 sm:px-6 lg:px-8 py-8 mb-8">
+    <div className="lg:max-w-7/10 mx-auto px-4 sm:px-6 lg:px-8 lg:py-8 mb-8">
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* ELO Rankings */}
         <div className="lg:col-span-1">

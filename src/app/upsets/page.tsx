@@ -16,7 +16,7 @@ export default async function UpsetTracker({
   const teams = await getTeams()
 
   return (
-    <div className="flex gap-8 max-w-[70%] p-8 mx-auto">
+    <div className="flex gap-8 lg:max-w-[70%] sm:max-w-full p-8 mx-auto flex-wrap">
       <div className="w-5/8">
         <h2 className="text-3xl font-extrabold mb-6 tracking-tight">
           Recent Upsets

@@ -41,17 +41,33 @@ export function Footer({ className = '' }: FooterProps) {
               </li>
               <li>
                 <Link
-                  href="/predictions"
+                  href="/confidence"
                   className="text-gray-300 dark:text-gray-300 hover:text-white dark:hover:text-white transition-colors duration-200"
                 >
-                  Predictions
+                  Confidence
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/upsets"
+                  className="text-gray-300 dark:text-gray-300 hover:text-white dark:hover:text-white transition-colors duration-200"
+                >
+                  Upsets
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/teams"
+                  className="text-gray-300 dark:text-gray-300 hover:text-white dark:hover:text-white transition-colors duration-200"
+                >
+                  Teams
                 </Link>
               </li>
             </ul>
           </div>
 
           {/* Support */}
-          <div>
+          {/* <div>
             <h4 className="text-md font-semibold mb-4 text-white dark:text-white transition-colors duration-200">
               Support
             </h4>
@@ -89,7 +105,7 @@ export function Footer({ className = '' }: FooterProps) {
                 </Link>
               </li>
             </ul>
-          </div>
+          </div> */}
         </div>
 
         {/* Bottom bar */}

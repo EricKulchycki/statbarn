@@ -9,7 +9,7 @@ export function SeasonSelector({ currentSeason }: { currentSeason: number }) {
   const seasonStartYear = currentMonth >= 10 ? currentYear : currentYear - 1 // Season starts in October
 
   const seasons = []
-  for (let year = 2015; year <= seasonStartYear; year++) {
+  for (let year = 2015; year <= seasonStartYear - 1; year++) {
     seasons.push(`${year}/${(year + 1).toString()}`)
   }
 

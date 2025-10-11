@@ -1,3 +1,4 @@
+import { GameType } from '@/constants'
 import mongoose, { Schema, Document, Model } from 'mongoose'
 
 const gameEloSchema: Schema = new Schema(
@@ -55,7 +56,7 @@ export interface GameELODocument extends Document {
   gameId: number
   season: number
   gameDate: Date
-  gameType: 'preseason' | 'regular' | 'postseason' | 'unknown'
+  gameType: GameType
   gameTimezone?: string
   homeTeam: {
     abbrev: string
@@ -101,7 +102,7 @@ export type GameELO = {
   gameId: number
   season: number
   gameDate: Date
-  gameType: 'preseason' | 'regular' | 'postseason' | 'unknown'
+  gameType: GameType
   gameTimezone?: string
   homeTeam: GameELOTeam
   awayTeam: GameELOTeam
@@ -127,7 +128,7 @@ export type GameELOSerialized = {
   season: number
   gameDate: string
   gameTimezone?: string
-  gameType: 'preseason' | 'regular' | 'postseason' | 'unknown'
+  gameType: GameType
   homeTeam: {
     abbrev: string
     eloBefore: number

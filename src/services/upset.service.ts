@@ -1,3 +1,4 @@
+import { GameType } from '@/constants'
 import { GameELOModel } from '@/models/gameElo'
 import { Upset } from '@/types/upset'
 import { DateTime } from 'luxon'
@@ -18,6 +19,7 @@ export class UpsetService {
     // Find all games with a clear predicted winner
     const games = await GameELOModel.find({
       gameDate: { $gte: asOf?.toISO() },
+      gameType: GameType.REGULAR,
     })
       .sort({ gameDate: -1 })
       .lean()
@@ -53,7 +55,10 @@ export class UpsetService {
   }
 
   async getSeasonsUpsets(season: number): Promise<Upset[]> {
-    const games = await GameELOModel.find({ season })
+    const games = await GameELOModel.find({
+      season,
+      gameType: GameType.REGULAR,
+    })
       .sort({ gameDate: -1 })
       .lean()
       .exec()

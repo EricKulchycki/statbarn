@@ -1,3 +1,4 @@
+import { GameType } from '@/constants'
 import {
   GameELO,
   GameELODocument,
@@ -149,9 +150,15 @@ export async function createGameElo(gameElo: GameELO): Promise<GameELO> {
   }
 }
 
-export async function getAllGamesForSeason(season: number): Promise<GameELO[]> {
+export async function getAllGamesForSeason(
+  season: number,
+  gameType: GameType = GameType.REGULAR
+): Promise<GameELO[]> {
   try {
-    const games = await GameELOModel.find({ season }).exec()
+    const games = await GameELOModel.find({
+      season,
+      gameType,
+    }).exec()
     return games.map(toGameELO)
   } catch (error) {
     console.error(`Error fetching all GameELOs for season ${season}:`, error)
@@ -161,7 +168,10 @@ export async function getAllGamesForSeason(season: number): Promise<GameELO[]> {
 
 export async function countSeasonsGames(season: number): Promise<number> {
   try {
-    const games = await GameELOModel.find({ season }).exec()
+    const games = await GameELOModel.find({
+      season,
+      gameType: GameType.REGULAR,
+    }).exec()
     return games.length
   } catch (error) {
     console.error(`Error fetching all GameELOs for season ${season}:`, error)

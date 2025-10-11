@@ -25,3 +25,10 @@ export const ELO_CONFIG = {
   initialRating: 1500,
   homeAdvantage: 100,
 } as const
+
+export enum GameType {
+  PRESEASON = 'preseason',
+  REGULAR = 'regular',
+  POSTSEASON = 'postseason',
+  UNKNOWN = 'unknown',
+}

@@ -7,6 +7,7 @@ import { SeasonELO } from '@/types/elo'
 import { NHLGame } from '@/types/game'
 import { Team } from '@/types/team'
 import { Season } from '@/types/time'
+import { mapNhlGameType } from '@/utils/gameType'
 
 export interface ELOCalculationResult {
   gameElo: GameELO
@@ -72,6 +73,7 @@ export async function calculateGameELO(
     gameId: game.id,
     season: game.season,
     gameDate: new Date(game.startTimeUTC),
+    gameType: mapNhlGameType(game.gameType),
     gameTimezone: game.venueTimezone,
     homeTeam: {
       abbrev: homeTeam,

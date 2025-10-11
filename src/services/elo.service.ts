@@ -14,6 +14,7 @@ import {
   getActualWinnerFromGameELO,
   getPredictedWinnerFromGameELO,
 } from '@/utils/gameElo'
+import { GameType } from '@/constants'
 
 export class EloService {
   private static instance: EloService
@@ -38,9 +39,13 @@ export class EloService {
     }
   }
 
-  async getLastEloGames(abbrev: string, limit: number): Promise<GameELO[]> {
+  async getLastEloGames(
+    abbrev: string,
+    limit: number,
+    gameType: GameType = GameType.REGULAR
+  ): Promise<GameELO[]> {
     try {
-      const last10 = await getGameElos(abbrev, limit)
+      const last10 = await getGameElos(abbrev, limit, gameType)
       return last10.map(toGameELO)
     } catch (error) {
       throw createApiError(
@@ -102,9 +107,12 @@ export class EloService {
     }
   }
 
-  async getAllGameElosForSeason(season: number): Promise<GameELO[]> {
+  async getAllGameElosForSeason(
+    season: number,
+    gameType: GameType = GameType.REGULAR
+  ): Promise<GameELO[]> {
     try {
-      const games = await getAllGamesForSeason(season)
+      const games = await getAllGamesForSeason(season, gameType)
       return games
     } catch (error) {
       throw createApiError(

@@ -63,10 +63,12 @@ export async function getLatestEloData(): Promise<LatestELO[]> {
 
 export async function getGameElos(
   abbrev: string,
-  limit: number
+  limit: number,
+  gameType: GameType = GameType.REGULAR
 ): Promise<GameELODocument[]> {
   try {
     const games = await GameELOModel.find({
+      gameType,
       $or: [{ 'homeTeam.abbrev': abbrev }, { 'awayTeam.abbrev': abbrev }],
     })
       .sort({ gameDate: -1 })

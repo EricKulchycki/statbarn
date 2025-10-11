@@ -1,35 +1,22 @@
 import mongoose from 'mongoose'
 import { GameELOModel } from '../src/models/gameElo'
-import { eloService } from '../src/services/elo.service'
+//import { eloService } from '../src/services/elo.service'
 import { getGameById } from '../src/data/games'
 import { Database } from '../src/lib/db'
-
-// Helper to map NHL API gameType to your internal type
-function mapNhlGameType(
-  type: number
-): 'preseason' | 'regular' | 'postseason' | 'unknown' {
-  switch (type) {
-    case 1:
-      return 'preseason'
-    case 2:
-      return 'regular'
-    case 3:
-      return 'postseason'
-    default:
-      return 'unknown'
-  }
-}
+import { mapNhlGameType } from '../src/utils/gameType'
 
 async function main() {
   const db = Database.getInstance()
 
   await db.connect()
-  const season = 20252026
+  const season = 20242025
 
   // console.log(`Fetching NHL games for season ${season}...`)
   // const nhlGames = await fetchNhlGames(season)
-  const gameELOs = await eloService.getAllGameElosForSeason(season)
-  //const gameELOs = await GameELOModel.find()
+  // const gameELOs = await eloService.getAllGameElosForSeason(season)
+  const gameELOs = await GameELOModel.find({ season })
+
+  console.log(gameELOs.length)
 
   // Map gamePk to gameType
   //const gameTypeMap: Record<number, string> = {}

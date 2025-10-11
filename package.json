@@ -8,6 +8,7 @@
     "test": "vitest",
     "seed:populateTeams": "tsx scripts/populateTeams.ts",
     "seed:predictionsForDate": "tsx scripts/seedPredictionForDate.ts",
+    "seed:markGameType": "tsx scripts/markGameType.ts",
     "start": "next start",
     "lint": "eslint"
   },

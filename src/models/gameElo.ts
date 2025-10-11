@@ -5,6 +5,12 @@ const gameEloSchema: Schema = new Schema(
     gameId: { type: Number, required: true, unique: true },
     season: { type: Number, required: true },
     gameDate: { type: Date, required: true },
+    gameType: {
+      type: String,
+      enum: ['preseason', 'regular', 'postseason', 'unknown'],
+      default: 'unknown',
+      required: false,
+    },
     gameTimezone: { type: String },
     homeTeam: {
       abbrev: { type: String, required: true },
@@ -49,6 +55,7 @@ export interface GameELODocument extends Document {
   gameId: number
   season: number
   gameDate: Date
+  gameType: 'preseason' | 'regular' | 'postseason' | 'unknown'
   gameTimezone?: string
   homeTeam: {
     abbrev: string
@@ -94,6 +101,7 @@ export type GameELO = {
   gameId: number
   season: number
   gameDate: Date
+  gameType: 'preseason' | 'regular' | 'postseason' | 'unknown'
   gameTimezone?: string
   homeTeam: GameELOTeam
   awayTeam: GameELOTeam
@@ -119,6 +127,7 @@ export type GameELOSerialized = {
   season: number
   gameDate: string
   gameTimezone?: string
+  gameType: 'preseason' | 'regular' | 'postseason' | 'unknown'
   homeTeam: {
     abbrev: string
     eloBefore: number
@@ -153,6 +162,7 @@ export function toGameELO(doc: GameELODocument): GameELO {
     gameId: doc.gameId,
     season: doc.season,
     gameDate: doc.gameDate,
+    gameType: doc.gameType ?? 'unknown',
     gameTimezone: doc.gameTimezone,
     homeTeam: { ...doc.homeTeam },
     awayTeam: { ...doc.awayTeam },

@@ -11,7 +11,7 @@ import { NHLGame } from '@/types/game'
 export type PredictionsByDay = { [day: string]: Prediction[] }
 
 export async function fetchLiveGamesForClient() {
-  const today = DateTime.now().minus({ hours: 4 })
+  const today = DateTime.now().minus({ hours: 8 })
 
   let todaysGames: NHLGame[] = []
   try {

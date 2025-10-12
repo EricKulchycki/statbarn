@@ -13,11 +13,6 @@ export function SeasonSelector({ currentSeason }: { currentSeason: number }) {
     seasons.push(`${year}/${(year + 1).toString()}`)
   }
 
-  console.log(
-    'Current Season:',
-    currentSeason?.toString().split('', 4).join('/')
-  )
-
   return (
     <form method="GET" className="mb-4">
       <select

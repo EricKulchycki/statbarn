@@ -16,6 +16,10 @@ export class UpsetService {
   }
 
   async getAllUpsets(asOf?: DateTime): Promise<Upset[]> {
+    if (!asOf) {
+      return []
+    }
+
     // Find all games with a clear predicted winner
     const games = await GameELOModel.find({
       gameType: GameType.REGULAR,

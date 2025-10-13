@@ -18,8 +18,8 @@ export class UpsetService {
   async getAllUpsets(asOf?: DateTime): Promise<Upset[]> {
     // Find all games with a clear predicted winner
     const games = await GameELOModel.find({
-      gameDate: { $gte: asOf?.toISO() },
       gameType: GameType.REGULAR,
+      gameDate: { $gte: asOf?.toISO() },
     })
       .sort({ gameDate: -1 })
       .lean()

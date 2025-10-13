@@ -22,7 +22,6 @@ export class UpsetService {
       gameDate: { $gte: asOf?.toISO() },
     })
       .sort({ gameDate: -1 })
-      .lean()
       .exec()
 
     const upsets: Upset[] = []

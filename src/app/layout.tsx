@@ -39,10 +39,10 @@ export default async function RootLayout({
         <Providers>
           <div className="flex flex-col min-h-screen">
             <Nav />
-            <main className="flex-1">
+            <div className="flex-1">
               <GameBanner />
               {children}
-            </main>
+            </div>
             <Footer />
           </div>
         </Providers>

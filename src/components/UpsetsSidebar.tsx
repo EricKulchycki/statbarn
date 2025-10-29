@@ -5,6 +5,8 @@ import { getTeamFullName, getTeamLogo } from '@/utils/team'
 import { eloService } from '@/services/elo.service'
 import { SeasonSelector } from './SeasonSelector'
 import { splitAtIndex } from '@/utils'
+import { UpsetByWeekChart } from './UpsetsByWeekChart'
+import { serializeUpset } from '@/utils/converters/upset'
 
 export default async function SeasonUpsetSidebar({
   season,
@@ -28,6 +30,13 @@ export default async function SeasonUpsetSidebar({
   const topUpsetTeams = Object.entries(teamUpsetCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
+
+  // Upset distribution by month
+  const upsetMonths: Record<string, number> = {}
+  seasonUpsets.forEach((u) => {
+    const month = u.date.toLocaleString({ month: 'short' })
+    upsetMonths[month] = (upsetMonths[month] || 0) + 1
+  })
 
   return (
     <aside className="w-full rounded-xl shadow-lg">
@@ -79,6 +88,7 @@ export default async function SeasonUpsetSidebar({
           </div>
         </div>
       </div>
+      <UpsetByWeekChart serializedUpsets={seasonUpsets.map(serializeUpset)} />
       {/* <div className="space-y-2">
         {seasonUpsets.slice(0, 20).map((upset) => (
           <div

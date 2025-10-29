@@ -1,6 +1,10 @@
 import { GameType } from '@/constants'
 import { GameELOModel } from '@/models/gameElo'
 import { Upset } from '@/types/upset'
+import {
+  getActualWinnerFromGameELO,
+  getPredictedWinnerFromGameELO,
+} from '@/utils/gameElo'
 import { DateTime } from 'luxon'
 
 export class UpsetService {
@@ -31,15 +35,9 @@ export class UpsetService {
     const upsets: Upset[] = []
     for (const game of games) {
       // Determine predicted winner
-      const predictedWinner =
-        game.expectedResult.homeTeam > game.expectedResult.awayTeam
-          ? game.homeTeam.abbrev
-          : game.awayTeam.abbrev
+      const predictedWinner = getPredictedWinnerFromGameELO(game)
       // Determine actual winner
-      const actualWinner =
-        game.homeTeam.score > game.awayTeam.score
-          ? game.homeTeam.abbrev
-          : game.awayTeam.abbrev
+      const actualWinner = getActualWinnerFromGameELO(game)
       // If predicted winner lost, it's an upset
       if (predictedWinner !== actualWinner) {
         upsets.push({
@@ -68,14 +66,8 @@ export class UpsetService {
 
     const upsets: Upset[] = []
     for (const game of games) {
-      const predictedWinner =
-        game.expectedResult.homeTeam > game.expectedResult.awayTeam
-          ? game.homeTeam.abbrev
-          : game.awayTeam.abbrev
-      const actualWinner =
-        game.homeTeam.score > game.awayTeam.score
-          ? game.homeTeam.abbrev
-          : game.awayTeam.abbrev
+      const predictedWinner = getPredictedWinnerFromGameELO(game)
+      const actualWinner = getActualWinnerFromGameELO(game)
       if (predictedWinner !== actualWinner) {
         upsets.push({
           gameId: game.gameId,

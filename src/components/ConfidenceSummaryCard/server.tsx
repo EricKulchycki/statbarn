@@ -8,6 +8,7 @@ import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
 } from '@heroicons/react/24/solid'
+import { cn } from '@heroui/react'
 
 export async function ConfidenceSummaryCard() {
   const db = Database.getInstance()
@@ -17,13 +18,15 @@ export async function ConfidenceSummaryCard() {
   const avgConfidence = await modelService.getAverageConfidence(20252026)
   const highConfidenceUpsets = await modelService.getHighConfidenceUpsets(
     20252026,
-    0.75
+    0.7
   )
   const correctPredictions =
     await eloService.countSeasonsCorrectPredictions(20252026)
 
   const mostConfidentTeam = await modelService.getMostConfidentTeam(20252026)
   const leastConfidentTeam = await modelService.getLeastConfidentTeam(20252026)
+
+  const currentPercentage = (correctPredictions / totalGames) * 100
 
   return (
     <div className="bg-slate-900 rounded-xl shadow-lg p-6 w-full max-w-lg">
@@ -48,6 +51,20 @@ export async function ConfidenceSummaryCard() {
           </span>
           <span className="font-bold text-green-400">
             {correctPredictions} / {totalGames}
+          </span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="flex items-center gap-2 text-slate-400">
+            <CheckCircleIcon className="w-5 h-5 text-green-400" />
+            Current Percentage
+          </span>
+          <span
+            className={cn(
+              'font-bold',
+              currentPercentage >= 0.5 ? 'text-green-400' : 'text-red-400'
+            )}
+          >
+            {((correctPredictions / totalGames) * 100).toFixed(1)}%
           </span>
         </div>
         <div className="flex justify-between items-center">

@@ -2,7 +2,7 @@
 
 import React, { Suspense } from 'react'
 import { formatDate } from '@/utils/time'
-import { NHLGameWeek } from '@/types/game'
+import { NHLGame, NHLGameWeek } from '@/types/game'
 import { GamePrediction } from './GamePrediction'
 import { PredictionsByDay } from './GamePredictions.server'
 import { useIsHydrated } from '@/hooks/useIsHydrated'
@@ -14,13 +14,18 @@ import {
 import { getPredictedWinnerFromPrediction } from '@/utils/prediction'
 import { isLive } from '@/utils/game'
 import { PlayIcon } from '@heroicons/react/24/solid'
+import { useDisclosure } from '@heroui/react'
+import { MatchupModal } from './MatchupModal'
+import { Prediction } from '@/models/prediction'
+
+export type LiveGame = {
+  [gameId: number]: { homeScore: number; awayScore: number; status: string }
+}
 
 interface GamePredictionsProps {
   scheduleData: NHLGameWeek
   predictions: SerializedPrediction[]
-  liveGames: {
-    [gameId: number]: { homeScore: number; awayScore: number; status: string }
-  }
+  liveGames: LiveGame
 }
 
 export const GamePredictions: React.FC<GamePredictionsProps> = ({
@@ -29,6 +34,10 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
   liveGames,
 }) => {
   const isHydrated = useIsHydrated()
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const [selectedPrediction, setSelectedPrediction] =
+    React.useState<Prediction | null>(null)
+  const [selectedGame, setSelectedGame] = React.useState<NHLGame | null>(null)
 
   const predictionsByDay = groupPredictionsByDate(
     predictions.map(deserializePrediction)
@@ -143,7 +152,16 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
                   }
 
                   return (
-                    <div key={prediction.gameId} className="p-2">
+                    <div
+                      key={prediction.gameId}
+                      aria-label={`game prediction for ${game.homeTeam.abbrev} vs ${game.awayTeam.abbrev}`}
+                      className="p-2 hover:scale-105 transition-transform duration-200 cursor-pointer"
+                      onClick={() => {
+                        setSelectedGame(game)
+                        setSelectedPrediction(prediction)
+                        onOpen()
+                      }}
+                    >
                       <div className="rounded-lg bg-gradient-to-br from-slate-800 to-slate-900 p-2 flex flex-col items-center">
                         <GamePrediction prediction={prediction} game={game} />
                         {live && (
@@ -194,6 +212,13 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
           )
         })}
       </div>
+      <MatchupModal
+        open={isOpen}
+        onClose={onClose}
+        prediction={selectedPrediction}
+        game={selectedGame}
+        matchupHistory={[]}
+      />
     </div>
   )
 }

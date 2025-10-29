@@ -53,8 +53,10 @@ export async function YesterdaysGameOutcomes() {
 
   return (
     <div className="my-4">
-      <h2 className="text-lg font-bold">Yesterday&apos;s Game Outcomes</h2>
-      <div className="mb-4 text-md text-blue-400 font-semibold">
+      <h2 className="text-lg font-bold text-blue-400">
+        Yesterday&apos;s Game Outcomes
+      </h2>
+      <div className="mb-4 text-md text-gray-50 font-semibold">
         Prediction Accuracy: {accuracy}% ({correctPredictions} of {totalGames}{' '}
         games)
       </div>

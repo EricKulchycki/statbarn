@@ -17,6 +17,7 @@ import { PlayIcon } from '@heroicons/react/24/solid'
 import { useDisclosure } from '@heroui/react'
 import { MatchupModal } from './MatchupModal'
 import { Prediction } from '@/models/prediction'
+import { Team } from '@/types/team'
 
 export type LiveGame = {
   [gameId: number]: { homeScore: number; awayScore: number; status: string }
@@ -26,12 +27,14 @@ interface GamePredictionsProps {
   scheduleData: NHLGameWeek
   predictions: SerializedPrediction[]
   liveGames: LiveGame
+  teams: Team[]
 }
 
 export const GamePredictions: React.FC<GamePredictionsProps> = ({
   scheduleData,
   predictions,
   liveGames,
+  teams,
 }) => {
   const isHydrated = useIsHydrated()
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -218,6 +221,7 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
         prediction={selectedPrediction}
         game={selectedGame}
         matchupHistory={[]}
+        teams={teams}
       />
     </div>
   )

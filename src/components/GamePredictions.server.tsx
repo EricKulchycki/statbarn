@@ -7,6 +7,7 @@ import { gameService } from '@/services/game.service'
 import { DateTime } from 'luxon'
 import { getTimezoneFromCookie } from '@/lib/time'
 import { NHLGame } from '@/types/game'
+import { getTeams } from '@/data/teams'
 
 export type PredictionsByDay = { [day: string]: Prediction[] }
 
@@ -47,12 +48,14 @@ export async function GamePredictionsWrapper() {
     await predictionsService.getUpcomingGamePredictions(currentSchedule)
 
   const liveGames = await fetchLiveGamesForClient()
+  const teams = await getTeams()
 
   return (
     <GamePredictions
       scheduleData={currentSchedule}
       predictions={upcomingPredictions.map(serializePrediction)}
       liveGames={liveGames}
+      teams={teams}
     />
   )
 }

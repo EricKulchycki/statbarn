@@ -53,7 +53,8 @@ export function ELO(props: Props) {
                   </span>
                 </div>
               </div>
-              <span className="px-3 py-1 rounded-full bg-slate-700 text-white font-bold text-md shadow">
+
+              <span className="px-3 py-2 my-2 rounded-full bg-slate-700 text-white font-bold text-md shadow">
                 {elo.elo?.toFixed(0)} pts
               </span>
               <span className="ml-2 text-xs text-gray-400">#{idx + 1}</span>

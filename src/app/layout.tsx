@@ -7,7 +7,6 @@ import { Footer } from '@/components/layout/Footer'
 import { Providers } from './providers'
 import { Nav } from '@/components/layout/Header.client'
 import { GameBanner } from '@/components/GameBanner'
-import { Database } from '@/lib/db'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -29,8 +28,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const db = Database.getInstance()
-  await db.connect()
   return (
     <html lang="en" className="dark">
       <body

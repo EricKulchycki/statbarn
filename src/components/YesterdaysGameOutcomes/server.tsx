@@ -8,6 +8,7 @@ import { DateTime } from 'luxon'
 import React from 'react'
 import { YesterdaysGameOutcomes as YesterdaysGamesOutcomesClient } from './client'
 import { GameELO } from '@/models/gameElo'
+import { getTeams } from '@/data/teams'
 
 export async function YesterdaysGameOutcomes() {
   const localTimezone = await getTimezoneFromCookie()
@@ -34,6 +35,8 @@ export async function YesterdaysGameOutcomes() {
     )
   }
 
+  const teams = await getTeams()
+
   // Calculate prediction accuracy
   const totalGames = gameElos.length
   let correctPredictions = 0
@@ -52,15 +55,15 @@ export async function YesterdaysGameOutcomes() {
       : 'N/A'
 
   return (
-    <div className="my-4">
-      <h2 className="text-lg font-bold text-blue-400">
+    <div className="mb-4">
+      <h2 className="text-2xl font-bold text-blue-400">
         Yesterday&apos;s Game Outcomes
       </h2>
       <div className="mb-4 text-md text-gray-50 font-semibold">
         Prediction Accuracy: {accuracy}% ({correctPredictions} of {totalGames}{' '}
         games)
       </div>
-      <YesterdaysGamesOutcomesClient gameElos={gameElos} />
+      <YesterdaysGamesOutcomesClient gameElos={gameElos} teams={teams} />
     </div>
   )
 }

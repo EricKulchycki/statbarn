@@ -2,16 +2,20 @@
 
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { GameELO } from '@/models/gameElo'
+import { Team } from '@/types/team'
 import {
   getActualWinnerFromGameELO,
   getPredictedWinnerFromGameELO,
 } from '@/utils/gameElo'
+import { getTeamLogo } from '@/utils/team'
+import Image from 'next/image'
 
 interface Props {
   gameElos: GameELO[]
+  teams: Team[]
 }
 
-export function YesterdaysGameOutcomes({ gameElos }: Props) {
+export function YesterdaysGameOutcomes({ gameElos, teams }: Props) {
   const isMobile = useIsMobile()
 
   if (isMobile) {
@@ -135,11 +139,25 @@ export function YesterdaysGameOutcomes({ gameElos }: Props) {
               <td
                 className={`p-3 font-bold ${game.homeTeam.abbrev === winner ? 'text-green-400' : 'text-red-400'}`}
               >
+                <Image
+                  src={getTeamLogo(teams, game.homeTeam.abbrev) ?? ''}
+                  alt={game.homeTeam.abbrev}
+                  width={40}
+                  height={40}
+                  className="inline-block mr-2 size-10"
+                />
                 {game.homeTeam.abbrev}
               </td>
               <td
                 className={`p-3 font-bold ${game.awayTeam.abbrev === winner ? 'text-green-400' : 'text-red-400'}`}
               >
+                <Image
+                  src={getTeamLogo(teams, game.awayTeam.abbrev) ?? ''}
+                  alt={game.awayTeam.abbrev}
+                  width={40}
+                  height={40}
+                  className="inline-block mr-2 size-10"
+                />
                 {game.awayTeam.abbrev}
               </td>
               <td className="p-3">

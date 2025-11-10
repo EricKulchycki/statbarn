@@ -40,7 +40,7 @@ export default async function UpsetTracker({
           {upsets.map((upset) => (
             <div
               key={upset.gameId}
-              className="flex flex-col sm:flex-row items-center justify-between bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl shadow-lg p-4 hover:shadow-xl transition-shadow w-full"
+              className="flex flex-col sm:flex-row items-center justify-between bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl shadow-lg p-4 hover:shadow-xl transition-shadow w-full flex-wrap"
             >
               {/* Date & Score */}
               <div className="w-full sm:w-24 text-center sm:mr-4 mb-2 sm:mb-0">

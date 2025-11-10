@@ -66,10 +66,10 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
         games (typically the next day) are shown, as new predictions are
         generated daily to reflect the most current data and match schedule.
       </p>
-      <div className="flex flex-wrap gap-4 w-full my-4 justify-center">
+      <div className="flex flex-wrap gap-4 w-full my-4">
         {Object.entries(visibleGames).map(([day, predictions]) => {
           return (
-            <div key={day} className="w-full">
+            <div key={day}>
               <h3 className="text-md font-semibold">
                 <Suspense key={isHydrated ? 'local' : 'utc'}>
                   <time dateTime={predictions[0].gameDate.toISOString()}>
@@ -77,7 +77,7 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
                   </time>
                 </Suspense>
               </h3>
-              <div className="flex flex-wrap gap-4 py-2">
+              <div className="flex gap-4 mt-2 w-full flex-wrap">
                 {predictions.map((prediction) => {
                   const game = allGames.find((g) => g.id === prediction.gameId)
                   if (!game) return null

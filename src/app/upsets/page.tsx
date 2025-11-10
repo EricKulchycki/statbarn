@@ -5,10 +5,14 @@ import Image from 'next/image'
 import React from 'react'
 import SeasonUpsetSidebar from '@/components/UpsetsSidebar'
 import { getTeamLogo } from '@/utils/team'
+import { Database } from '@/lib/db'
 
 export default async function UpsetTracker({
   searchParams,
 }: PageProps<'/upsets'>) {
+  const db = Database.getInstance()
+  await db.connect()
+
   const sp = await searchParams
   const upsets = await upsetService.getAllUpsets(
     DateTime.now().minus({ days: 7 })

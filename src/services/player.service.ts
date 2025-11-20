@@ -46,7 +46,9 @@ export class PlayerService {
     }
   }
 
-  async getEnhancedTopScorers(limit: number = 10): Promise<EnhancedSkaterStats[]> {
+  async getEnhancedTopScorers(
+    limit: number = 10
+  ): Promise<EnhancedSkaterStats[]> {
     try {
       return await getEnhancedTopScorers(limit)
     } catch (error) {
@@ -57,7 +59,9 @@ export class PlayerService {
     }
   }
 
-  async getEnhancedTopGoalies(limit: number = 5): Promise<EnhancedGoalieStats[]> {
+  async getEnhancedTopGoalies(
+    limit: number = 5
+  ): Promise<EnhancedGoalieStats[]> {
     try {
       return await getEnhancedTopGoalies(limit)
     } catch (error) {

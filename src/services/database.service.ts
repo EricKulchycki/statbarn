@@ -1,6 +1,5 @@
 import mongoose from 'mongoose'
 import { Database } from '@/lib/db'
-import { DB_CONFIG } from '@/constants'
 import { createDatabaseError } from '@/types/errors'
 
 export class DatabaseService {
@@ -46,7 +45,7 @@ export class DatabaseService {
     try {
       const connection = mongoose.connection
       return connection.readyState === 1 // Connected
-    } catch (error) {
+    } catch {
       return false
     }
   }

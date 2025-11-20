@@ -5,7 +5,5 @@ export async function PlayerStatsWrapper() {
   const topScorers = await playerService.getEnhancedTopScorers(10)
   const topGoalies = await playerService.getEnhancedTopGoalies(5)
 
-  console.log(topScorers)
-
   return <PlayerStats topScorers={topScorers} topGoalies={topGoalies} />
 }

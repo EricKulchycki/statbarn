@@ -1,6 +1,6 @@
-// import { AllTeamsHistoryGraphWrapper } from '@/components/AllTeamsHistoryGraph.server'
 import { ELOWrapper } from '@/components/ELO.server'
 import { GamePredictionsWrapper } from '@/components/GamePredictions.server'
+import { PlayerStatsWrapper } from '@/components/PlayerStats.server'
 import { YesterdaysGameOutcomes } from '@/components/YesterdaysGameOutcomes/server'
 import { Database } from '@/lib/db'
 
@@ -22,13 +22,8 @@ export default async function Index() {
         </div>
 
         <div className="lg:col-span-1">
-          <div>Player stats (coming soon)</div>
+          <PlayerStatsWrapper />
         </div>
-
-        {/* Graph With all Teams
-        <div className="lg:col-span-4">
-          <AllTeamsHistoryGraphWrapper />
-        </div> */}
       </div>
     </div>
   )

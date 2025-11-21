@@ -21,7 +21,7 @@ export interface ELOsByTeam {
 }
 
 const K_FACTOR = 32
-const HOME_ADVANTAGE = 65
+const HOME_ADVANTAGE = 30
 const INITIAL_ELO = 1500
 const MAX_MATCHUP_ADJUSTMENT = 15
 

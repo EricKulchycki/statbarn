@@ -18,6 +18,7 @@ import { useDisclosure } from '@heroui/react'
 import { MatchupModal } from './MatchupModal'
 import { Prediction } from '@/models/prediction'
 import { Team } from '@/types/team'
+import { getMatchupHistory, MatchupData } from '@/actions/matchup'
 
 export type LiveGame = {
   [gameId: number]: { homeScore: number; awayScore: number; status: string }
@@ -41,6 +42,8 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
   const [selectedPrediction, setSelectedPrediction] =
     React.useState<Prediction | null>(null)
   const [selectedGame, setSelectedGame] = React.useState<NHLGame | null>(null)
+  const [matchupData, setMatchupData] = React.useState<MatchupData | null>(null)
+  const [isLoadingMatchup, setIsLoadingMatchup] = React.useState(false)
 
   const predictionsByDay = groupPredictionsByDate(
     predictions.map(deserializePrediction)
@@ -154,16 +157,34 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
                     )
                   }
 
+                  const handleGameClick = async () => {
+                    setSelectedGame(game)
+                    setSelectedPrediction(prediction)
+                    setMatchupData(null)
+                    onOpen()
+
+                    // Fetch matchup data asynchronously
+                    setIsLoadingMatchup(true)
+                    try {
+                      const data = await getMatchupHistory(
+                        game.awayTeam.abbrev,
+                        game.homeTeam.abbrev,
+                        5
+                      )
+                      setMatchupData(data)
+                    } catch (error) {
+                      console.error('Failed to fetch matchup data:', error)
+                    } finally {
+                      setIsLoadingMatchup(false)
+                    }
+                  }
+
                   return (
                     <div
                       key={prediction.gameId}
                       aria-label={`game prediction for ${game.homeTeam.abbrev} vs ${game.awayTeam.abbrev}`}
                       className="p-2 hover:scale-105 transition-transform duration-200 cursor-pointer"
-                      onClick={() => {
-                        setSelectedGame(game)
-                        setSelectedPrediction(prediction)
-                        onOpen()
-                      }}
+                      onClick={handleGameClick}
                     >
                       <div className="rounded-lg bg-gradient-to-br from-slate-800 to-slate-900 p-2 flex flex-col items-center">
                         <GamePrediction prediction={prediction} game={game} />
@@ -220,8 +241,9 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
         onClose={onClose}
         prediction={selectedPrediction}
         game={selectedGame}
-        matchupHistory={[]}
+        matchupData={matchupData}
         teams={teams}
+        isLoading={isLoadingMatchup}
       />
     </div>
   )

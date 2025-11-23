@@ -10,7 +10,12 @@ import {
 import { Header } from './Header.server'
 import { useRouter } from 'next/navigation'
 
-export function Nav() {
+interface Props {
+  accuracyPercentage: number
+}
+
+export function Nav(props: Props) {
+  const { accuracyPercentage } = props
   const isMobile = useIsMobile()
 
   if (isMobile) {
@@ -18,7 +23,7 @@ export function Nav() {
     return <MobileNav />
   }
 
-  return <Header />
+  return <Header percentage={accuracyPercentage} />
 }
 
 export function MobileNav() {

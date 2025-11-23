@@ -7,6 +7,8 @@ import { Footer } from '@/components/layout/Footer'
 import { Providers } from './providers'
 import { Nav } from '@/components/layout/Header.client'
 import { GameBanner } from '@/components/GameBanner'
+import { Database } from '@/lib/db'
+import { eloService } from '@/services/elo.service'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -28,6 +30,16 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const db = Database.getInstance()
+  await db.connect()
+
+  const totalGames = await eloService.countSeasonsGames(20252026)
+  const correctPredictions =
+    await eloService.countSeasonsCorrectPredictions(20252026)
+
+  const percentage =
+    totalGames > 0 ? (correctPredictions / totalGames) * 100 : 0
+
   return (
     <html lang="en" className="dark">
       <body
@@ -35,7 +47,7 @@ export default async function RootLayout({
       >
         <Providers>
           <div className="flex flex-col min-h-screen">
-            <Nav />
+            <Nav accuracyPercentage={percentage} />
             <div className="flex-1">
               <GameBanner />
               {children}

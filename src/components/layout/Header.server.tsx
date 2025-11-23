@@ -1,12 +1,14 @@
 import { APP_CONFIG } from '@/constants'
 import Link from 'next/link'
 import Image from 'next/image'
+import { cn } from '@heroui/react'
 
 interface HeaderProps {
+  percentage: number
   className?: string
 }
 
-export function Header({ className = '' }: HeaderProps) {
+export function Header({ percentage, className = '' }: HeaderProps) {
   return (
     <header
       className={`bg-gray-900 shadow-sm dark:border-gray-700 transition-colors duration-200 ${className}`}
@@ -14,7 +16,7 @@ export function Header({ className = '' }: HeaderProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and Brand */}
-          <div className="flex items-center">
+          <div className="flex items-center gap-6">
             <div className="flex-shrink-0 mr-2">
               <Link href="/">
                 <Image
@@ -30,6 +32,21 @@ export function Header({ className = '' }: HeaderProps) {
               <p className="text-sm text-gray-300 dark:text-gray-400 transition-colors duration-200">
                 {APP_CONFIG.description}
               </p>
+            </div>
+            <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800">
+              <span className="text-sm text-gray-300">Accuracy:</span>
+              <span
+                className={cn(
+                  'text-lg font-bold',
+                  percentage < 50
+                    ? 'text-red-400'
+                    : percentage < 55
+                      ? 'text-orange-400'
+                      : 'text-green-400'
+                )}
+              >
+                {percentage.toFixed(1)}%
+              </span>
             </div>
           </div>
 

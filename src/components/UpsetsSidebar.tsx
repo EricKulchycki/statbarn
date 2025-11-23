@@ -59,7 +59,7 @@ export default async function SeasonUpsetSidebar({
         <div className="flex items-center gap-8 flex-wrap">
           <UpsetTeamList
             upsetTeams={topUpsetTeams}
-            title="Highest Upset Causers"
+            title="Most Successful Underdogs"
             teams={teams}
           />
           <UpsetTeamList

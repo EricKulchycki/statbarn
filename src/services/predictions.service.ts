@@ -117,12 +117,6 @@ export class PredictionsService {
     }
   }
 
-  private getYesterdayDateString(): string {
-    const yesterday = new Date()
-    yesterday.setDate(yesterday.getDate() - 1)
-    return yesterday.toISOString().split('T')[0]
-  }
-
   private getTodayDateString(): string {
     const tomorrow = new Date().getTime()
     return new Date(tomorrow).toISOString().slice(0, 10)

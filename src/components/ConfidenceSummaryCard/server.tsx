@@ -10,6 +10,9 @@ import {
 } from '@heroicons/react/24/solid'
 import { cn } from '@heroui/react'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function ConfidenceSummaryCard() {
   const db = Database.getInstance()
   await db.connect()

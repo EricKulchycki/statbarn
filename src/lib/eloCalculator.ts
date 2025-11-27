@@ -191,7 +191,8 @@ export async function getLast5MatchupFactor(
 
   // Apply matchup advantage to the team with the better record
   // If home team dominates (>50%), they get a boost. If away team dominates (<50%), they get a boost.
-  const matchupAdvantage = Math.abs(homeWinRate - 0.5) * 2 * MAX_MATCHUP_ADJUSTMENT
+  const matchupAdvantage =
+    Math.abs(homeWinRate - 0.5) * 2 * MAX_MATCHUP_ADJUSTMENT
 
   if (homeWinRate > 0.5) {
     // Home team has historical advantage

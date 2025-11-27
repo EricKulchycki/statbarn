@@ -169,7 +169,13 @@ export async function getLast5MatchupFactor(
 ): Promise<{ homeFactor: number; awayFactor: number }> {
   const homeAbbrev = game.homeTeam.abbrev
   const awayAbbrev = game.awayTeam.abbrev
-  const last5Games = await getMatchupHistory(homeAbbrev, awayAbbrev, 5)
+  // Only consider matchups from current season
+  const last5Games = await getMatchupHistory(
+    homeAbbrev,
+    awayAbbrev,
+    5,
+    game.season
+  )
 
   if (last5Games.length === 0) return { homeFactor: 0, awayFactor: 0 }
 
@@ -179,20 +185,24 @@ export async function getLast5MatchupFactor(
         g.homeTeam.score > g.awayTeam.score) ||
       (g.awayTeam.abbrev === homeAbbrev && g.awayTeam.score > g.homeTeam.score)
   ).length
-  const awayWins = last5Games.filter(
-    (g) =>
-      (g.homeTeam.abbrev === awayAbbrev &&
-        g.homeTeam.score > g.awayTeam.score) ||
-      (g.awayTeam.abbrev === awayAbbrev && g.awayTeam.score > g.homeTeam.score)
-  ).length
 
   const totalGames = last5Games.length
-  const homeEloAdjustment =
-    (homeWins / totalGames - 0.5) * 2 * MAX_MATCHUP_ADJUSTMENT
-  const awayEloAdjustment =
-    (awayWins / totalGames - 0.5) * 2 * MAX_MATCHUP_ADJUSTMENT
+  const homeWinRate = homeWins / totalGames
 
-  return { homeFactor: homeEloAdjustment, awayFactor: awayEloAdjustment }
+  // Apply matchup advantage to the team with the better record
+  // If home team dominates (>50%), they get a boost. If away team dominates (<50%), they get a boost.
+  const matchupAdvantage = Math.abs(homeWinRate - 0.5) * 2 * MAX_MATCHUP_ADJUSTMENT
+
+  if (homeWinRate > 0.5) {
+    // Home team has historical advantage
+    return { homeFactor: matchupAdvantage, awayFactor: 0 }
+  } else if (homeWinRate < 0.5) {
+    // Away team has historical advantage
+    return { homeFactor: 0, awayFactor: matchupAdvantage }
+  } else {
+    // Even matchup
+    return { homeFactor: 0, awayFactor: 0 }
+  }
 }
 
 /**

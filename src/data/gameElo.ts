@@ -183,15 +183,23 @@ export async function countSeasonsGames(season: number): Promise<number> {
 export async function getMatchupHistory(
   teamA: string,
   teamB: string,
-  limit: number = 10
+  limit: number = 10,
+  season?: number
 ): Promise<GameELO[]> {
   try {
-    const matchupGames = await GameELOModel.find({
+    const query: any = {
       $or: [
         { 'homeTeam.abbrev': teamA, 'awayTeam.abbrev': teamB },
         { 'homeTeam.abbrev': teamB, 'awayTeam.abbrev': teamA },
       ],
-    })
+    }
+
+    // Filter by season if provided
+    if (season !== undefined) {
+      query.season = season
+    }
+
+    const matchupGames = await GameELOModel.find(query)
       .limit(limit)
       .sort({ gameDate: -1 })
       .exec()

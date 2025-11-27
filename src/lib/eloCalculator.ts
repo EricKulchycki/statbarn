@@ -21,9 +21,9 @@ export interface ELOsByTeam {
 }
 
 const K_FACTOR = 32
-const HOME_ADVANTAGE = 30
+const HOME_ADVANTAGE = 25
 const INITIAL_ELO = 1500
-const MAX_MATCHUP_ADJUSTMENT = 15
+const MAX_MATCHUP_ADJUSTMENT = 8
 
 /**
  * Calculate ELO for a single game
@@ -54,8 +54,13 @@ export async function calculateGameELO(
   )
   const awayExpectedResult = 1 - homeExpectedResult
 
-  // Calculate actual results
-  const homeActualResult = game.homeTeam.score > game.awayTeam.score ? 1 : 0
+  // Calculate actual results (1 = win, 0.5 = tie, 0 = loss)
+  const homeActualResult =
+    game.homeTeam.score > game.awayTeam.score
+      ? 1
+      : game.homeTeam.score === game.awayTeam.score
+        ? 0.5
+        : 0
   const awayActualResult = 1 - homeActualResult
 
   // Calculate ELO changes
@@ -146,12 +151,16 @@ export function calculateExpectedResult(
 
 /**
  * Adjust K factor based on goal difference
+ * Uses logarithmic scaling to prevent empty-net goals from dominating
  */
 function adjustKFactor(baseK: number, goalDiff: number): number {
   if (goalDiff === 0) return baseK
 
-  // Adjust K based on goal difference (blowout factor)
-  const adjustedK = baseK * (1 + goalDiff * 0.1)
+  // Cap goal difference at 4 to reduce empty-net goal impact
+  const cappedDiff = Math.min(goalDiff, 4)
+
+  // Use logarithmic scaling for more gradual adjustment
+  const adjustedK = baseK * (1 + Math.log(1 + cappedDiff) * 0.3)
   return Math.min(adjustedK, 100) // Cap at 100
 }
 

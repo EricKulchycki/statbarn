@@ -7,6 +7,7 @@ import {
 } from '@/models/gameElo'
 import { getCurrentNHLSeason } from '@/utils/currentSeason'
 import { DateTime } from 'luxon'
+import { RootFilterQuery } from 'mongoose'
 
 export interface LatestELO {
   abbrev: string
@@ -187,7 +188,7 @@ export async function getMatchupHistory(
   season?: number
 ): Promise<GameELO[]> {
   try {
-    const query: any = {
+    const query: RootFilterQuery<GameELODocument> = {
       $or: [
         { 'homeTeam.abbrev': teamA, 'awayTeam.abbrev': teamB },
         { 'homeTeam.abbrev': teamB, 'awayTeam.abbrev': teamA },

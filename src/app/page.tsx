@@ -4,6 +4,7 @@ import { GamePredictionsWrapper } from '@/components/GamePredictions.server'
 import { PlayerStatsWrapper } from '@/components/PlayerStats.server'
 import { YesterdaysGameOutcomes } from '@/components/YesterdaysGameOutcomes/server'
 import { Database } from '@/lib/db'
+import { CollapsibleSection } from '@/components/CollapsibleSection'
 
 function LoadingSkeleton() {
   return (
@@ -22,15 +23,8 @@ export default async function Index() {
   return (
     <div className="lg:max-w-7/10 mx-auto px-4 sm:px-6 lg:px-8 lg:py-8 mb-8">
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* ELO Rankings */}
-        <div className="lg:col-span-1">
-          <Suspense fallback={<LoadingSkeleton />}>
-            <ELOWrapper />
-          </Suspense>
-        </div>
-
-        {/* Game Predictions */}
-        <div className="lg:col-span-2">
+        {/* Game Predictions - Priority content, always visible */}
+        <div className="lg:col-span-2 lg:order-2">
           <Suspense fallback={<LoadingSkeleton />}>
             <YesterdaysGameOutcomes />
           </Suspense>
@@ -39,10 +33,30 @@ export default async function Index() {
           </Suspense>
         </div>
 
-        <div className="lg:col-span-1">
-          <Suspense fallback={<LoadingSkeleton />}>
-            <PlayerStatsWrapper />
-          </Suspense>
+        {/* ELO Rankings - Collapsible on mobile, always visible on desktop */}
+        <div className="lg:col-span-1 lg:order-1">
+          <CollapsibleSection
+            title="Power Rankings"
+            defaultOpen={false}
+            alwaysOpenOnDesktop={true}
+          >
+            <Suspense fallback={<LoadingSkeleton />}>
+              <ELOWrapper />
+            </Suspense>
+          </CollapsibleSection>
+        </div>
+
+        {/* Player Stats - Collapsible on mobile, always visible on desktop */}
+        <div className="lg:col-span-1 lg:order-3">
+          <CollapsibleSection
+            title="Player Stats"
+            defaultOpen={false}
+            alwaysOpenOnDesktop={true}
+          >
+            <Suspense fallback={<LoadingSkeleton />}>
+              <PlayerStatsWrapper />
+            </Suspense>
+          </CollapsibleSection>
         </div>
       </div>
     </div>

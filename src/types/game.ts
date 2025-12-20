@@ -1,3 +1,4 @@
+import { GameStatus } from '@/utils/game'
 import { DayAbbrev } from './common'
 import { NHLTeam } from './team'
 
@@ -24,7 +25,7 @@ export interface NHLGame {
   easternUTCOffset: string
   gameCenterLink: string
   gameScheduleState: string
-  gameState: 'FUT' | 'LIVE' | 'FINAL' | 'CRIT' | 'OFF'
+  gameState: GameStatus
   gameType: number
   id: number
   neutralSite: boolean

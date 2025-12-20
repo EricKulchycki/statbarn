@@ -8,6 +8,7 @@ import { DateTime } from 'luxon'
 import { getTimezoneFromCookie } from '@/lib/time'
 import { NHLGame } from '@/types/game'
 import { getTeams } from '@/data/teams'
+import { GameStatus } from '@/utils/game'
 
 export type PredictionsByDay = { [day: string]: Prediction[] }
 
@@ -21,7 +22,11 @@ export async function fetchLiveGamesForClient() {
     console.error('Error fetching today games for live updates:', error)
   }
   const map: {
-    [gameId: number]: { homeScore: number; awayScore: number; status: string }
+    [gameId: number]: {
+      homeScore: number
+      awayScore: number
+      status: GameStatus
+    }
   } = {}
   for (const g of todaysGames) {
     map[g.id] = {

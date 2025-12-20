@@ -12,11 +12,14 @@ import {
 const NHL_API_BASE = 'https://api-web.nhle.com/v1'
 
 // Simple in-memory cache
-const playerCache = new Map<number, { data: PlayerLandingResponse | null; timestamp: number }>()
+const playerCache = new Map<
+  number,
+  { data: PlayerLandingResponse | null; timestamp: number }
+>()
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
 // Helper to delay between requests
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 // Fetch individual player data with caching
 async function getPlayerLanding(
@@ -30,7 +33,7 @@ async function getPlayerLanding(
 
   try {
     const res = await fetch(`${NHL_API_BASE}/player/${playerId}/landing`, {
-      next: { revalidate: 300 } // Cache for 5 minutes in Next.js
+      next: { revalidate: 300 }, // Cache for 5 minutes in Next.js
     })
     if (!res.ok) {
       console.error(`Failed to fetch player ${playerId}: ${res.status}`)

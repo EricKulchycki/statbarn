@@ -11,17 +11,37 @@ import {
 
 const NHL_API_BASE = 'https://api-web.nhle.com/v1'
 
-// Fetch individual player data
+// Simple in-memory cache
+const playerCache = new Map<number, { data: PlayerLandingResponse | null; timestamp: number }>()
+const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
+// Helper to delay between requests
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+// Fetch individual player data with caching
 async function getPlayerLanding(
   playerId: number
 ): Promise<PlayerLandingResponse | null> {
+  // Check cache
+  const cached = playerCache.get(playerId)
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data
+  }
+
   try {
-    const res = await fetch(`${NHL_API_BASE}/player/${playerId}/landing`)
+    const res = await fetch(`${NHL_API_BASE}/player/${playerId}/landing`, {
+      next: { revalidate: 300 } // Cache for 5 minutes in Next.js
+    })
     if (!res.ok) {
       console.error(`Failed to fetch player ${playerId}: ${res.status}`)
       return null
     }
-    return await res.json()
+    const data = await res.json()
+
+    // Update cache
+    playerCache.set(playerId, { data, timestamp: Date.now() })
+
+    return data
   } catch (error) {
     console.error(`Error fetching player landing for ${playerId}:`, error)
     return null
@@ -155,7 +175,8 @@ export async function getEnhancedTopScorers(
   try {
     // First get the points leaders
     const res = await fetch(
-      `${NHL_API_BASE}/skater-stats-leaders/current?categories=points&limit=${limit}`
+      `${NHL_API_BASE}/skater-stats-leaders/current?categories=points&limit=${limit}`,
+      { next: { revalidate: 300 } }
     )
     if (!res.ok) {
       throw new Error(`NHL API returned ${res.status}: ${res.statusText}`)
@@ -164,11 +185,18 @@ export async function getEnhancedTopScorers(
     const data: NHLSkaterStatsResponse = await res.json()
     const pointsLeaders: NHLSkaterLeader[] = data.points || []
 
-    // Fetch detailed data for each player in parallel
-    const playerDataPromises = pointsLeaders.map((leader) =>
-      getPlayerLanding(leader.id)
-    )
-    const playerDataResults = await Promise.all(playerDataPromises)
+    // Fetch detailed data incrementally with delays to avoid rate limiting
+    const playerDataResults: (PlayerLandingResponse | null)[] = []
+    for (let i = 0; i < pointsLeaders.length; i++) {
+      const leader = pointsLeaders[i]
+      const playerData = await getPlayerLanding(leader.id)
+      playerDataResults.push(playerData)
+
+      // Add small delay between requests (except for last one)
+      if (i < pointsLeaders.length - 1) {
+        await delay(100) // 100ms delay between requests
+      }
+    }
 
     // Combine leader data with detailed stats
     const enhancedPlayers: EnhancedSkaterStats[] = []
@@ -228,7 +256,8 @@ export async function getEnhancedTopGoalies(
   try {
     // First get the save % leaders
     const res = await fetch(
-      `${NHL_API_BASE}/goalie-stats-leaders/current?categories=savePctg&limit=${limit}`
+      `${NHL_API_BASE}/goalie-stats-leaders/current?categories=savePctg&limit=${limit}`,
+      { next: { revalidate: 300 } }
     )
     if (!res.ok) {
       throw new Error(`NHL API returned ${res.status}: ${res.statusText}`)
@@ -237,11 +266,18 @@ export async function getEnhancedTopGoalies(
     const data: NHLGoalieStatsResponse = await res.json()
     const savePctgLeaders: NHLGoalieLeader[] = data.savePctg || []
 
-    // Fetch detailed data for each goalie in parallel
-    const goalieDataPromises = savePctgLeaders.map((leader) =>
-      getPlayerLanding(leader.id)
-    )
-    const goalieDataResults = await Promise.all(goalieDataPromises)
+    // Fetch detailed data incrementally with delays to avoid rate limiting
+    const goalieDataResults: (PlayerLandingResponse | null)[] = []
+    for (let i = 0; i < savePctgLeaders.length; i++) {
+      const leader = savePctgLeaders[i]
+      const goalieData = await getPlayerLanding(leader.id)
+      goalieDataResults.push(goalieData)
+
+      // Add small delay between requests (except for last one)
+      if (i < savePctgLeaders.length - 1) {
+        await delay(100) // 100ms delay between requests
+      }
+    }
 
     // Combine leader data with detailed stats
     const enhancedGoalies: EnhancedGoalieStats[] = []

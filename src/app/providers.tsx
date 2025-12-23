@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { HeroUIProvider } from '@heroui/react'
+import { AuthProvider } from '@/contexts/AuthContext'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -9,5 +10,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     document.cookie = `localTimezone=${timezone}; path=/; SameSite=Lax`
   }, [])
 
-  return <HeroUIProvider>{children}</HeroUIProvider>
+  return (
+    <HeroUIProvider>
+      <AuthProvider>{children}</AuthProvider>
+    </HeroUIProvider>
+  )
 }

@@ -16,6 +16,7 @@
     "@heroicons/react": "^2.2.0",
     "@heroui/react": "^2.8.2",
     "@vercel/node": "^5.3.13",
+    "firebase": "^12.7.0",
     "framer-motion": "^12.23.12",
     "isbot": "^4.1.0",
     "lodash": "^4.17.21",

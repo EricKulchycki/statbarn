@@ -2,6 +2,7 @@ import { APP_CONFIG } from '@/constants'
 import Link from 'next/link'
 import Image from 'next/image'
 import { cn } from '@heroui/react'
+import { UserButton } from '@/components/auth/UserButton'
 
 interface HeaderProps {
   percentage: number
@@ -51,32 +52,35 @@ export function Header({ percentage, className = '' }: HeaderProps) {
           </div>
 
           {/* Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            <Link
-              href="/"
-              className=" text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-            >
-              Home
-            </Link>
-            <Link
-              href="/upsets"
-              className="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-            >
-              Upsets
-            </Link>
-            <Link
-              href="/model-confidence"
-              className="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-            >
-              Confidence
-            </Link>
-            <Link
-              href="/historical"
-              className="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-            >
-              Teams
-            </Link>
-          </nav>
+          <div className="flex items-center gap-4">
+            <nav className="hidden md:flex space-x-8">
+              <Link
+                href="/"
+                className=" text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+              >
+                Home
+              </Link>
+              <Link
+                href="/upsets"
+                className="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+              >
+                Upsets
+              </Link>
+              <Link
+                href="/model-confidence"
+                className="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+              >
+                Confidence
+              </Link>
+              <Link
+                href="/historical"
+                className="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+              >
+                Teams
+              </Link>
+            </nav>
+            <UserButton />
+          </div>
         </div>
       </div>
     </header>

@@ -2,25 +2,26 @@ import { DateTime } from 'luxon'
 import { gameService } from '@/services/game.service'
 import { predictionsService } from '@/services/predictions.service'
 import { GameBannerClient } from './GameBanner.client'
-import { serializePrediction } from '@/utils/converters/prediction'
+import {
+  SerializedPrediction,
+  serializePrediction,
+} from '@/utils/converters/prediction'
+import { NHLGameWeek } from '@/types/game'
 
 export async function GameBanner() {
   const today = DateTime.now().minus({ hours: 12 })
   const gamesThisWeek = await gameService.getThisWeeksGames(today)
 
-  if (
-    !gamesThisWeek ||
-    gamesThisWeek.every((day) => day.numberOfGames === 0)
-  ) {
+  if (!gamesThisWeek || gamesThisWeek.every((day) => day.numberOfGames === 0)) {
     return null
   }
 
   // Fetch predictions asynchronously
-  let predictions = []
+  let predictions: SerializedPrediction[] = []
   try {
-    const scheduleData: any = { gameWeek: gamesThisWeek }
+    const scheduleData: Partial<NHLGameWeek> = { gameWeek: gamesThisWeek }
     const rawPredictions = await predictionsService.getUpcomingGamePredictions(
-      scheduleData
+      scheduleData as NHLGameWeek
     )
     predictions = rawPredictions.map(serializePrediction)
   } catch (error) {

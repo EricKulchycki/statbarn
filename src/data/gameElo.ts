@@ -211,10 +211,7 @@ export async function countSeasonsCorrectPredictions(
           predictedWinner: {
             $cond: {
               if: {
-                $gt: [
-                  '$expectedResult.homeTeam',
-                  '$expectedResult.awayTeam',
-                ],
+                $gt: ['$expectedResult.homeTeam', '$expectedResult.awayTeam'],
               },
               then: '$homeTeam.abbrev',
               else: '$awayTeam.abbrev',

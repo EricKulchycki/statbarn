@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { SerializedPrediction } from '@/utils/converters/prediction'
 import { deserializePrediction } from '@/utils/converters/prediction'
 import { getPredictedWinnerFromPrediction } from '@/utils/prediction'
+import { Prediction } from '@/models/prediction'
 
 interface GameBannerClientProps {
   gamesThisWeek: NHLGameDay[]
@@ -44,7 +45,7 @@ export function GameBannerClient({
 interface TodaysGamesProps {
   games: NHLGame[]
   date: string
-  predictionsMap: Map<number, any>
+  predictionsMap: Map<number, Prediction>
 }
 
 function TodaysGames(props: TodaysGamesProps) {
@@ -65,7 +66,7 @@ function TodaysGames(props: TodaysGamesProps) {
 
 interface BannerGameProps {
   game: NHLGame
-  prediction?: any
+  prediction?: Prediction
 }
 
 function BannerGame(props: BannerGameProps) {

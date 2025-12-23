@@ -170,13 +170,74 @@ export async function getAllGamesForSeason(
 
 export async function countSeasonsGames(season: number): Promise<number> {
   try {
-    const games = await GameELOModel.find({
+    const count = await GameELOModel.countDocuments({
       season,
       gameType: GameType.REGULAR,
     }).exec()
-    return games.length
+    return count
   } catch (error) {
     console.error(`Error fetching all GameELOs for season ${season}:`, error)
+    throw error
+  }
+}
+
+export async function countSeasonsCorrectPredictions(
+  season: number
+): Promise<number> {
+  try {
+    // Use aggregation to count correct predictions efficiently
+    const result = await GameELOModel.aggregate([
+      {
+        $match: {
+          season,
+          gameType: GameType.REGULAR,
+        },
+      },
+      {
+        $addFields: {
+          actualWinner: {
+            $cond: {
+              if: { $gt: ['$homeTeam.score', '$awayTeam.score'] },
+              then: '$homeTeam.abbrev',
+              else: {
+                $cond: {
+                  if: { $lt: ['$homeTeam.score', '$awayTeam.score'] },
+                  then: '$awayTeam.abbrev',
+                  else: null,
+                },
+              },
+            },
+          },
+          predictedWinner: {
+            $cond: {
+              if: {
+                $gt: [
+                  '$expectedResult.homeTeam',
+                  '$expectedResult.awayTeam',
+                ],
+              },
+              then: '$homeTeam.abbrev',
+              else: '$awayTeam.abbrev',
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          $expr: { $eq: ['$actualWinner', '$predictedWinner'] },
+        },
+      },
+      {
+        $count: 'correct',
+      },
+    ]).exec()
+
+    return result.length > 0 ? result[0].correct : 0
+  } catch (error) {
+    console.error(
+      `Error counting correct predictions for season ${season}:`,
+      error
+    )
     throw error
   }
 }

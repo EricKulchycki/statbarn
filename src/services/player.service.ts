@@ -60,10 +60,10 @@ export class PlayerService {
   }
 
   async getEnhancedTopGoalies(
-    limit: number = 5
+    limit: number = 10
   ): Promise<EnhancedGoalieStats[]> {
     try {
-      return await getEnhancedTopGoalies(limit)
+      return await getEnhancedTopGoalies(limit, 10)
     } catch (error) {
       throw createApiError(
         'getEnhancedTopGoalies',

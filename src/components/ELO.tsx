@@ -23,10 +23,7 @@ export function ELO(props: Props) {
   const visibleRankings = showAll ? rankings : rankings.slice(0, 10)
 
   return (
-    <div className="p-4 sm:pt-0 mb-8">
-      <h2 className="text-2xl font-bold mb-6 text-blue-400 tracking-wide">
-        Power Rankings
-      </h2>
+    <div className="py-4 sm:pt-0 mb-8">
       <div className="flex flex-col gap-4">
         {visibleRankings.map((elo, idx) => {
           if (elo.abbrev === 'ARI') {

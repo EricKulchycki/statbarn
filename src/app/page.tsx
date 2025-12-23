@@ -21,8 +21,8 @@ export default async function Index() {
   const db = Database.getInstance()
   await db.connect()
   return (
-    <div className="lg:max-w-7/10 mx-auto px-4 sm:px-6 lg:px-8 lg:py-8 mb-8">
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <div className="w-full max-w-[1900px] mx-auto px-4 sm:px-6 lg:px-8 lg:py-8 mb-8">
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8">
         {/* Game Predictions - Priority content, always visible */}
         <div className="lg:col-span-2 lg:order-2">
           <Suspense fallback={<LoadingSkeleton />}>

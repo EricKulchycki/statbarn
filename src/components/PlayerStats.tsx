@@ -22,12 +22,7 @@ export function PlayerStats(props: Props) {
     : props.topGoalies.slice(0, 3)
 
   return (
-    <div className="p-4 sm:pt-0 mb-8">
-      <h2 className="text-2xl font-bold mb-6 text-blue-400 tracking-wide">
-        Player Stats
-      </h2>
-
-      {/* Top Scorers Section */}
+    <div className="py-4 sm:pt-0 mb-8">
       <div className="mb-8">
         <h3 className="text-lg font-semibold mb-4 text-slate-200">
           Top Scorers

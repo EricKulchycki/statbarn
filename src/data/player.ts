@@ -254,12 +254,16 @@ export async function getEnhancedTopScorers(
 
 // Enhanced function for goalies with detailed data from landing endpoint
 export async function getEnhancedTopGoalies(
-  limit: number = 5
+  limit: number = 5,
+  minGamesPlayed: number = 5
 ): Promise<EnhancedGoalieStats[]> {
   try {
+    // Fetch more than needed to account for filtering by games played
+    const fetchLimit = Math.max(limit * 3, 15)
+
     // First get the save % leaders
     const res = await fetch(
-      `${NHL_API_BASE}/goalie-stats-leaders/current?categories=savePctg&limit=${limit}`,
+      `${NHL_API_BASE}/goalie-stats-leaders/current?categories=savePctg&limit=${fetchLimit}`,
       { next: { revalidate: 300 } }
     )
     if (!res.ok) {
@@ -282,7 +286,7 @@ export async function getEnhancedTopGoalies(
       }
     }
 
-    // Combine leader data with detailed stats
+    // Combine leader data with detailed stats and filter by minimum games
     const enhancedGoalies: EnhancedGoalieStats[] = []
 
     for (let i = 0; i < savePctgLeaders.length; i++) {
@@ -290,15 +294,16 @@ export async function getEnhancedTopGoalies(
       const goalieData = goalieDataResults[i] as GoalieLandingResponse | null
 
       if (!goalieData || !goalieData.featuredStats?.regularSeason?.subSeason) {
-        // If we couldn't fetch detailed data, use basic leader data
-        enhancedGoalies.push({
-          ...leader,
-          savePctg: leader.value,
-        })
+        // If we couldn't fetch detailed data, skip this goalie
         continue
       }
 
       const stats = goalieData.featuredStats.regularSeason.subSeason
+
+      // Filter out goalies who haven't played enough games
+      if (stats.gamesPlayed < minGamesPlayed) {
+        continue
+      }
 
       // Calculate derived stats
       const winPctg =
@@ -316,6 +321,11 @@ export async function getEnhancedTopGoalies(
         winPctg,
         shutoutRate,
       })
+
+      // Stop once we have enough qualified goalies
+      if (enhancedGoalies.length >= limit) {
+        break
+      }
     }
 
     return enhancedGoalies

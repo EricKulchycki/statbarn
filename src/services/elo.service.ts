@@ -1,5 +1,6 @@
 import {
   countSeasonsGames,
+  countSeasonsCorrectPredictions as countCorrectPredictions,
   createGameElo,
   getAllGamesForSeason,
   getGameElos,
@@ -108,13 +109,7 @@ export class EloService {
 
   async countSeasonsCorrectPredictions(season: number): Promise<number> {
     try {
-      const games = await getAllGamesForSeason(season)
-      const correctPredictions = games.filter((game) => {
-        const predictedWinner = getPredictedWinnerFromGameELO(game)
-        const actualWinner = getActualWinnerFromGameELO(game)
-        return predictedWinner === actualWinner
-      })
-      return correctPredictions.length
+      return await countCorrectPredictions(season)
     } catch (error) {
       throw createApiError(
         'countSeasonsCorrectPredictions',

@@ -46,7 +46,12 @@ export interface UserPicks {
   updatedAt: Date
 }
 
-export interface UserPicksDocument extends UserPicks, Document {}
+export interface UserPicksDocument extends UserPicks, Document {
+  addPick(pickData: Omit<Pick, 'createdAt' | 'updatedAt'>): this
+  updatePickResult(gameId: number, actualWinner: string, points: number): this
+  getPendingPicks(): Pick[]
+  getRecentPicks(limit?: number): Pick[]
+}
 
 // Pick subdocument schema
 const pickSchema = new Schema(

@@ -49,12 +49,17 @@ export async function createPick(data: CreatePickData) {
     }
 
     // Validate picked team
-    if (data.pickedTeam !== data.homeTeam && data.pickedTeam !== data.awayTeam) {
+    if (
+      data.pickedTeam !== data.homeTeam &&
+      data.pickedTeam !== data.awayTeam
+    ) {
       throw new Error('Picked team must be either home or away team')
     }
 
     // Find or create user picks document
-    let userPicks = await UserPicksModel.findOne({ firebaseUid: data.firebaseUid })
+    let userPicks = await UserPicksModel.findOne({
+      firebaseUid: data.firebaseUid,
+    })
 
     if (!userPicks) {
       userPicks = new UserPicksModel({
@@ -76,7 +81,10 @@ export async function createPick(data: CreatePickData) {
 
     await userPicks.save()
 
-    return { success: true, pick: userPicks.picks.find(p => p.gameId === data.gameId) }
+    return {
+      success: true,
+      pick: userPicks.picks.find((p) => p.gameId === data.gameId),
+    }
   } catch (error) {
     console.error('Error creating pick:', error)
     throw error
@@ -110,7 +118,7 @@ export async function deletePick(firebaseUid: string, gameId: number) {
     }
 
     // Remove the pick
-    const pickIndex = userPicks.picks.findIndex(p => p.gameId === gameId)
+    const pickIndex = userPicks.picks.findIndex((p) => p.gameId === gameId)
     if (pickIndex === -1) {
       throw new Error('Pick not found')
     }
@@ -144,11 +152,11 @@ export async function getUserPicks(firebaseUid: string, filters?: PickFilters) {
 
     // Apply filters
     if (filters?.season) {
-      picks = picks.filter(p => p.season === filters.season)
+      picks = picks.filter((p) => p.season === filters.season)
     }
 
     if (filters?.pending) {
-      picks = picks.filter(p => p.isCorrect === undefined)
+      picks = picks.filter((p) => p.isCorrect === undefined)
     }
 
     // Sort by game date descending
@@ -186,7 +194,7 @@ export async function getTomorrowsGames() {
       .sort({ gameDate: 1 })
       .lean()
 
-    return games.map(game => ({
+    return games.map((game) => ({
       gameId: game.gameId,
       season: game.season,
       gameDate: game.gameDate.toISOString(),
@@ -256,7 +264,7 @@ export async function getLeaderboard(limit: number = 10, season?: number) {
     const db = Database.getInstance()
     await db.connect()
 
-    let query: any = {}
+    let query = {}
 
     // If season specified, filter by users who have picks in that season
     if (season) {
@@ -268,7 +276,9 @@ export async function getLeaderboard(limit: number = 10, season?: number) {
     const leaderboard = await UserPicksModel.find(query)
       .sort({ totalPoints: -1, accuracy: -1 })
       .limit(limit)
-      .select('firebaseUid totalPicks correctPicks accuracy currentStreak totalPoints')
+      .select(
+        'firebaseUid totalPicks correctPicks accuracy currentStreak totalPoints'
+      )
       .lean()
 
     return leaderboard.map((user, index) => ({

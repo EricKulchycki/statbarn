@@ -57,10 +57,10 @@ export function Footer({ className = '' }: FooterProps) {
               </li>
               <li>
                 <Link
-                  href="/teams"
+                  href="/historical"
                   className="text-gray-300 dark:text-gray-300 hover:text-white dark:hover:text-white transition-colors duration-200"
                 >
-                  Teams
+                  Power Rankings
                 </Link>
               </li>
             </ul>

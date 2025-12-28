@@ -56,7 +56,7 @@ export function MobileNav() {
         className="flex flex-col items-center text-slate-300 hover:text-blue-400"
       >
         <UserGroupIcon className="w-6 h-6 mb-1" />
-        <span className="text-xs">Teams</span>
+        <span className="text-xs">Power Rankings</span>
       </div>
     </nav>
   )

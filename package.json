@@ -9,6 +9,7 @@
     "seed:populateTeams": "tsx scripts/populateTeams.ts",
     "seed:predictionsForDate": "tsx scripts/seedPredictionForDate.ts",
     "seed:markGameType": "tsx scripts/markGameType.ts",
+    "seed:testGames": "tsx scripts/seedTestGames.ts",
     "start": "next start",
     "lint": "eslint"
   },

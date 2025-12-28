@@ -1,5 +1,4 @@
 import { Suspense } from 'react'
-import { ELOWrapper } from '@/components/ELO.server'
 import { GamePredictionsWrapper } from '@/components/GamePredictions.server'
 import { PlayerStatsWrapper } from '@/components/PlayerStats.server'
 import { YesterdaysGameOutcomes } from '@/components/YesterdaysGameOutcomes/server'
@@ -22,9 +21,9 @@ export default async function Index() {
   await db.connect()
   return (
     <div className="w-full max-w-[1900px] mx-auto px-4 sm:px-6 lg:px-8 lg:py-8 mb-8">
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8">
-        {/* Game Predictions - Priority content, always visible */}
-        <div className="lg:col-span-2 lg:order-2">
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
+        {/* Game Predictions - Priority content, center column */}
+        <div className="lg:col-span-2 lg:order-1">
           <Suspense fallback={<LoadingSkeleton />}>
             <YesterdaysGameOutcomes />
           </Suspense>
@@ -33,21 +32,8 @@ export default async function Index() {
           </Suspense>
         </div>
 
-        {/* ELO Rankings - Collapsible on mobile, always visible on desktop */}
-        <div className="lg:col-span-1 lg:order-1">
-          <CollapsibleSection
-            title="Power Rankings"
-            defaultOpen={false}
-            alwaysOpenOnDesktop={true}
-          >
-            <Suspense fallback={<LoadingSkeleton />}>
-              <ELOWrapper />
-            </Suspense>
-          </CollapsibleSection>
-        </div>
-
-        {/* Player Stats - Collapsible on mobile, always visible on desktop */}
-        <div className="lg:col-span-1 lg:order-3">
+        {/* Player Stats - Right sidebar */}
+        <div className="lg:col-span-1 lg:order-2">
           <CollapsibleSection
             title="Player Stats"
             defaultOpen={false}

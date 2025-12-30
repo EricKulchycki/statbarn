@@ -3,43 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { getTomorrowsGames, getUserStats, getUserPicks } from '@/actions/picks'
+import { Game, UserPick, UserStats } from '@/types/picks'
 import { PickemDashboardClient } from './PickemDashboardClient'
-
-interface Game {
-  gameId: number
-  season: number
-  gameDate: string
-  homeTeam: {
-    abbrev: string
-    eloBefore: number
-    score: number
-  }
-  awayTeam: {
-    abbrev: string
-    eloBefore: number
-    score: number
-  }
-  expectedResult: {
-    homeTeam: number
-    awayTeam: number
-  }
-}
-
-interface UserPick {
-  gameId: number
-  pickedTeam: string
-  confidence?: number
-}
-
-interface UserStats {
-  totalPicks: number
-  correctPicks: number
-  accuracy: number
-  currentStreak: number
-  longestStreak: number
-  totalPoints: number
-  rank?: number
-}
 
 export function PickemDashboard() {
   const { user, loading: authLoading } = useAuth()

@@ -1,45 +1,9 @@
 'use client'
 
-import { useState } from 'react'
 import { PickCard } from '@/components/PickCard'
 import { UserStatsCard } from '@/components/UserStatsCard'
+import { Game, UserPick, UserStats } from '@/types/picks'
 import Link from 'next/link'
-
-interface Game {
-  gameId: number
-  season: number
-  gameDate: string
-  homeTeam: {
-    abbrev: string
-    eloBefore: number
-    score: number
-  }
-  awayTeam: {
-    abbrev: string
-    eloBefore: number
-    score: number
-  }
-  expectedResult: {
-    homeTeam: number
-    awayTeam: number
-  }
-}
-
-interface UserPick {
-  gameId: number
-  pickedTeam: string
-  confidence?: number
-}
-
-interface UserStats {
-  totalPicks: number
-  correctPicks: number
-  accuracy: number
-  currentStreak: number
-  longestStreak: number
-  totalPoints: number
-  rank?: number
-}
 
 interface PickemDashboardClientProps {
   games: Game[]
@@ -54,13 +18,6 @@ export function PickemDashboardClient({
   userPicks,
   firebaseUid,
 }: PickemDashboardClientProps) {
-  const [refreshKey, setRefreshKey] = useState(0)
-
-  const handlePickMade = () => {
-    // Trigger a refresh of the data
-    setRefreshKey((prev) => prev + 1)
-  }
-
   // Create a map of user picks by gameId for easy lookup
   const userPicksMap = new Map(userPicks.map((pick) => [pick.gameId, pick]))
 
@@ -96,7 +53,7 @@ export function PickemDashboardClient({
         {games.length === 0 ? (
           <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-lg p-8 text-center">
             <p className="text-gray-400 text-lg">
-              No games available for picks in the next 24 hours.
+              No games available for picks in the next 48 hours.
             </p>
             <p className="text-gray-500 text-sm mt-2">
               Check back later for upcoming games!
@@ -129,9 +86,9 @@ export function PickemDashboardClient({
                   Available Games {firebaseUid && `(${unpickedGames.length})`}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {unpickedGames.map((game) => (
+                  {unpickedGames.map((game, i) => (
                     <PickCard
-                      key={`${game.gameId}-${refreshKey}`}
+                      key={`${game.gameId}-${i}`}
                       gameId={game.gameId}
                       season={game.season}
                       gameDate={game.gameDate}
@@ -139,7 +96,6 @@ export function PickemDashboardClient({
                       awayTeam={game.awayTeam}
                       expectedResult={game.expectedResult}
                       firebaseUid={firebaseUid}
-                      onPickMade={handlePickMade}
                     />
                   ))}
                 </div>
@@ -153,11 +109,11 @@ export function PickemDashboardClient({
                   Your Picks ({pickedGames.length})
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {pickedGames.map((game) => {
+                  {pickedGames.map((game, i) => {
                     const userPick = userPicksMap.get(game.gameId)
                     return (
                       <PickCard
-                        key={`${game.gameId}-${refreshKey}`}
+                        key={`${game.gameId}-${i}`}
                         gameId={game.gameId}
                         season={game.season}
                         gameDate={game.gameDate}
@@ -166,7 +122,6 @@ export function PickemDashboardClient({
                         expectedResult={game.expectedResult}
                         userPick={userPick}
                         firebaseUid={firebaseUid}
-                        onPickMade={handlePickMade}
                       />
                     )
                   })}

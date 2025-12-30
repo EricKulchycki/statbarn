@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { DateTime } from 'luxon'
 import { LockClosedIcon } from '@heroicons/react/24/solid'
 import { createPick } from '@/actions/picks'
+import Image from 'next/image'
 
 interface PickCardProps {
   gameId: number
@@ -11,11 +12,13 @@ interface PickCardProps {
   gameDate: string
   homeTeam: {
     abbrev: string
+    logo: string
     eloBefore: number
     score: number
   }
   awayTeam: {
     abbrev: string
+    logo: string
     eloBefore: number
     score: number
   }
@@ -37,7 +40,6 @@ export function PickCard({
   gameDate,
   homeTeam,
   awayTeam,
-  expectedResult,
   userPick,
   firebaseUid,
   onPickMade,
@@ -53,15 +55,6 @@ export function PickCard({
   const now = DateTime.now()
   const isLocked = gameTime <= now
   const timeUntilGame = gameTime.diff(now, ['hours', 'minutes'])
-
-  const aiPrediction =
-    expectedResult.homeTeam > expectedResult.awayTeam
-      ? homeTeam.abbrev
-      : awayTeam.abbrev
-  const aiConfidence = Math.max(
-    expectedResult.homeTeam,
-    expectedResult.awayTeam
-  )
 
   const handleTeamSelect = async (team: string) => {
     if (isLocked || !firebaseUid) return
@@ -146,46 +139,44 @@ export function PickCard({
         <button
           onClick={() => handleTeamSelect(awayTeam.abbrev)}
           disabled={isLocked || isSubmitting || !firebaseUid}
-          className={`p-3 rounded-lg border-2 transition-all ${
+          className={`p-4 rounded-lg border-2 transition-all flex flex-col items-center gap-2 ${
             selectedTeam === awayTeam.abbrev
               ? 'border-blue-500 bg-blue-500/20'
               : 'border-slate-600 hover:border-slate-500 bg-slate-800/50'
           } ${isLocked || !firebaseUid ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
         >
-          <div className="text-lg font-bold text-white">{awayTeam.abbrev}</div>
-          <div className="text-xs text-gray-400">
-            {Math.round(awayTeam.eloBefore)} ELO
-          </div>
+          <Image
+            width={48}
+            height={48}
+            className="size-12"
+            src={awayTeam.logo}
+            alt={`${awayTeam.abbrev} logo`}
+          />
+          <div className="text-xl font-bold text-white">{awayTeam.abbrev}</div>
         </button>
 
         <div className="flex items-center justify-center">
-          <span className="text-gray-500 font-semibold">@</span>
+          <span className="text-gray-500 font-semibold text-lg">@</span>
         </div>
 
         <button
           onClick={() => handleTeamSelect(homeTeam.abbrev)}
           disabled={isLocked || isSubmitting || !firebaseUid}
-          className={`p-3 rounded-lg border-2 transition-all ${
+          className={`p-4 rounded-lg border-2 transition-all flex flex-col items-center gap-2 ${
             selectedTeam === homeTeam.abbrev
               ? 'border-blue-500 bg-blue-500/20'
               : 'border-slate-600 hover:border-slate-500 bg-slate-800/50'
           } ${isLocked || !firebaseUid ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
         >
-          <div className="text-lg font-bold text-white">{homeTeam.abbrev}</div>
-          <div className="text-xs text-gray-400">
-            {Math.round(homeTeam.eloBefore)} ELO
-          </div>
+          <Image
+            width={48}
+            height={48}
+            className="size-12"
+            src={homeTeam.logo}
+            alt={`${homeTeam.abbrev} logo`}
+          />
+          <div className="text-xl font-bold text-white">{homeTeam.abbrev}</div>
         </button>
-      </div>
-
-      <div className="mb-3 p-2 bg-slate-700/30 rounded text-sm">
-        <div className="text-gray-400">
-          Statbarn Prediction:{' '}
-          <span className="text-white font-semibold">{aiPrediction}</span>{' '}
-          <span className="text-gray-500">
-            ({Math.round(aiConfidence * 100)}%)
-          </span>
-        </div>
       </div>
 
       {selectedTeam && !isLocked && firebaseUid && (

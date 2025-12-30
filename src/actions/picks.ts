@@ -3,6 +3,8 @@
 import { Database } from '@/lib/db'
 import { UserPicksModel } from '@/models/userPicks'
 import { GameELOModel } from '@/models/gameElo'
+import { SeasonELOModel } from '@/models/elo'
+import { getScheduleByDate } from '@/data/schedule'
 import { DateTime } from 'luxon'
 
 export interface CreatePickData {
@@ -174,7 +176,7 @@ export async function getUserPicks(firebaseUid: string, filters?: PickFilters) {
 }
 
 /**
- * Get upcoming games available for picks (games happening in the next 24 hours)
+ * Get upcoming games available for picks (games happening in the next 48 hours)
  */
 export async function getTomorrowsGames() {
   try {
@@ -182,34 +184,91 @@ export async function getTomorrowsGames() {
     await db.connect()
 
     const now = DateTime.now()
-    const tomorrow = now.plus({ hours: 24 })
+    const endTime = now.plus({ hours: 48 })
 
-    const games = await GameELOModel.find({
-      gameDate: {
-        $gte: now.toJSDate(),
-        $lte: tomorrow.toJSDate(),
-      },
-      gameType: 'regular',
+    // Fetch schedule from NHL API for today and tomorrow
+    const today = now.toFormat('yyyy-MM-dd')
+    const tomorrow = now.plus({ days: 1 }).toFormat('yyyy-MM-dd')
+    const dayAfter = now.plus({ days: 2 }).toFormat('yyyy-MM-dd')
+
+    const [todaySchedule, tomorrowSchedule, dayAfterSchedule] =
+      await Promise.all([
+        getScheduleByDate(today).catch(() => ({ gameWeek: [] })),
+        getScheduleByDate(tomorrow).catch(() => ({ gameWeek: [] })),
+        getScheduleByDate(dayAfter).catch(() => ({ gameWeek: [] })),
+      ])
+
+    // Combine all games from the schedules
+    const allGameDays = [
+      ...(todaySchedule.gameWeek || []),
+      ...(tomorrowSchedule.gameWeek || []),
+      ...(dayAfterSchedule.gameWeek || []),
+    ]
+
+    const allGames = allGameDays.flatMap((day) => day.games || [])
+
+    // Filter games that are in the next 48 hours and are regular season
+    const upcomingGames = allGames.filter((game) => {
+      const gameTime = DateTime.fromISO(game.startTimeUTC)
+      return (
+        gameTime >= now &&
+        gameTime <= endTime &&
+        game.gameType === 2 && // Regular season
+        game.gameState !== 'OFF' && // Not finished
+        game.gameState !== 'FINAL' // Not final
+      )
     })
-      .sort({ gameDate: 1 })
-      .lean()
 
-    return games.map((game) => ({
-      gameId: game.gameId,
-      season: game.season,
-      gameDate: game.gameDate.toISOString(),
-      homeTeam: {
-        abbrev: game.homeTeam.abbrev,
-        eloBefore: game.homeTeam.eloBefore,
-        score: game.homeTeam.score,
-      },
-      awayTeam: {
-        abbrev: game.awayTeam.abbrev,
-        eloBefore: game.awayTeam.eloBefore,
-        score: game.awayTeam.score,
-      },
-      expectedResult: game.expectedResult,
-    }))
+    // Get current season ELO ratings for all teams
+    // NHL season typically starts in October, so after October use current year, otherwise previous year
+    const seasonStartYear = now.month >= 10 ? now.year : now.year - 1
+    const eloRatings = await SeasonELOModel.find({
+      'season.startYear': seasonStartYear,
+    }).lean()
+
+    const eloMap = new Map(eloRatings.map((e) => [e.abbrev, e.elo]))
+
+    const HOME_ADVANTAGE = 25
+    const INITIAL_ELO = 1500
+
+    // Calculate expected results for each game
+    return upcomingGames
+      .map((game) => {
+        const homeElo = eloMap.get(game.homeTeam.abbrev) || INITIAL_ELO
+        const awayElo = eloMap.get(game.awayTeam.abbrev) || INITIAL_ELO
+
+        // Calculate expected win probability
+        const homeEloWithAdvantage = homeElo + HOME_ADVANTAGE
+        const homeExpected =
+          1 / (1 + Math.pow(10, (awayElo - homeEloWithAdvantage) / 400))
+        const awayExpected = 1 - homeExpected
+
+        return {
+          gameId: game.id,
+          season: game.season,
+          gameDate: game.startTimeUTC,
+          homeTeam: {
+            abbrev: game.homeTeam.abbrev,
+            logo: game.homeTeam.logo,
+            eloBefore: homeElo,
+            score: game.homeTeam.score || 0,
+          },
+          awayTeam: {
+            abbrev: game.awayTeam.abbrev,
+            logo: game.awayTeam.logo,
+            eloBefore: awayElo,
+            score: game.awayTeam.score || 0,
+          },
+          expectedResult: {
+            homeTeam: homeExpected,
+            awayTeam: awayExpected,
+          },
+        }
+      })
+      .sort(
+        (a, b) =>
+          new Date(a.gameDate).getTime() - new Date(b.gameDate).getTime()
+      )
   } catch (error) {
     console.error('Error getting tomorrows games:', error)
     throw error

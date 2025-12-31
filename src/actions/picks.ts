@@ -2,7 +2,6 @@
 
 import { Database } from '@/lib/db'
 import { UserPicksModel } from '@/models/userPicks'
-import { GameELOModel } from '@/models/gameElo'
 import { SeasonELOModel } from '@/models/elo'
 import { getScheduleByDate } from '@/data/schedule'
 import { DateTime } from 'luxon'
@@ -38,13 +37,8 @@ export async function createPick(data: CreatePickData) {
     await db.connect()
 
     // Validate that the game hasn't started yet
-    const game = await GameELOModel.findOne({ gameId: data.gameId })
-    if (!game) {
-      throw new Error('Game not found')
-    }
-
     const now = DateTime.now()
-    const gameTime = DateTime.fromJSDate(game.gameDate)
+    const gameTime = DateTime.fromJSDate(data.gameDate)
 
     if (gameTime <= now) {
       throw new Error('Cannot make picks for games that have already started')
@@ -101,30 +95,26 @@ export async function deletePick(firebaseUid: string, gameId: number) {
     const db = Database.getInstance()
     await db.connect()
 
-    // Validate that the game hasn't started yet
-    const game = await GameELOModel.findOne({ gameId })
-    if (!game) {
-      throw new Error('Game not found')
-    }
-
-    const now = DateTime.now()
-    const gameTime = DateTime.fromJSDate(game.gameDate)
-
-    if (gameTime <= now) {
-      throw new Error('Cannot delete picks for games that have already started')
-    }
-
     const userPicks = await UserPicksModel.findOne({ firebaseUid })
     if (!userPicks) {
       throw new Error('User picks not found')
     }
 
-    // Remove the pick
+    // Find the pick
     const pickIndex = userPicks.picks.findIndex((p) => p.gameId === gameId)
     if (pickIndex === -1) {
       throw new Error('Pick not found')
     }
 
+    // Validate that the game hasn't started yet using the pick's game date
+    const now = DateTime.now()
+    const gameTime = DateTime.fromJSDate(userPicks.picks[pickIndex].gameDate)
+
+    if (gameTime <= now) {
+      throw new Error('Cannot delete picks for games that have already started')
+    }
+
+    // Remove the pick
     userPicks.picks.splice(pickIndex, 1)
     userPicks.totalPicks = Math.max(0, userPicks.totalPicks - 1)
 

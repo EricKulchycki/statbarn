@@ -28,7 +28,6 @@ interface PickCardProps {
   }
   userPick?: {
     pickedTeam: string
-    confidence?: number
   }
   firebaseUid?: string
   onPickMade?: () => void
@@ -47,7 +46,6 @@ export function PickCard({
   const [selectedTeam, setSelectedTeam] = useState<string | null>(
     userPick?.pickedTeam || null
   )
-  const [confidence, setConfidence] = useState(userPick?.confidence || 3)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -72,43 +70,12 @@ export function PickCard({
         pickedTeam: team,
         homeTeam: homeTeam.abbrev,
         awayTeam: awayTeam.abbrev,
-        confidence,
       })
 
       onPickMade?.()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save pick')
       setSelectedTeam(userPick?.pickedTeam || null)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const handleConfidenceChange = async (newConfidence: number) => {
-    if (isLocked || !firebaseUid || !selectedTeam) return
-
-    setConfidence(newConfidence)
-    setError(null)
-    setIsSubmitting(true)
-
-    try {
-      await createPick({
-        firebaseUid,
-        gameId,
-        gameDate: new Date(gameDate),
-        season,
-        pickedTeam: selectedTeam,
-        homeTeam: homeTeam.abbrev,
-        awayTeam: awayTeam.abbrev,
-        confidence: newConfidence,
-      })
-
-      onPickMade?.()
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Failed to update confidence'
-      )
-      setConfidence(userPick?.confidence || 3)
     } finally {
       setIsSubmitting(false)
     }
@@ -178,30 +145,6 @@ export function PickCard({
           <div className="text-xl font-bold text-white">{homeTeam.abbrev}</div>
         </button>
       </div>
-
-      {selectedTeam && !isLocked && firebaseUid && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-400">Confidence:</span>
-            <div className="flex gap-1">
-              {[1, 2, 3, 4, 5].map((level) => (
-                <button
-                  key={level}
-                  onClick={() => handleConfidenceChange(level)}
-                  disabled={isSubmitting}
-                  className={`w-6 h-6 rounded transition-all ${
-                    level <= confidence
-                      ? 'text-yellow-400 hover:text-yellow-300'
-                      : 'text-gray-600 hover:text-gray-500'
-                  }`}
-                >
-                  ⭐
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
       {error && (
         <div className="mt-2 text-xs text-red-400 bg-red-500/10 p-2 rounded">

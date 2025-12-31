@@ -23,7 +23,6 @@ export interface Game {
 export interface UserPick {
   gameId: number
   pickedTeam: string
-  confidence?: number
 }
 
 export interface UserStats {

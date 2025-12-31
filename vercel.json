@@ -7,6 +7,10 @@
     {
       "path": "/api/outcomes/processYesterday",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/picks/processResults",
+      "schedule": "0 7 * * *"
     }
   ]
 }

@@ -198,7 +198,7 @@ export async function getTomorrowsGames() {
     const allGames = allGameDays.flatMap((day) => day.games || [])
 
     // Filter games that are in the next 48 hours and are regular season
-    const upcomingGames = allGames.filter((game) => {
+    const filteredGames = allGames.filter((game) => {
       const gameTime = DateTime.fromISO(game.startTimeUTC)
       return (
         gameTime >= now &&
@@ -208,6 +208,15 @@ export async function getTomorrowsGames() {
         game.gameState !== 'FINAL' // Not final
       )
     })
+
+    // Remove duplicates by gameId (NHL API can return same game across multiple date queries)
+    const uniqueGamesMap = new Map()
+    filteredGames.forEach((game) => {
+      if (!uniqueGamesMap.has(game.id)) {
+        uniqueGamesMap.set(game.id, game)
+      }
+    })
+    const upcomingGames = Array.from(uniqueGamesMap.values())
 
     // Get current season ELO ratings for all teams
     // NHL season typically starts in October, so after October use current year, otherwise previous year

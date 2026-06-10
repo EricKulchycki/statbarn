@@ -1,69 +1,22 @@
-import { getTimezoneFromCookie } from '@/lib/time'
-import { eloService } from '@/services/elo.service'
-import {
-  getActualWinnerFromGameELO,
-  getPredictedWinnerFromGameELO,
-} from '@/utils/gameElo'
-import { DateTime } from 'luxon'
 import React from 'react'
-import { YesterdaysGameOutcomes as YesterdaysGamesOutcomesClient } from './client'
-import { GameELO } from '@/models/gameElo'
 import { getTeams } from '@/data/teams'
+import { getYesterdayGamesSummary } from '@/lib/yesterdayGames'
+import { YesterdaysGameOutcomes as YesterdaysGameOutcomesClient } from './client'
+import { CollapsibleSection } from '@/components/CollapsibleSection'
 
 export async function YesterdaysGameOutcomes() {
-  const localTimezone = await getTimezoneFromCookie()
-  const localDate = DateTime.now().setZone(localTimezone).toISODate()
-  const yesterday =
-    localDate !== ''
-      ? DateTime.fromISO(localDate || '').minus({ days: 1 })
-      : DateTime.now().minus({ days: 1 })
+  const summary = await getYesterdayGamesSummary()
 
-  // Fetch all gameElos for yesterday
-  let gameElos: GameELO[] = []
-  try {
-    gameElos = await eloService.getLastEloGamesForDate(yesterday.toJSDate())
-  } catch (error) {
-    console.error('Error fetching yesterday ELO games:', error)
-  }
-
-  if (!gameElos || gameElos.length === 0) {
-    return (
-      <div className="my-4">
-        <h2 className="text-lg font-bold">Yesterday&apos;s Game Outcomes</h2>
-        <p className="text-sm text-gray-400">No games were played yesterday.</p>
-      </div>
-    )
+  if (!summary.gameElos || summary.gameElos.length === 0) {
+    return null
   }
 
   const teams = await getTeams()
-
-  // Calculate prediction accuracy
-  const totalGames = gameElos.length
-  let correctPredictions = 0
-  gameElos.forEach((game) => {
-    if (typeof game.expectedResult?.homeTeam === 'number') {
-      const predictedWinner = getPredictedWinnerFromGameELO(game)
-      const actualWinner = getActualWinnerFromGameELO(game)
-      if (predictedWinner === actualWinner) {
-        correctPredictions++
-      }
-    }
-  })
-  const accuracy =
-    totalGames > 0
-      ? ((correctPredictions / totalGames) * 100).toFixed(1)
-      : 'N/A'
+  const title = `Yesterday (${summary.correctPredictions}/${summary.totalGames} correct)`
 
   return (
-    <div className="mb-4">
-      <h2 className="text-2xl font-bold text-blue-400">
-        Yesterday&apos;s Game Outcomes
-      </h2>
-      <div className="mb-4 text-md text-gray-50 font-semibold">
-        Prediction Accuracy: {accuracy}% ({correctPredictions} of {totalGames}{' '}
-        games)
-      </div>
-      <YesterdaysGamesOutcomesClient gameElos={gameElos} teams={teams} />
-    </div>
+    <CollapsibleSection title={title} defaultOpen={false}>
+      <YesterdaysGameOutcomesClient gameElos={summary.gameElos} teams={teams} />
+    </CollapsibleSection>
   )
 }

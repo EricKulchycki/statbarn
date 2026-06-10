@@ -1,53 +1,47 @@
 import { scheduleService } from '@/services/schedule.service'
 import { GamePredictions } from './GamePredictions'
+import { LiveGame } from './GamePredictions.types'
 import { predictionsService } from '@/services/predictions.service'
 import { Prediction } from '@/models/prediction'
 import { serializePrediction } from '@/utils/converters/prediction'
-import { gameService } from '@/services/game.service'
 import { DateTime } from 'luxon'
 import { getTimezoneFromCookie } from '@/lib/time'
-import { NHLGame } from '@/types/game'
+import { NHLGameWeek } from '@/types/game'
 import { getTeams } from '@/data/teams'
-import { GameStatus } from '@/utils/game'
 
 export type PredictionsByDay = { [day: string]: Prediction[] }
 
-export async function fetchLiveGamesForClient() {
-  const today = DateTime.now().minus({ hours: 8 })
+function buildLiveGamesFromSchedule(
+  schedule: NHLGameWeek,
+  todayIso: string
+): LiveGame {
+  const map: LiveGame = {}
 
-  let todaysGames: NHLGame[] = []
-  try {
-    todaysGames = await gameService.getGamesByDate(today.toISODate())
-  } catch (error) {
-    console.error('Error fetching today games for live updates:', error)
-  }
-  const map: {
-    [gameId: number]: {
-      homeScore: number
-      awayScore: number
-      status: GameStatus
-    }
-  } = {}
-  for (const g of todaysGames) {
-    map[g.id] = {
-      homeScore: g.homeTeam.score,
-      awayScore: g.awayTeam.score,
-      status: g.gameState,
+  for (const day of schedule.gameWeek) {
+    if (day.date !== todayIso) continue
+    for (const game of day.games) {
+      map[game.id] = {
+        homeScore: game.homeTeam.score,
+        awayScore: game.awayTeam.score,
+        status: game.gameState,
+      }
     }
   }
+
   return map
 }
 
 export async function GamePredictionsWrapper() {
   const localTimezone = await getTimezoneFromCookie()
 
-  const localDate = DateTime.now().setZone(localTimezone).toISODate()
+  const localDate = DateTime.now().setZone(localTimezone).toISODate() ?? ''
 
-  const [currentSchedule, liveGames, teams] = await Promise.all([
-    scheduleService.getScheduleByDate(localDate ?? ''),
-    fetchLiveGamesForClient(),
+  const [currentSchedule, teams] = await Promise.all([
+    scheduleService.getScheduleByDate(localDate),
     getTeams(),
   ])
+
+  const liveGames = buildLiveGamesFromSchedule(currentSchedule, localDate)
 
   const upcomingPredictions =
     await predictionsService.getUpcomingGamePredictions(currentSchedule)

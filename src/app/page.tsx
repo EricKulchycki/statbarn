@@ -1,8 +1,9 @@
-import { Suspense } from 'react'
+import { CollapsibleSection } from '@/components/CollapsibleSection'
+import { DashboardHeader } from '@/components/DashboardHeader.server'
 import { GamePredictionsWrapper } from '@/components/GamePredictions.server'
 import { PlayerStatsWrapper } from '@/components/PlayerStats.server'
 import { YesterdaysGameOutcomes } from '@/components/YesterdaysGameOutcomes/server'
-import { CollapsibleSection } from '@/components/CollapsibleSection'
+import { Suspense } from 'react'
 
 function LoadingSkeleton() {
   return (
@@ -18,18 +19,24 @@ function LoadingSkeleton() {
 export default async function Index() {
   return (
     <div className="w-full max-w-[1900px] mx-auto px-4 sm:px-6 lg:px-8 lg:py-8 mb-8">
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
-        {/* Game Predictions - Priority content, center column */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
         <div className="lg:col-span-2 lg:order-1">
-          <Suspense fallback={<LoadingSkeleton />}>
-            <YesterdaysGameOutcomes />
+          <Suspense
+            fallback={
+              <div className="h-20 animate-pulse bg-slate-800/40 rounded-lg mb-6" />
+            }
+          >
+            <DashboardHeader />
           </Suspense>
           <Suspense fallback={<LoadingSkeleton />}>
             <GamePredictionsWrapper />
           </Suspense>
+
+          <Suspense fallback={<LoadingSkeleton />}>
+            <YesterdaysGameOutcomes />
+          </Suspense>
         </div>
 
-        {/* Player Stats - Right sidebar */}
         <div className="lg:col-span-1 lg:order-2">
           <CollapsibleSection
             title="Player Stats"

@@ -4,7 +4,6 @@ import {
   ELOsByTeam,
 } from '@/lib/eloCalculator'
 import { Prediction, PredictionModel } from '@/models/prediction'
-import { createApiError } from '@/types/errors'
 import { NHLGame, NHLGameWeek } from '@/types/game'
 import { eloService } from './elo.service'
 import { scheduleService } from './schedule.service'
@@ -22,19 +21,6 @@ export class PredictionsService {
       PredictionsService.instance = new PredictionsService()
     }
     return PredictionsService.instance
-  }
-
-  async getPredictionsByDate(date: Date): Promise<Prediction[]> {
-    try {
-      // Implement logic to fetch predictions for a given date
-      // Example: return await PredictionModel.find({ gameDate: date }).exec()
-      return []
-    } catch (error) {
-      throw createApiError(
-        'getPredictionsByDate',
-        `Failed to fetch predictions for date ${date.toISOString()}: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
-    }
   }
 
   async getUpcomingGamePredictions(
@@ -58,39 +44,6 @@ export class PredictionsService {
 
   async createPredictionForGame(game: NHLGame, latestElos: ELOsByTeam) {
     return calculateGameELO(game, latestElos)
-  }
-
-  async savePrediction(prediction: Prediction): Promise<Prediction> {
-    try {
-      // Implement logic to save a new prediction
-      // Example: return await PredictionModel.create(prediction)
-      return prediction
-    } catch (error) {
-      throw createApiError(
-        'savePrediction',
-        `Failed to save prediction: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
-    }
-  }
-
-  async getPredictionsForGame(gameId: number): Promise<Prediction> {
-    try {
-      const predictionDocument = await PredictionModel.findOne({
-        filter: { gameId },
-      }).exec()
-      if (!predictionDocument) {
-        throw createApiError(
-          'getPredictionsForGame',
-          `No predictions found for game ${gameId}`
-        )
-      }
-      return toPredictionDomain(predictionDocument)
-    } catch (error) {
-      throw createApiError(
-        'getPredictionsForGame',
-        `Failed to fetch predictions for game ${gameId}: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
-    }
   }
 
   async createNextDayPredictions() {

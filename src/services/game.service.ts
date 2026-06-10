@@ -1,6 +1,4 @@
-import { Prediction } from '@/models/prediction'
 import { getDailyScoresByDate, getThisWeeksGames } from '@/data/games'
-import { getPredictions } from '@/data/predictions'
 import { createApiError, createNotFoundError } from '@/types/errors'
 import { NHLGame, NHLGameDay } from '@/types/game'
 import { DateTime } from 'luxon'
@@ -56,29 +54,6 @@ export class GameService {
     }
   }
 
-  async getPredictionsForDate(date: Date): Promise<Prediction[]> {
-    try {
-      const predictions = await getPredictions(date)
-      return predictions || []
-    } catch (error) {
-      throw createApiError(
-        'getPredictionsForDate',
-        `Failed to fetch predictions for date ${date.toISOString()}: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
-    }
-  }
-
-  private getYesterdayDateString(): string {
-    const yesterday = new Date()
-    yesterday.setDate(yesterday.getDate() - 1)
-    return yesterday.toISOString().split('T')[0]
-  }
-
-  private getTomorrowDateString(): string {
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    return tomorrow.toISOString().split('T')[0]
-  }
 }
 
 // Export singleton instance

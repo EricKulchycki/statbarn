@@ -7,7 +7,7 @@ import {
 } from '@/models/gameElo'
 import { getCurrentNHLSeason } from '@/utils/currentSeason'
 import { DateTime } from 'luxon'
-import { RootFilterQuery } from 'mongoose'
+import { FlattenMaps, RootFilterQuery } from 'mongoose'
 
 export interface LatestELO {
   abbrev: string
@@ -106,7 +106,9 @@ export async function getGameElosByTeam(limit: number): Promise<{
         .lean()
         .exec()
 
-      const gamesMapped = games.map(toGameELO)
+      const gamesMapped = games.map((game: FlattenMaps<GameELODocument>) =>
+        toGameELO(game as unknown as GameELODocument)
+      )
 
       result[abbrev] = gamesMapped.sort(
         (a, b) =>

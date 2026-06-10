@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { UserCircleIcon } from '@heroicons/react/24/solid'
+import Image from 'next/image'
+import { useEffect, useRef, useState } from 'react'
 import { AuthModal } from './AuthModal'
 
 export function UserButton() {
@@ -59,7 +60,7 @@ export function UserButton() {
         className="flex items-center gap-2 hover:bg-slate-800 rounded-full p-1 transition-colors"
       >
         {user.photoURL ? (
-          <img
+          <Image
             src={user.photoURL}
             alt={user.displayName || 'User'}
             className="size-8 rounded-full"

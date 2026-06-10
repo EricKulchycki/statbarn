@@ -1,6 +1,7 @@
+import { GameType } from '@/constants'
 import {
-  countSeasonsGames,
   countSeasonsCorrectPredictions as countCorrectPredictions,
+  countSeasonsGames,
   createGameElo,
   getAllGamesForSeason,
   getGameElos,
@@ -10,13 +11,8 @@ import {
   getMatchupHistory,
   LatestELO,
 } from '@/data/gameElo'
-import { createApiError } from '../types/errors'
 import { GameELO, toGameELO } from '@/models/gameElo'
-import {
-  getActualWinnerFromGameELO,
-  getPredictedWinnerFromGameELO,
-} from '@/utils/gameElo'
-import { GameType } from '@/constants'
+import { createApiError } from '../types/errors'
 
 export class EloService {
   private static instance: EloService

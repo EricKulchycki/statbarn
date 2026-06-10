@@ -53,7 +53,6 @@ export class GameService {
       )
     }
   }
-
 }
 
 // Export singleton instance

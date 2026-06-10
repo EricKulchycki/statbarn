@@ -41,7 +41,7 @@ export default function RootLayout({
             <Suspense fallback={<NavSkeleton />}>
               <NavWrapper />
             </Suspense>
-            <div className="flex-1">
+            <div className="flex-1 pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-0">
               <Suspense fallback={<div className="h-24" />}>
                 <GameBanner />
               </Suspense>
@@ -66,11 +66,14 @@ async function NavWrapper() {
 
 function NavSkeleton() {
   return (
-    <nav className="bg-slate-900 border-b border-slate-800 h-16 flex items-center px-4">
-      <div className="animate-pulse flex items-center gap-4 w-full">
-        <div className="h-8 bg-slate-700 rounded w-32"></div>
-        <div className="ml-auto h-6 bg-slate-700 rounded w-24"></div>
+    <header className="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md">
+      <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
+        <div className="h-8 w-28 animate-pulse rounded bg-slate-800" />
+        <div className="ml-auto flex items-center gap-3">
+          <div className="hidden h-7 w-20 animate-pulse rounded-full bg-slate-800 sm:block" />
+          <div className="size-8 animate-pulse rounded-full bg-slate-800" />
+        </div>
       </div>
-    </nav>
+    </header>
   )
 }

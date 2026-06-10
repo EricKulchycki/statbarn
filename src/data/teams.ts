@@ -1,12 +1,16 @@
+import { unstable_cache } from 'next/cache'
 import { Team } from '@/types/team'
 import { TeamModel } from '@/models/team'
 import { toDomainTeam } from '@/utils/converters/team'
 
-export async function getTeams(): Promise<Team[]> {
-  const teamModel = await TeamModel.find().exec()
-
-  return teamModel.map(toDomainTeam)
-}
+export const getTeams = unstable_cache(
+  async (): Promise<Team[]> => {
+    const teamModel = await TeamModel.find().exec()
+    return teamModel.map(toDomainTeam)
+  },
+  ['teams'],
+  { revalidate: 86400, tags: ['teams'] }
+)
 
 export async function getTeamById(id: number): Promise<Team | null> {
   const team = await TeamModel.findOne({ id }).exec()

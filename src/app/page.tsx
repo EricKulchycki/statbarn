@@ -2,7 +2,6 @@ import { Suspense } from 'react'
 import { GamePredictionsWrapper } from '@/components/GamePredictions.server'
 import { PlayerStatsWrapper } from '@/components/PlayerStats.server'
 import { YesterdaysGameOutcomes } from '@/components/YesterdaysGameOutcomes/server'
-import { Database } from '@/lib/db'
 import { CollapsibleSection } from '@/components/CollapsibleSection'
 
 function LoadingSkeleton() {
@@ -17,8 +16,6 @@ function LoadingSkeleton() {
 }
 
 export default async function Index() {
-  const db = Database.getInstance()
-  await db.connect()
   return (
     <div className="w-full max-w-[1900px] mx-auto px-4 sm:px-6 lg:px-8 lg:py-8 mb-8">
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">

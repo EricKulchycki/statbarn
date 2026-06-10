@@ -43,17 +43,14 @@ export async function GamePredictionsWrapper() {
 
   const localDate = DateTime.now().setZone(localTimezone).toISODate()
 
-  // Gets the game week from the NHL API, which includes all games for the current week
-  const currentSchedule = await scheduleService.getScheduleByDate(
-    localDate ?? ''
-  )
-  // console.log('Current Schedule:', currentSchedule)
+  const [currentSchedule, liveGames, teams] = await Promise.all([
+    scheduleService.getScheduleByDate(localDate ?? ''),
+    fetchLiveGamesForClient(),
+    getTeams(),
+  ])
 
   const upcomingPredictions =
     await predictionsService.getUpcomingGamePredictions(currentSchedule)
-
-  const liveGames = await fetchLiveGamesForClient()
-  const teams = await getTeams()
 
   return (
     <GamePredictions

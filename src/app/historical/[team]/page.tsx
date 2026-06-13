@@ -1,9 +1,9 @@
-import Image from 'next/image'
-import { getTeamByAbbrev } from '@/data/teams'
-import { eloService } from '@/services/elo.service'
-import { Database } from '@/lib/db'
-import { EloHistoryTable } from '@/components/ELOHistoryTable'
 import { ELOHistoryGraph } from '@/components/ELOHistoryGraph'
+import { EloHistoryTable } from '@/components/ELOHistoryTable'
+import { getTeamByAbbrev } from '@/data/teams'
+import { Database } from '@/lib/db'
+import { eloService } from '@/services/elo.service'
+import Image from 'next/image'
 
 export default async function Team({
   params,
@@ -37,10 +37,10 @@ export default async function Team({
         </div>
         <div className="flex flex-wrap w-full">
           <div className="lg:w-1/2 sm:max-w-full">
-            <EloHistoryTable history={last10Games} teamAbbrev={teamAbbrev} />
+            <EloHistoryTable history={last10Games} />
           </div>
           <div className="lg:w-1/2 sm:max-w-full">
-            <ELOHistoryGraph history={last82Games} teamAbbrev={teamAbbrev} />
+            <ELOHistoryGraph history={last82Games} />
           </div>
         </div>
       </div>

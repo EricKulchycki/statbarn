@@ -23,7 +23,7 @@ export const DB_CONFIG = {
 export const ELO_CONFIG = {
   kFactor: 32,
   initialRating: 1500,
-  homeAdvantage: 100,
+  homeAdvantage: 25,
 } as const
 
 export enum GameType {

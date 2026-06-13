@@ -1,9 +1,11 @@
 'use server'
 
+import { ELO_CONFIG } from '@/constants'
+import { getScheduleByDate } from '@/data/schedule'
+import { getLatestEloData } from '@/data/teams'
 import { Database } from '@/lib/db'
 import { UserPicksModel } from '@/models/userPicks'
-import { SeasonELOModel } from '@/models/elo'
-import { getScheduleByDate } from '@/data/schedule'
+import { predictorService } from '@/services/predictor.service'
 import { DateTime } from 'luxon'
 
 export interface CreatePickData {
@@ -218,29 +220,24 @@ export async function getTomorrowsGames() {
     })
     const upcomingGames = Array.from(uniqueGamesMap.values())
 
-    // Get current season ELO ratings for all teams
-    // NHL season typically starts in October, so after October use current year, otherwise previous year
-    const seasonStartYear = now.month >= 10 ? now.year : now.year - 1
-    const eloRatings = await SeasonELOModel.find({
-      'season.startYear': seasonStartYear,
-    }).lean()
-
+    const eloRatings = await getLatestEloData()
     const eloMap = new Map(eloRatings.map((e) => [e.abbrev, e.elo]))
-
-    const HOME_ADVANTAGE = 25
-    const INITIAL_ELO = 1500
 
     // Calculate expected results for each game
     return upcomingGames
       .map((game) => {
-        const homeElo = eloMap.get(game.homeTeam.abbrev) || INITIAL_ELO
-        const awayElo = eloMap.get(game.awayTeam.abbrev) || INITIAL_ELO
+        const homeElo =
+          eloMap.get(game.homeTeam.abbrev) || ELO_CONFIG.initialRating
+        const awayElo =
+          eloMap.get(game.awayTeam.abbrev) || ELO_CONFIG.initialRating
 
-        // Calculate expected win probability
-        const homeEloWithAdvantage = homeElo + HOME_ADVANTAGE
-        const homeExpected =
-          1 / (1 + Math.pow(10, (awayElo - homeEloWithAdvantage) / 400))
-        const awayExpected = 1 - homeExpected
+        const { homeWinProbability, awayWinProbability } =
+          predictorService.predictGame({
+            homeAbbrev: game.homeTeam.abbrev,
+            awayAbbrev: game.awayTeam.abbrev,
+            homeElo,
+            awayElo,
+          })
 
         return {
           gameId: game.id,
@@ -259,8 +256,8 @@ export async function getTomorrowsGames() {
             score: game.awayTeam.score || 0,
           },
           expectedResult: {
-            homeTeam: homeExpected,
-            awayTeam: awayExpected,
+            homeTeam: homeWinProbability,
+            awayTeam: awayWinProbability,
           },
         }
       })

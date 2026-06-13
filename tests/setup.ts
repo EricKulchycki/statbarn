@@ -1,5 +1,5 @@
 // Vitest global setup file
-import { beforeAll, afterAll } from 'vitest'
+import { afterAll, beforeAll } from 'vitest'
 
 beforeAll(async () => {
   // Setup logic before all tests (e.g., mock DB, env vars)

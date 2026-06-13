@@ -1,13 +1,12 @@
-import React from 'react'
+import { CollapsibleSection } from '@/components/CollapsibleSection'
 import { getTeams } from '@/data/teams'
 import { getYesterdayGamesSummary } from '@/lib/yesterdayGames'
 import { YesterdaysGameOutcomes as YesterdaysGameOutcomesClient } from './client'
-import { CollapsibleSection } from '@/components/CollapsibleSection'
 
 export async function YesterdaysGameOutcomes() {
   const summary = await getYesterdayGamesSummary()
 
-  if (!summary.gameElos || summary.gameElos.length === 0) {
+  if (!summary.games || summary.games.length === 0) {
     return null
   }
 
@@ -16,7 +15,7 @@ export async function YesterdaysGameOutcomes() {
 
   return (
     <CollapsibleSection title={title} defaultOpen={false}>
-      <YesterdaysGameOutcomesClient gameElos={summary.gameElos} teams={teams} />
+      <YesterdaysGameOutcomesClient games={summary.games} teams={teams} />
     </CollapsibleSection>
   )
 }

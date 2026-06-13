@@ -1,17 +1,16 @@
 'use client'
 
+import { TeamSeasonGame } from '@/types/team'
 import React from 'react'
 import {
-  LineChart,
+  CartesianGrid,
   Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
 } from 'recharts'
-import { GameELO } from '@/models/gameElo'
-import { getSelf } from '@/utils/gameElo'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function CustomTooltip({ payload, active }: any) {
@@ -22,27 +21,21 @@ function CustomTooltip({ payload, active }: any) {
       </div>
     )
   }
-
   return null
 }
 
 interface ELOHistoryGraphProps {
-  history: GameELO[]
-  teamAbbrev: string
+  history: TeamSeasonGame[]
 }
 
 export const ELOHistoryGraph: React.FC<ELOHistoryGraphProps> = ({
   history,
-  teamAbbrev,
 }) => {
-  // Prepare data for recharts
-  const chartData = history
-    .map((gameElo) => ({
-      date: new Date(gameElo.gameDate).toLocaleDateString(),
-      elo: getSelf(gameElo, teamAbbrev).eloAfter,
-      gameId: gameElo.gameId,
-    }))
-    .reverse()
+  const chartData = [...history].reverse().map((game) => ({
+    date: new Date(game.gameDate).toLocaleDateString(),
+    elo: game.outcome?.eloAfter ?? game.eloBefore,
+    gameId: game.gameId,
+  }))
 
   return (
     <div className="rounded-xl lg:p-6 h-full">

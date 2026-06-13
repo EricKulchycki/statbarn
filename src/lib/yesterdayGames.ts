@@ -1,14 +1,10 @@
-import { eloService } from '@/services/elo.service'
 import { getTimezoneFromCookie } from '@/lib/time'
-import {
-  getActualWinnerFromGameELO,
-  getPredictedWinnerFromGameELO,
-} from '@/utils/gameElo'
-import { GameELO } from '@/models/gameElo'
+import { eloService } from '@/services/elo.service'
+import { GamePrediction } from '@/types/gamePrediction'
 import { DateTime } from 'luxon'
 
 export interface YesterdayGamesSummary {
-  gameElos: GameELO[]
+  games: GamePrediction[]
   correctPredictions: number
   totalGames: number
   accuracy: string
@@ -23,32 +19,24 @@ export async function getYesterdayGamesSummary(): Promise<YesterdayGamesSummary>
       ? DateTime.fromISO(localDate).minus({ days: 1 })
       : DateTime.now().minus({ days: 1 })
 
-  let gameElos: GameELO[] = []
+  let games: GamePrediction[] = []
   try {
-    gameElos = await eloService.getLastEloGamesForDate(yesterday.toJSDate())
+    games = await eloService.getLastEloGamesForDate(yesterday.toJSDate())
   } catch (error) {
-    console.error('Error fetching yesterday ELO games:', error)
+    console.error('Error fetching yesterday games:', error)
   }
 
-  let correctPredictions = 0
-  gameElos.forEach((game) => {
-    if (typeof game.expectedResult?.homeTeam === 'number') {
-      const predictedWinner = getPredictedWinnerFromGameELO(game)
-      const actualWinner = getActualWinnerFromGameELO(game)
-      if (predictedWinner === actualWinner) {
-        correctPredictions++
-      }
-    }
-  })
-
-  const totalGames = gameElos.length
+  const correctPredictions = games.filter(
+    (g) => g.outcome?.correctPrediction
+  ).length
+  const totalGames = games.length
   const accuracy =
     totalGames > 0
       ? ((correctPredictions / totalGames) * 100).toFixed(1)
       : 'N/A'
 
   return {
-    gameElos,
+    games,
     correctPredictions,
     totalGames,
     accuracy,

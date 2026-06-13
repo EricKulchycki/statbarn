@@ -1,7 +1,6 @@
 'use client'
 
-import { GameELO } from '@/models/gameElo'
-import { getOpponent, getSelf } from '@/utils/gameElo'
+import { TeamSeasonGame } from '@/types/team'
 import {
   Table,
   TableBody,
@@ -14,13 +13,11 @@ import React from 'react'
 import { WinLossChip } from './ui/WinLoss'
 
 interface EloHistoryTableProps {
-  history: GameELO[]
-  teamAbbrev: string
+  history: TeamSeasonGame[]
 }
 
 export const EloHistoryTable: React.FC<EloHistoryTableProps> = ({
   history,
-  teamAbbrev,
 }) => {
   return (
     <div className="rounded-xl lg:p-6 h-full">
@@ -45,47 +42,29 @@ export const EloHistoryTable: React.FC<EloHistoryTableProps> = ({
             </TableColumn>
           </TableHeader>
           <TableBody>
-            {history.map((gameElo) => {
-              const isHome = gameElo.homeTeam.abbrev === teamAbbrev
-              return (
-                <TableRow key={gameElo.gameId} className="hover:bg-slate-800">
-                  <TableCell className="py-2 px-4 rounded-l-xl">
-                    {new Date(gameElo.gameDate).toLocaleDateString(undefined, {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </TableCell>
-
-                  <TableCell className="py-2 px-4">
-                    {getOpponent(gameElo, teamAbbrev).abbrev}
-                  </TableCell>
-                  <TableCell className="py-2 px-4">
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-semibold }`}
-                    >
-                      {gameElo.homeTeam.abbrev === teamAbbrev ? 'Home' : 'Away'}
-                    </span>
-                  </TableCell>
-                  <TableCell className="py-2 px-4">
-                    <WinLossChip
-                      val={
-                        isHome &&
-                        gameElo.homeTeam.score > gameElo.awayTeam.score
-                          ? 'win'
-                          : !isHome &&
-                              gameElo.awayTeam.score > gameElo.homeTeam.score
-                            ? 'win'
-                            : 'loss'
-                      }
-                    />
-                  </TableCell>
-                  <TableCell className="py-2 px-4 rounded-r-xl font-bold">
-                    {getSelf(gameElo, teamAbbrev).eloAfter.toFixed(0)}
-                  </TableCell>
-                </TableRow>
-              )
-            })}
+            {history.map((game) => (
+              <TableRow key={game.gameId} className="hover:bg-slate-800">
+                <TableCell className="py-2 px-4 rounded-l-xl">
+                  {new Date(game.gameDate).toLocaleDateString(undefined, {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                </TableCell>
+                <TableCell className="py-2 px-4">{game.opponent}</TableCell>
+                <TableCell className="py-2 px-4">
+                  <span className="px-2 py-1 rounded text-xs font-semibold">
+                    {game.isHome ? 'Home' : 'Away'}
+                  </span>
+                </TableCell>
+                <TableCell className="py-2 px-4">
+                  <WinLossChip val={game.outcome?.actualWin ? 'win' : 'loss'} />
+                </TableCell>
+                <TableCell className="py-2 px-4 rounded-r-xl font-bold">
+                  {(game.outcome?.eloAfter ?? game.eloBefore).toFixed(0)}
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </div>

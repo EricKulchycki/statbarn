@@ -1,5 +1,4 @@
 import mongoose from 'mongoose'
-import { GameELOModel } from '../src/models/gameElo'
 import { Database } from '../src/lib/db'
 import { Team } from '../src/types/team'
 import { TeamModel } from '../src/models/team'
@@ -19,25 +18,7 @@ async function main() {
 
   await db.connect()
 
-  const lastSeason = 20242025
-
-  // Find all teams that played last season (from home or away)
-  const lastSeasonGames = await GameELOModel.find({ season: lastSeason })
-
-  const homeTeams = lastSeasonGames.map((game) => game.homeTeam.abbrev)
-  const awayTeams = lastSeasonGames.map((game) => game.awayTeam.abbrev)
-
   const allTeams = await getTeams()
-
-  const playedTeamIds: string[] = Array.from(
-    new Set([...homeTeams, ...awayTeams])
-  )
-
-  const playedTeams = allTeams.filter((team: Team) =>
-    playedTeamIds.includes(team.triCode)
-  )
-
-  console.log({ played: playedTeams.length, all: allTeams.length })
 
   // Manual mapping for conference and division
   const conferenceDivisionMap: {
@@ -78,20 +59,18 @@ async function main() {
     WPG: { conference: 'western', division: 'central' },
   }
 
-  // Insert into DB (upsert to avoid duplicates)
-  for (const team of playedTeams) {
+  console.log(`Populating ${allTeams.length} teams...`)
+
+  for (const team of allTeams) {
     try {
       const teamInfo = await fetchTeamInfo(team.id.toString())
-      // You may need to adjust the structure depending on the API response
       const confDiv = conferenceDivisionMap[team.triCode]
       if (!confDiv) {
         console.warn(`No conference/division mapping for team: ${team.triCode}`)
         continue
       }
       await TeamModel.updateOne(
-        {
-          id: team.id,
-        },
+        { id: team.id },
         {
           $set: {
             ...teamInfo,
@@ -101,7 +80,7 @@ async function main() {
         },
         { upsert: true }
       )
-      console.log(`Upserted team: ${team.id}`)
+      console.log(`Upserted team: ${team.id} (${team.triCode})`)
     } catch (err) {
       console.error(`Error for team ${team.id}:`, err)
     }

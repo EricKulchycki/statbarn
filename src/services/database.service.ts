@@ -1,6 +1,6 @@
-import mongoose from 'mongoose'
 import { Database } from '@/lib/db'
 import { createDatabaseError } from '@/types/errors'
+import mongoose from 'mongoose'
 
 export class DatabaseService {
   private static instance: DatabaseService

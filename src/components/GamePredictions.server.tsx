@@ -1,15 +1,14 @@
+import { getTeams } from '@/data/teams'
+import { getTimezoneFromCookie } from '@/lib/time'
+import { predictionsService } from '@/services/predictions.service'
 import { scheduleService } from '@/services/schedule.service'
+import { NHLGameWeek } from '@/types/game'
+import { GamePrediction, serializeGamePrediction } from '@/types/gamePrediction'
+import { DateTime } from 'luxon'
 import { GamePredictions } from './GamePredictions'
 import { LiveGame } from './GamePredictions.types'
-import { predictionsService } from '@/services/predictions.service'
-import { Prediction } from '@/models/prediction'
-import { serializePrediction } from '@/utils/converters/prediction'
-import { DateTime } from 'luxon'
-import { getTimezoneFromCookie } from '@/lib/time'
-import { NHLGameWeek } from '@/types/game'
-import { getTeams } from '@/data/teams'
 
-export type PredictionsByDay = { [day: string]: Prediction[] }
+export type PredictionsByDay = { [day: string]: GamePrediction[] }
 
 function buildLiveGamesFromSchedule(
   schedule: NHLGameWeek,
@@ -49,7 +48,7 @@ export async function GamePredictionsWrapper() {
   return (
     <GamePredictions
       scheduleData={currentSchedule}
-      predictions={upcomingPredictions.map(serializePrediction)}
+      predictions={upcomingPredictions.map(serializeGamePrediction)}
       liveGames={liveGames}
       teams={teams}
     />

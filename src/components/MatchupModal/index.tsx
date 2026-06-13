@@ -1,18 +1,17 @@
-import React from 'react'
-import { Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/react'
 import { formatDate } from '@/utils/time'
-import { getPredictedWinnerFromPrediction } from '@/utils/prediction'
-import { getTeamLogo, getTeamFullName } from '@/utils/team'
-import { Prediction } from '@/models/prediction'
-import { NHLGame } from '@/types/game'
-import { Team } from '@/types/team'
-import Image from 'next/image'
+import { Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/react'
+
 import { MatchupData } from '@/actions/matchup'
+import { NHLGame } from '@/types/game'
+import { GamePrediction } from '@/types/gamePrediction'
+import { Team } from '@/types/team'
+import { getTeamFullName, getTeamLogo } from '@/utils/team'
+import Image from 'next/image'
 
 interface MatchupModalProps {
   open: boolean
   onClose: () => void
-  prediction: Prediction | null
+  prediction: GamePrediction | null
   game: NHLGame | null
   matchupData?: MatchupData | null
   teams?: Team[]
@@ -30,7 +29,7 @@ export function MatchupModal({
 }: MatchupModalProps) {
   if (!open || !prediction || !game) return null
 
-  const predictedWinner = getPredictedWinnerFromPrediction(prediction)
+  const predictedWinner = prediction.predictedWinner
   const matchupHistory = matchupData?.history || []
   const last5Matchups = matchupHistory.slice(0, 5)
 

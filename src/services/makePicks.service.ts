@@ -1,8 +1,8 @@
+import { getGamePredictionsForGameIds } from '@/data/teams'
 import { UserPicksModel } from '@/models/userPicks'
-import { PredictionModel } from '@/models/prediction'
 import { scheduleService } from '@/services/schedule.service'
-import { DateTime } from 'luxon'
 import { NHLGame } from '@/types/game'
+import { DateTime } from 'luxon'
 
 export interface MakePicksStats {
   gamesProcessed: number
@@ -122,29 +122,16 @@ export class MakePicksService {
       return 'skipped'
     }
 
-    // Get AI prediction for this game
-    const prediction = await PredictionModel.findOne({ gameId: game.id })
+    const predictions = await getGamePredictionsForGameIds([game.id])
+    const prediction = predictions[0]
+
+    const pickedTeam = prediction?.predictedWinner ?? game.homeTeam.abbrev
 
     if (!prediction) {
-      console.warn(`No prediction found for game ${game.id}`)
-      // Default to home team if no prediction exists
-      const pickedTeam = game.homeTeam.abbrev
-
-      userPicks.addPick({
-        gameId: game.id,
-        gameDate: new Date(game.startTimeUTC),
-        season: game.season,
-        pickedTeam,
-        homeTeam: game.homeTeam.abbrev,
-        awayTeam: game.awayTeam.abbrev,
-        pickedAt: new Date(),
-      })
-
-      return existingPick ? 'updated' : 'created'
+      console.warn(
+        `No prediction found for game ${game.id}, defaulting to home team`
+      )
     }
-
-    // Pick the team that AI predicts will win
-    const pickedTeam = prediction.predictedWinner
 
     userPicks.addPick({
       gameId: game.id,

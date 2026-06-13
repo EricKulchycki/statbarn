@@ -27,6 +27,38 @@ export interface Team {
   logo?: string
 }
 
+export interface EloReset {
+  date: Date
+  reason: string
+  fromElo: number
+  toElo: number
+}
+
+export interface TeamSeasonGame {
+  gameId: number
+  gameDate: Date
+  opponent: string
+  isHome: boolean
+  eloBefore: number
+  prediction?: {
+    winProbability: number
+    predictedWin: boolean
+    modelVersion: string
+  }
+  outcome?: {
+    actualWin: boolean
+    eloAfter: number
+    eloChange: number
+    score: { team: number; opponent: number }
+  }
+}
+
+export interface TeamSeason {
+  season: number
+  startElo: number
+  games: TeamSeasonGame[]
+}
+
 export enum Conference {
   EASTERN = 'eastern',
   WESTERN = 'western',

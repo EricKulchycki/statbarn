@@ -1,7 +1,6 @@
 import { scheduleService } from '../src/services/schedule.service'
 import { eloService } from '../src/services/elo.service'
-import { PredictionModel } from '../src/models/prediction'
-import { calculateGameELO } from '../src/lib/eloCalculator'
+import { predictionsService } from '../src/services/predictions.service'
 import { Database } from '../src/lib/db'
 
 async function seedPredictionsForDate(date: string) {
@@ -9,32 +8,23 @@ async function seedPredictionsForDate(date: string) {
   await db.connect()
   console.log(`Seeding predictions for date: ${date}`)
 
-  // 1. Get schedule for the date
   const schedule = await scheduleService.getScheduleByDate(date)
-  const games = schedule.gameWeek[0]?.games || []
+  const games = (schedule.gameWeek[0]?.games || []).filter(
+    (g) => g.gameType === 2
+  )
 
-  // 2. Get latest ELOs for all teams
+  if (games.length === 0) {
+    console.log('No regular season games found for this date.')
+    return
+  }
+
   const latestElos = await eloService.getLatestElos()
   const eloMap = Object.fromEntries(latestElos.map((e) => [e.abbrev, e.elo]))
 
-  let seeded = 0
-  for (const game of games) {
-    // 3. Calculate prediction using ELO logic
-    const { prediction } = await calculateGameELO(game, eloMap)
-
-    // 4. Upsert prediction in DB
-    await PredictionModel.findOneAndUpdate(
-      { gameId: prediction.gameId },
-      prediction,
-      { upsert: true, new: true }
-    )
-    seeded++
-  }
-
-  console.log(`Seeded ${seeded} predictions for ${date}`)
+  await predictionsService.predictGames(games, eloMap)
+  console.log(`Seeded predictions for ${games.length} games on ${date}`)
 }
 
-// Usage: node scripts/seedPredictionForDate.js YYYY-MM-DD
 const dateArg = process.argv[2]
 if (!dateArg) {
   console.error('Please provide a date in YYYY-MM-DD format.')

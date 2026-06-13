@@ -1,25 +1,25 @@
 'use client'
 
-import React, { Suspense } from 'react'
-import { formatDate } from '@/utils/time'
-import { NHLGame, NHLGameWeek } from '@/types/game'
 import { useIsHydrated } from '@/hooks/useIsHydrated'
 import { groupPredictionsByDate } from '@/lib/predictions'
+import { NHLGame, NHLGameWeek } from '@/types/game'
 import {
-  deserializePrediction,
-  SerializedPrediction,
-} from '@/utils/converters/prediction'
-import { Prediction } from '@/models/prediction'
+  GamePrediction,
+  GamePredictionSerialized,
+  deserializeGamePrediction,
+} from '@/types/gamePrediction'
 import { Team } from '@/types/team'
-import { GameScheduleTable } from './GameScheduleTable'
 import { toScheduleRowFromPrediction } from '@/utils/gameSchedule'
+import { formatDate } from '@/utils/time'
+import React, { Suspense } from 'react'
 import { LiveGame } from './GamePredictions.types'
+import { GameScheduleTable } from './GameScheduleTable'
 
 export type { LiveGame } from './GamePredictions.types'
 
 interface GamePredictionsProps {
   scheduleData: NHLGameWeek
-  predictions: SerializedPrediction[]
+  predictions: GamePredictionSerialized[]
   liveGames: LiveGame
   teams: Team[]
 }
@@ -32,12 +32,12 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
 }) => {
   const isHydrated = useIsHydrated()
 
-  const deserializedPredictions = predictions.map(deserializePrediction)
+  const deserializedPredictions = predictions.map(deserializeGamePrediction)
   const predictionsByDay = groupPredictionsByDate(deserializedPredictions)
   const allGames = scheduleData.gameWeek.flatMap((day) => day.games)
 
   const gamesById = new Map<number, NHLGame>(allGames.map((g) => [g.id, g]))
-  const predictionsById = new Map<number, Prediction>(
+  const predictionsById = new Map<number, GamePrediction>(
     deserializedPredictions.map((p) => [p.gameId, p])
   )
 

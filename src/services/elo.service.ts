@@ -1,17 +1,17 @@
-import { GameType } from '@/constants'
 import {
-  countSeasonsCorrectPredictions as countCorrectPredictions,
-  countSeasonsGames,
-  createGameElo,
-  getAllGamesForSeason,
-  getGameElos,
-  getGameElosByTeam,
-  getGameElosForDate,
+  countSeasonCorrectPredictions,
+  countSeasonGames,
+  getAllGamePredictionsForSeason,
+  getCompletedGamesForDate,
   getLatestEloData,
-  getMatchupHistory,
+  getLeagueGameHistoryByTeam,
+  getMatchupHistoryForTeam,
+  getTeamSeasonGames,
   LatestELO,
-} from '@/data/gameElo'
-import { GameELO, toGameELO } from '@/models/gameElo'
+} from '@/data/teams'
+import { GamePrediction } from '@/types/gamePrediction'
+import { TeamSeasonGame } from '@/types/team'
+import { getCurrentNHLSeason } from '@/utils/currentSeason'
 import { createApiError } from '../types/errors'
 
 export class EloService {
@@ -39,40 +39,40 @@ export class EloService {
 
   async getLastEloGames(
     abbrev: string,
-    limit: number,
-    gameType: GameType = GameType.REGULAR
-  ): Promise<GameELO[]> {
+    limit: number
+  ): Promise<TeamSeasonGame[]> {
     try {
-      const gameElos = await getGameElos(abbrev, limit, gameType)
-      return gameElos.map(toGameELO)
+      const season = Number(getCurrentNHLSeason())
+      return await getTeamSeasonGames(abbrev, season, limit)
     } catch (error) {
       throw createApiError(
-        'getLast10EloGames',
-        `Failed to fetch last 10 ELO games: ${error instanceof Error ? error.message : 'Unknown error'}`
+        'getLastEloGames',
+        `Failed to fetch last ELO games: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }
 
-  async getLeagueGameEloHistoryByTeam(): Promise<{
-    [abbrev: string]: GameELO[]
+  async getLeagueGameHistoryByTeam(): Promise<{
+    [abbrev: string]: TeamSeasonGame[]
   }> {
     try {
-      return await getGameElosByTeam(82)
+      const season = Number(getCurrentNHLSeason())
+      return await getLeagueGameHistoryByTeam(season, 82)
     } catch (error) {
       throw createApiError(
-        'getLeagueGameEloHistoryByTeam',
-        `Failed to fetch league game ELO history by team: ${error instanceof Error ? error.message : 'Unknown error'}`
+        'getLeagueGameHistoryByTeam',
+        `Failed to fetch league game history by team: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }
 
-  async getLastEloGamesForDate(date: Date): Promise<GameELO[]> {
+  async getLastEloGamesForDate(date: Date): Promise<GamePrediction[]> {
     try {
-      return await getGameElosForDate(date)
+      return await getCompletedGamesForDate(date)
     } catch (error) {
       throw createApiError(
         'getLastEloGamesForDate',
-        `Failed to fetch last ELO games for date: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Failed to fetch ELO games for date: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }
@@ -81,9 +81,9 @@ export class EloService {
     teamA: string,
     teamB: string,
     limit: number
-  ): Promise<GameELO[]> {
+  ): Promise<TeamSeasonGame[]> {
     try {
-      return await getMatchupHistory(teamA, teamB, limit)
+      return await getMatchupHistoryForTeam(teamA, teamB, limit)
     } catch (error) {
       throw createApiError(
         'getMatchupHistory',
@@ -92,54 +92,40 @@ export class EloService {
     }
   }
 
-  async createGameElo(gameElo: GameELO): Promise<GameELO> {
-    try {
-      return await createGameElo(gameElo)
-    } catch (error) {
-      throw createApiError(
-        'createGameElo',
-        `Failed to create GameELO: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
-    }
-  }
-
   async countSeasonsCorrectPredictions(season: number): Promise<number> {
     try {
-      return await countCorrectPredictions(season)
+      return await countSeasonCorrectPredictions(season)
     } catch (error) {
       throw createApiError(
         'countSeasonsCorrectPredictions',
-        `Failed to count season's correct predictions: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Failed to count correct predictions: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }
 
-  async getAllGameElosForSeason(
-    season: number,
-    gameType: GameType = GameType.REGULAR
-  ): Promise<GameELO[]> {
+  async getAllGamePredictionsForSeason(
+    season: number
+  ): Promise<GamePrediction[]> {
     try {
-      const games = await getAllGamesForSeason(season, gameType)
-      return games
+      return await getAllGamePredictionsForSeason(season)
     } catch (error) {
       throw createApiError(
-        'getSeasonsGameElos',
-        `Failed to fetch season's game ELOs: ${error instanceof Error ? error.message : 'Unknown error'}`
+        'getAllGamePredictionsForSeason',
+        `Failed to fetch season game predictions: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }
 
   async countSeasonsGames(season: number): Promise<number> {
     try {
-      return await countSeasonsGames(season)
+      return await countSeasonGames(season)
     } catch (error) {
       throw createApiError(
-        'getCompletedGamesForSeason',
-        `Failed to fetch completed games for season: ${error instanceof Error ? error.message : 'Unknown error'}`
+        'countSeasonsGames',
+        `Failed to count season games: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }
 }
 
-// Export singleton instance
 export const eloService = EloService.getInstance()

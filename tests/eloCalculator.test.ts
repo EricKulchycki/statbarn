@@ -1,43 +1,76 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   calculateGameELO,
   getLast5MatchupFactor,
 } from '../src/lib/eloCalculator'
 import { NHLGame } from '../src/types/game'
+import { TeamSeasonGame } from '../src/types/team'
 
-vi.mock('@/data/gameElo', () => {
+vi.mock('@/data/teams', () => {
+  const mockGames: Partial<TeamSeasonGame>[] = [
+    {
+      opponent: 'CHI',
+      isHome: true,
+      outcome: {
+        actualWin: true,
+        eloAfter: 1530,
+        eloChange: 10,
+        score: { team: 3, opponent: 2 },
+      },
+    },
+    {
+      opponent: 'CHI',
+      isHome: true,
+      outcome: {
+        actualWin: false,
+        eloAfter: 1510,
+        eloChange: -10,
+        score: { team: 2, opponent: 4 },
+      },
+    },
+    {
+      opponent: 'CHI',
+      isHome: true,
+      outcome: {
+        actualWin: true,
+        eloAfter: 1540,
+        eloChange: 10,
+        score: { team: 4, opponent: 1 },
+      },
+    },
+    {
+      opponent: 'CHI',
+      isHome: false,
+      outcome: {
+        actualWin: true,
+        eloAfter: 1550,
+        eloChange: 10,
+        score: { team: 3, opponent: 2 },
+      },
+    },
+    {
+      opponent: 'CHI',
+      isHome: true,
+      outcome: {
+        actualWin: true,
+        eloAfter: 1560,
+        eloChange: 10,
+        score: { team: 2, opponent: 1 },
+      },
+    },
+  ]
   return {
-    getMatchupHistory: vi.fn().mockResolvedValue([
-      // Home team (COL) wins 4 out of 5
-      {
-        homeTeam: { abbrev: 'COL', score: 3 },
-        awayTeam: { abbrev: 'CHI', score: 2 },
-      },
-      {
-        homeTeam: { abbrev: 'CHI', score: 4 },
-        awayTeam: { abbrev: 'COL', score: 2 },
-      },
-      {
-        homeTeam: { abbrev: 'COL', score: 4 },
-        awayTeam: { abbrev: 'CHI', score: 1 },
-      },
-      {
-        homeTeam: { abbrev: 'CHI', score: 2 },
-        awayTeam: { abbrev: 'COL', score: 3 },
-      },
-      {
-        homeTeam: { abbrev: 'COL', score: 2 },
-        awayTeam: { abbrev: 'CHI', score: 1 },
-      },
-    ]),
+    getMatchupHistoryForTeam: vi.fn().mockResolvedValue(mockGames),
   }
 })
 
 const mockGame = {
   id: 3,
-  homeTeam: { abbrev: 'COL' },
-  awayTeam: { abbrev: 'CHI' },
+  homeTeam: { abbrev: 'COL', score: 3 },
+  awayTeam: { abbrev: 'CHI', score: 2 },
   gameDate: new Date('2025-09-22T00:00:00Z'),
+  startTimeUTC: '2025-09-22T00:00:00Z',
+  season: 20252026,
 } as unknown as NHLGame
 
 const mockEloMap = {
@@ -46,23 +79,24 @@ const mockEloMap = {
 }
 
 describe('calculateGameELO', () => {
-  it('should calculate expected results and prediction', async () => {
+  it('should return homeTeam, awayTeam, and newElos', async () => {
     const result = await calculateGameELO(mockGame, mockEloMap)
-    console.log('ELO Calculation Result:', result)
-    expect(result).toHaveProperty('prediction')
-    expect(result.prediction.homeTeamWinProbability).toBeGreaterThan(0.5)
-    expect(result.prediction.predictedWinner).toBe('COL')
+    expect(result).toHaveProperty('homeTeam')
+    expect(result).toHaveProperty('awayTeam')
+    expect(result).toHaveProperty('newElos')
+    expect(result.homeTeam.eloBefore).toBe(1520)
+    expect(result.awayTeam.eloBefore).toBe(1480)
+    expect(result.newElos['COL']).toBeGreaterThan(1520)
+    expect(result.newElos['CHI']).toBeLessThan(1480)
   })
 
   describe('matchup factor adjustments', () => {
     it('should adjust ELOs based on last 5 matchups', async () => {
       const matchupFactor = await getLast5MatchupFactor(mockGame)
-
-      console.log('Matchup Factor:', matchupFactor)
-      // With COL winning 4/5, the home win probability should be noticeably higher
+      // With COL winning 4/5 from home perspective, homeFactor should exceed awayFactor
       expect(matchupFactor.homeFactor).toBeGreaterThan(matchupFactor.awayFactor)
       expect(matchupFactor.homeFactor).toBeLessThanOrEqual(15)
-      expect(matchupFactor.awayFactor).toBeGreaterThanOrEqual(-15)
+      expect(matchupFactor.awayFactor).toBeGreaterThanOrEqual(0)
     })
   })
 })

@@ -1,22 +1,22 @@
 'use client'
 
-import React from 'react'
-import Image from 'next/image'
-import { useDisclosure } from '@heroui/react'
-import { PlayIcon } from '@heroicons/react/24/solid'
+import { getMatchupHistory, MatchupData } from '@/actions/matchup'
+import { useIsHydrated } from '@/hooks/useIsHydrated'
 import { NHLGame } from '@/types/game'
-import { Prediction } from '@/models/prediction'
-import { Team } from '@/types/team'
+import { GamePrediction } from '@/types/gamePrediction'
 import { GameScheduleRow } from '@/types/gameSchedule'
+import { Team } from '@/types/team'
+import { isLive } from '@/utils/game'
 import {
   getConfidenceClass,
   getRowBorderClass,
   isRowLive,
 } from '@/utils/gameSchedule'
-import { isLive } from '@/utils/game'
-import { useIsHydrated } from '@/hooks/useIsHydrated'
-import { getMatchupHistory, MatchupData } from '@/actions/matchup'
 import { getTeamLogo } from '@/utils/team'
+import { PlayIcon } from '@heroicons/react/24/solid'
+import { useDisclosure } from '@heroui/react'
+import Image from 'next/image'
+import React from 'react'
 import { MatchupModal } from './MatchupModal'
 
 function resolveTeamLogo(
@@ -104,7 +104,7 @@ interface GameScheduleTableProps {
   rows: GameScheduleRow[]
   teams: Team[]
   gamesById?: Map<number, NHLGame>
-  predictionsById?: Map<number, Prediction>
+  predictionsById?: Map<number, GamePrediction>
   interactive?: boolean
 }
 
@@ -304,7 +304,7 @@ export function GameScheduleTable({
 }: GameScheduleTableProps) {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [selectedPrediction, setSelectedPrediction] =
-    React.useState<Prediction | null>(null)
+    React.useState<GamePrediction | null>(null)
   const [selectedGame, setSelectedGame] = React.useState<NHLGame | null>(null)
   const [matchupData, setMatchupData] = React.useState<MatchupData | null>(null)
   const [isLoadingMatchup, setIsLoadingMatchup] = React.useState(false)

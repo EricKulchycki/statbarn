@@ -1,7 +1,9 @@
 'use server'
 
 import { Database } from '@/lib/db'
-import { GameELOModel } from '@/models/gameElo'
+import { TeamModel } from '@/models/team'
+import { TeamSeasonGame } from '@/types/team'
+import { getCurrentNHLSeason } from '@/utils/currentSeason'
 
 export interface MatchupHistoryGame {
   date: string
@@ -40,108 +42,88 @@ export async function getMatchupHistory(
   const db = Database.getInstance()
   await db.connect()
 
-  // Find all games between these two teams, sorted by date descending
-  const games = await GameELOModel.find({
-    $or: [
-      { 'homeTeam.abbrev': teamA, 'awayTeam.abbrev': teamB },
-      { 'homeTeam.abbrev': teamB, 'awayTeam.abbrev': teamA },
-    ],
-  })
-    .sort({ gameDate: -1 })
-    .limit(limit)
-    .lean()
+  const currentSeason = Number(getCurrentNHLSeason())
 
-  const history: MatchupHistoryGame[] = games.map((game) => {
-    const homeScore = game.homeTeam.score
-    const awayScore = game.awayTeam.score
+  const h2hGames: TeamSeasonGame[] = await TeamModel.aggregate([
+    { $match: { triCode: teamA } },
+    { $unwind: '$seasons' },
+    { $unwind: '$seasons.games' },
+    {
+      $match: {
+        'seasons.games.opponent': teamB,
+        'seasons.games.outcome': { $exists: true },
+      },
+    },
+    { $sort: { 'seasons.games.gameDate': -1 } },
+    { $limit: limit },
+    { $replaceRoot: { newRoot: '$seasons.games' } },
+  ])
+
+  const history: MatchupHistoryGame[] = h2hGames.map((game) => {
+    const teamScore = game.outcome!.score.team
+    const opponentScore = game.outcome!.score.opponent
+    const homeScore = game.isHome ? teamScore : opponentScore
+    const awayScore = game.isHome ? opponentScore : teamScore
+    const homeTeam = game.isHome ? teamA : teamB
+    const awayTeam = game.isHome ? teamB : teamA
     const winner =
       homeScore > awayScore
-        ? game.homeTeam.abbrev
+        ? homeTeam
         : awayScore > homeScore
-          ? game.awayTeam.abbrev
+          ? awayTeam
           : 'TIE'
 
     return {
-      date: game.gameDate.toISOString().split('T')[0],
-      homeTeam: game.homeTeam.abbrev,
-      awayTeam: game.awayTeam.abbrev,
+      date: new Date(game.gameDate).toISOString().split('T')[0],
+      homeTeam,
+      awayTeam,
       homeScore,
       awayScore,
       winner,
-      season: game.season,
+      season: currentSeason,
       gameId: game.gameId,
     }
   })
 
-  // Calculate last 5 record
   const last5Record = { teamA: 0, teamB: 0, ties: 0 }
-  history.forEach((game) => {
-    if (game.winner === teamA) last5Record.teamA++
-    else if (game.winner === teamB) last5Record.teamB++
+  history.forEach((g) => {
+    if (g.winner === teamA) last5Record.teamA++
+    else if (g.winner === teamB) last5Record.teamB++
     else last5Record.ties++
   })
 
-  // Get current season (assuming it's 2025-2026)
-  const currentSeason = 20252026
+  const [teamASeasonStats, teamBSeasonStats] = await Promise.all([
+    getTeamSeasonStats(teamA, currentSeason),
+    getTeamSeasonStats(teamB, currentSeason),
+  ])
 
-  // Calculate season stats for team A
-  const teamAGames = await GameELOModel.find({
-    season: currentSeason,
-    $or: [{ 'homeTeam.abbrev': teamA }, { 'awayTeam.abbrev': teamA }],
-  }).lean()
+  return { history, teamASeasonStats, teamBSeasonStats, last5Record }
+}
 
-  let teamAPointsScored = 0
-  let teamAPointsAllowed = 0
-  teamAGames.forEach((game) => {
-    if (game.homeTeam.abbrev === teamA) {
-      teamAPointsScored += game.homeTeam.score
-      teamAPointsAllowed += game.awayTeam.score
-    } else {
-      teamAPointsScored += game.awayTeam.score
-      teamAPointsAllowed += game.homeTeam.score
-    }
-  })
+async function getTeamSeasonStats(
+  abbrev: string,
+  season: number
+): Promise<TeamSeasonStats> {
+  const games: TeamSeasonGame[] = await TeamModel.aggregate([
+    { $match: { triCode: abbrev } },
+    { $unwind: '$seasons' },
+    { $match: { 'seasons.season': season } },
+    { $unwind: '$seasons.games' },
+    { $match: { 'seasons.games.outcome': { $exists: true } } },
+    { $replaceRoot: { newRoot: '$seasons.games' } },
+  ])
 
-  const teamASeasonStats: TeamSeasonStats = {
-    teamAbbrev: teamA,
-    avgPointsScored:
-      teamAGames.length > 0 ? teamAPointsScored / teamAGames.length : 0,
-    avgPointsAllowed:
-      teamAGames.length > 0 ? teamAPointsAllowed / teamAGames.length : 0,
-    totalGames: teamAGames.length,
-  }
-
-  // Calculate season stats for team B
-  const teamBGames = await GameELOModel.find({
-    season: currentSeason,
-    $or: [{ 'homeTeam.abbrev': teamB }, { 'awayTeam.abbrev': teamB }],
-  }).lean()
-
-  let teamBPointsScored = 0
-  let teamBPointsAllowed = 0
-  teamBGames.forEach((game) => {
-    if (game.homeTeam.abbrev === teamB) {
-      teamBPointsScored += game.homeTeam.score
-      teamBPointsAllowed += game.awayTeam.score
-    } else {
-      teamBPointsScored += game.awayTeam.score
-      teamBPointsAllowed += game.homeTeam.score
-    }
-  })
-
-  const teamBSeasonStats: TeamSeasonStats = {
-    teamAbbrev: teamB,
-    avgPointsScored:
-      teamBGames.length > 0 ? teamBPointsScored / teamBGames.length : 0,
-    avgPointsAllowed:
-      teamBGames.length > 0 ? teamBPointsAllowed / teamBGames.length : 0,
-    totalGames: teamBGames.length,
+  let scored = 0
+  let allowed = 0
+  for (const game of games) {
+    scored += game.outcome!.score.team
+    allowed += game.outcome!.score.opponent
   }
 
   return {
-    history,
-    teamASeasonStats,
-    teamBSeasonStats,
-    last5Record,
+    teamAbbrev: abbrev,
+    avgPointsScored: games.length > 0 ? scored / games.length : 0,
+    avgPointsAllowed: games.length > 0 ? allowed / games.length : 0,
+    totalGames: games.length,
   }
 }

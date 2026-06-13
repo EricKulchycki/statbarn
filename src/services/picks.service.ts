@@ -1,8 +1,8 @@
+import { getGamePredictionsForGameIds } from '@/data/teams'
 import { Pick, UserPicksModel } from '@/models/userPicks'
-import { PredictionModel } from '@/models/prediction'
 import { scheduleService } from '@/services/schedule.service'
-import { DateTime } from 'luxon'
 import { NHLGame } from '@/types/game'
+import { DateTime } from 'luxon'
 
 export interface ProcessResultsStats {
   gamesProcessed: number
@@ -149,21 +149,17 @@ export class PicksService {
     statbarnPredictedWinner: string | null
     isUpset: boolean
   }> {
-    const statbarnPrediction = await PredictionModel.findOne({ gameId })
+    const predictions = await getGamePredictionsForGameIds([gameId])
+    const prediction = predictions[0]
 
-    if (!statbarnPrediction) {
-      return {
-        statbarnPredictedWinner: null,
-        isUpset: false,
-      }
+    if (!prediction) {
+      return { statbarnPredictedWinner: null, isUpset: false }
     }
 
-    const statbarnPredictedWinner = statbarnPrediction.predictedWinner
-    const isUpset = actualWinner !== statbarnPredictedWinner
-
+    const statbarnPredictedWinner = prediction.predictedWinner
     return {
       statbarnPredictedWinner,
-      isUpset,
+      isUpset: actualWinner !== statbarnPredictedWinner,
     }
   }
 

@@ -1,12 +1,12 @@
 'use client'
 
-import _ from 'lodash'
-import { LatestELO } from '@/data/gameElo'
+import { LatestELO } from '@/data/teams'
 import { Team } from '@/types/team'
+import _ from 'lodash'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { ShowAll } from './ShowAll'
-import { useRouter } from 'next/navigation'
 
 interface Props {
   elos: LatestELO[]

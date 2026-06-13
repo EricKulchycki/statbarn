@@ -1,10 +1,7 @@
-import { GameType } from '@/constants'
-import { GameELOModel } from '@/models/gameElo'
+import { getAllGamePredictionsForSeason } from '@/data/teams'
+import { GamePrediction } from '@/types/gamePrediction'
 import { Upset } from '@/types/upset'
-import {
-  getActualWinnerFromGameELO,
-  getPredictedWinnerFromGameELO,
-} from '@/utils/gameElo'
+import { getCurrentNHLSeason } from '@/utils/currentSeason'
 import { DateTime } from 'luxon'
 
 export class UpsetService {
@@ -20,68 +17,34 @@ export class UpsetService {
   }
 
   async getAllUpsets(asOf?: DateTime): Promise<Upset[]> {
-    if (!asOf) {
-      return []
-    }
+    if (!asOf) return []
 
-    // Find all games with a clear predicted winner
-    const games = await GameELOModel.find({
-      gameType: GameType.REGULAR,
-      gameDate: { $gte: asOf?.toISO() },
-    })
-      .sort({ gameDate: -1 })
-      .exec()
+    const season = Number(getCurrentNHLSeason())
+    const games = await getAllGamePredictionsForSeason(season)
 
-    const upsets: Upset[] = []
-    for (const game of games) {
-      // Determine predicted winner
-      const predictedWinner = getPredictedWinnerFromGameELO(game)
-      // Determine actual winner
-      const actualWinner = getActualWinnerFromGameELO(game)
-      // If predicted winner lost, it's an upset
-      if (predictedWinner !== actualWinner) {
-        upsets.push({
-          gameId: game.gameId,
-          date: DateTime.fromJSDate(game.gameDate),
-          homeTeam: game.homeTeam.abbrev,
-          awayTeam: game.awayTeam.abbrev,
-          predictedWinner,
-          actualWinner,
-          homeScore: game.homeTeam.score,
-          awayScore: game.awayTeam.score,
-        })
-      }
-    }
-    return upsets
+    return this.toUpsets(
+      games.filter((g) => g.outcome && DateTime.fromJSDate(g.gameDate) >= asOf)
+    )
   }
 
   async getSeasonsUpsets(season: number): Promise<Upset[]> {
-    const games = await GameELOModel.find({
-      season,
-      gameType: GameType.REGULAR,
-    })
-      .sort({ gameDate: -1 })
-      .lean()
-      .exec()
+    const games = await getAllGamePredictionsForSeason(season)
+    return this.toUpsets(games.filter((g) => g.outcome))
+  }
 
-    const upsets: Upset[] = []
-    for (const game of games) {
-      const predictedWinner = getPredictedWinnerFromGameELO(game)
-      const actualWinner = getActualWinnerFromGameELO(game)
-      if (predictedWinner !== actualWinner) {
-        upsets.push({
-          gameId: game.gameId,
-          date: DateTime.fromJSDate(game.gameDate),
-          homeTeam: game.homeTeam.abbrev,
-          awayTeam: game.awayTeam.abbrev,
-          predictedWinner,
-          actualWinner,
-          homeScore: game.homeTeam.score,
-          awayScore: game.awayTeam.score,
-        })
-      }
-    }
-    return upsets
+  private toUpsets(games: GamePrediction[]): Upset[] {
+    return games
+      .filter((g) => g.outcome && !g.outcome.correctPrediction)
+      .map((g) => ({
+        gameId: g.gameId,
+        date: DateTime.fromJSDate(g.gameDate),
+        homeTeam: g.homeTeam,
+        awayTeam: g.awayTeam,
+        predictedWinner: g.predictedWinner,
+        actualWinner: g.outcome!.winner,
+        homeScore: g.outcome!.homeScore,
+        awayScore: g.outcome!.awayScore,
+      }))
   }
 }
 

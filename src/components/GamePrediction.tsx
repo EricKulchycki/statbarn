@@ -1,15 +1,14 @@
 'use client'
 
-import React from 'react'
-import { formatPercentage } from '@/utils/percentage'
-import { NHLGame } from '@/types/game'
-import Image from 'next/image'
 import { useIsHydrated } from '@/hooks/useIsHydrated'
-import { Prediction } from '@/models/prediction'
+import { NHLGame } from '@/types/game'
+import { GamePrediction as GamePredictionData } from '@/types/gamePrediction'
+import { formatPercentage } from '@/utils/percentage'
+import Image from 'next/image'
 
 interface GamePredictionProps {
   game: NHLGame
-  prediction?: Prediction
+  prediction?: GamePredictionData
 }
 
 export const GamePrediction = (props: GamePredictionProps) => {

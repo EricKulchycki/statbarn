@@ -1,10 +1,6 @@
+import { GamePrediction } from '@/types/gamePrediction'
 import { sum } from 'lodash'
 import { EloService, eloService } from './elo.service'
-import { GameELO } from '@/models/gameElo'
-import {
-  getActualWinnerFromGameELO,
-  getPredictedWinnerFromGameELO,
-} from '@/utils/gameElo'
 
 export class ModelService {
   private static instance: ModelService
@@ -18,28 +14,20 @@ export class ModelService {
     return ModelService.instance
   }
 
-  getPredictionConfidence(game: GameELO): number {
-    const { expectedResult } = game
-    return Math.max(expectedResult.homeTeam, expectedResult.awayTeam)
+  getPredictionConfidence(game: GamePrediction): number {
+    return Math.max(game.homeTeamWinProbability, game.awayTeamWinProbability)
   }
 
-  // Example: Get average model confidence for a season
   async getAverageConfidence(season: number): Promise<number> {
-    const games = await this.eloService.getAllGameElosForSeason(season)
-
-    const confidences: number[] = []
-    for (const game of games) {
-      const confidence = this.getPredictionConfidence(game)
-      confidences.push(confidence)
-    }
+    const games = await this.eloService.getAllGamePredictionsForSeason(season)
+    const confidences = games.map((g) => this.getPredictionConfidence(g))
     return sum(confidences) / (confidences.length || 1)
   }
 
   async getConfidenceBuckets(
     season: number
   ): Promise<{ bucket: string; count: number }[]> {
-    const games = await this.eloService.getAllGameElosForSeason(season)
-    const buckets: { bucket: string; count: number }[] = []
+    const games = await this.eloService.getAllGamePredictionsForSeason(season)
     const bucketRanges = [
       [0.5, 0.6],
       [0.6, 0.7],
@@ -48,120 +36,85 @@ export class ModelService {
       [0.9, 1.0],
     ]
 
-    for (const [min, max] of bucketRanges) {
-      const count = games.filter((game) => {
-        const confidence = this.getPredictionConfidence(game) / 100
-        return confidence >= min && confidence < max
-      }).length
-      buckets.push({
-        bucket: `${(min * 100).toFixed(0)}-${(max * 100).toFixed(0)}%`,
-        count,
-      })
-    }
-    return buckets
+    return bucketRanges.map(([min, max]) => ({
+      bucket: `${(min * 100).toFixed(0)}-${(max * 100).toFixed(0)}%`,
+      count: games.filter((g) => {
+        const c = this.getPredictionConfidence(g)
+        return c >= min && c < max
+      }).length,
+    }))
   }
 
-  // Example: Get high-confidence upsets
   async getHighConfidenceUpsets(
     season: number,
-    threshold: number = 0.8
-  ): Promise<GameELO[]> {
-    console.log('Fetching high-confidence upsets...')
-    const seasonsGames = await this.eloService.getAllGameElosForSeason(season)
-    // Fetch all games for the season and filter by confidence and upset
-    // return games.filter(g => g.confidence >= threshold && g.predictionIncorrect)
-    const highConfidenceUpsets: GameELO[] = seasonsGames.filter((game) => {
-      const confidence = this.getPredictionConfidence(game)
-      const predictedWinner = getPredictedWinnerFromGameELO(game)
-      const actualWinner = getActualWinnerFromGameELO(game)
-      return confidence >= threshold && predictedWinner !== actualWinner
+    threshold = 0.8
+  ): Promise<GamePrediction[]> {
+    const games = await this.eloService.getAllGamePredictionsForSeason(season)
+    return games.filter((g) => {
+      if (!g.outcome) return false
+      return (
+        this.getPredictionConfidence(g) >= threshold &&
+        !g.outcome.correctPrediction
+      )
     })
-    return highConfidenceUpsets
   }
 
   async getMostConfidentTeam(season: number): Promise<string | null> {
-    const seasonsGames = await this.eloService.getAllGameElosForSeason(season)
-    const teamConfidences: { [team: string]: number[] } = {}
-
-    for (const game of seasonsGames) {
-      const confidence = this.getPredictionConfidence(game)
-      const predictedWinner = getPredictedWinnerFromGameELO(game)
-      if (!teamConfidences[predictedWinner]) {
-        teamConfidences[predictedWinner] = []
-      }
-      teamConfidences[predictedWinner].push(confidence)
-    }
-
-    let mostConfidentTeam: string | null = null
-    let highestAvgConfidence = 0
-
-    for (const team in teamConfidences) {
-      const avgConfidence =
-        sum(teamConfidences[team]) / teamConfidences[team].length
-      if (avgConfidence > highestAvgConfidence) {
-        highestAvgConfidence = avgConfidence
-        mostConfidentTeam = team
-      }
-    }
-
-    return mostConfidentTeam
+    return this.getTeamByConfidence(season, 'highest')
   }
 
   async getLeastConfidentTeam(season: number): Promise<string | null> {
-    const seasonsGames = await this.eloService.getAllGameElosForSeason(season)
+    return this.getTeamByConfidence(season, 'lowest')
+  }
+
+  private async getTeamByConfidence(
+    season: number,
+    direction: 'highest' | 'lowest'
+  ): Promise<string | null> {
+    const games = await this.eloService.getAllGamePredictionsForSeason(season)
     const teamConfidences: { [team: string]: number[] } = {}
 
-    for (const game of seasonsGames) {
-      const confidence = this.getPredictionConfidence(game)
-      const predictedWinner = getPredictedWinnerFromGameELO(game)
-      if (!teamConfidences[predictedWinner]) {
-        teamConfidences[predictedWinner] = []
-      }
-      teamConfidences[predictedWinner].push(confidence)
+    for (const game of games) {
+      const predicted = game.predictedWinner
+      if (!teamConfidences[predicted]) teamConfidences[predicted] = []
+      teamConfidences[predicted].push(this.getPredictionConfidence(game))
     }
 
-    let leastConfidentTeam: string | null = null
-    let lowestAvgConfidence = Infinity
+    let result: string | null = null
+    let target = direction === 'highest' ? 0 : Infinity
 
     for (const team in teamConfidences) {
-      const avgConfidence =
-        sum(teamConfidences[team]) / teamConfidences[team].length
-      if (avgConfidence < lowestAvgConfidence) {
-        lowestAvgConfidence = avgConfidence
-        leastConfidentTeam = team
+      const avg = sum(teamConfidences[team]) / teamConfidences[team].length
+      if (
+        (direction === 'highest' && avg > target) ||
+        (direction === 'lowest' && avg < target)
+      ) {
+        target = avg
+        result = team
       }
     }
-
-    return leastConfidentTeam
+    return result
   }
 
   async getModelConfidenceTrend(
     season: number
   ): Promise<{ date: string; avgConfidence: number }[]> {
-    const seasonsGames = await this.eloService.getAllGameElosForSeason(season)
+    const games = await this.eloService.getAllGamePredictionsForSeason(season)
     const dateConfidences: { [date: string]: number[] } = {}
 
-    for (const game of seasonsGames) {
-      const confidence = this.getPredictionConfidence(game)
-      const gameDate = game.gameDate.toISOString().split('T')[0] // YYYY-MM-DD
-      if (!dateConfidences[gameDate]) {
-        dateConfidences[gameDate] = []
-      }
-      dateConfidences[gameDate].push(confidence)
+    for (const game of games) {
+      const date = new Date(game.gameDate).toISOString().split('T')[0]
+      if (!dateConfidences[date]) dateConfidences[date] = []
+      dateConfidences[date].push(this.getPredictionConfidence(game))
     }
 
-    const trend: { date: string; avgConfidence: number }[] = []
-    for (const date in dateConfidences) {
-      const avgConfidence =
-        sum(dateConfidences[date]) / dateConfidences[date].length
-      trend.push({ date, avgConfidence })
-    }
-
-    // Sort by date ascending
-    trend.sort((a, b) => (a.date < b.date ? -1 : 1))
-    return trend
+    return Object.entries(dateConfidences)
+      .map(([date, values]) => ({
+        date,
+        avgConfidence: sum(values) / values.length,
+      }))
+      .sort((a, b) => (a.date < b.date ? -1 : 1))
   }
 }
 
-// Export singleton instance
 export const modelService = ModelService.getInstance()

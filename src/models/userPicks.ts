@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from 'mongoose'
+import mongoose, { Document, Model, Schema } from 'mongoose'
 
 // Individual pick subdocument
 export interface Pick {
@@ -6,7 +6,7 @@ export interface Pick {
   gameDate: Date
   season: number
   pickedTeam: string
-  pickedAt: Date
+  pickedAt?: Date
   confidence?: number
   homeTeam: string
   awayTeam: string

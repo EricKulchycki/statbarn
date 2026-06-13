@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { UserPicksModel } from '../src/models/userPicks'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Database } from '../src/lib/db'
+import { UserPicksModel } from '../src/models/userPicks'
 
 describe('UserPicks Model', () => {
   const db = Database.getInstance()

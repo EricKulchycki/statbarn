@@ -1,22 +1,7 @@
-import { GameELO } from '@/models/gameElo'
-import { Prediction } from '@/models/prediction'
 import { NHLGame } from '@/types/game'
+import { GamePrediction } from '@/types/gamePrediction'
 import { GameScheduleResultStatus, GameScheduleRow } from '@/types/gameSchedule'
 import { GameStatus, isLive } from '@/utils/game'
-import {
-  getActualWinnerFromGameELO,
-  getPredictedWinnerFromGameELO,
-} from '@/utils/gameElo'
-import { getPredictedWinnerFromPrediction } from '@/utils/prediction'
-
-function getConfidenceForPrediction(
-  prediction: Prediction,
-  predictedWinner: string
-): number {
-  return predictedWinner === prediction.homeTeam
-    ? prediction.homeTeamWinProbability
-    : prediction.awayTeamWinProbability
-}
 
 function getResultStatus(
   predictedWinner: string,
@@ -24,19 +9,21 @@ function getResultStatus(
   gameState: GameStatus
 ): GameScheduleResultStatus {
   if (gameState === 'FUT') return 'pending'
-
   if (actualWinner === null) return 'tied'
-
   return actualWinner === predictedWinner ? 'correct' : 'incorrect'
 }
 
 export function toScheduleRowFromPrediction(
-  prediction: Prediction,
+  prediction: GamePrediction,
   game: NHLGame,
   live?: { homeScore: number; awayScore: number; status: GameStatus }
 ): GameScheduleRow {
-  const predictedWinner = getPredictedWinnerFromPrediction(prediction)
-  const confidence = getConfidenceForPrediction(prediction, predictedWinner)
+  const { predictedWinner } = prediction
+  const confidence =
+    predictedWinner === prediction.homeTeam
+      ? prediction.homeTeamWinProbability
+      : prediction.awayTeamWinProbability
+
   const status = live?.status ?? game.gameState
 
   let actualWinner: string | null = null
@@ -63,24 +50,29 @@ export function toScheduleRowFromPrediction(
   }
 }
 
-export function toScheduleRowFromGameElo(gameElo: GameELO): GameScheduleRow {
-  const predictedWinner = getPredictedWinnerFromGameELO(gameElo)
-  const actualWinner = getActualWinnerFromGameELO(gameElo)
-  const homeConf = gameElo.expectedResult?.homeTeam ?? 0.5
-  const awayConf = gameElo.expectedResult?.awayTeam ?? 0.5
+export function toScheduleRowFromCompletedGame(
+  game: GamePrediction
+): GameScheduleRow {
+  const { predictedWinner } = game
   const confidence =
-    predictedWinner === gameElo.homeTeam.abbrev ? homeConf : awayConf
+    predictedWinner === game.homeTeam
+      ? game.homeTeamWinProbability
+      : game.awayTeamWinProbability
 
   return {
-    id: gameElo.gameId,
-    awayTeam: gameElo.awayTeam.abbrev,
-    homeTeam: gameElo.homeTeam.abbrev,
-    awayScore: gameElo.awayTeam.score,
-    homeScore: gameElo.homeTeam.score,
+    id: game.gameId,
+    awayTeam: game.awayTeam,
+    homeTeam: game.homeTeam,
+    awayScore: game.outcome?.awayScore ?? null,
+    homeScore: game.outcome?.homeScore ?? null,
     predictedWinner,
     confidence,
     gameState: 'FINAL',
-    resultStatus: actualWinner === predictedWinner ? 'correct' : 'incorrect',
+    resultStatus: game.outcome
+      ? game.outcome.correctPrediction
+        ? 'correct'
+        : 'incorrect'
+      : 'pending',
   }
 }
 
@@ -89,15 +81,9 @@ export function isRowLive(row: GameScheduleRow): boolean {
 }
 
 export function getRowBorderClass(row: GameScheduleRow): string {
-  if (row.resultStatus === 'tied') {
-    return 'border-l-4 border-l-yellow-500'
-  }
-  if (row.resultStatus === 'correct') {
-    return 'border-l-4 border-l-green-500'
-  }
-  if (row.resultStatus === 'incorrect') {
-    return 'border-l-4 border-l-red-500'
-  }
+  if (row.resultStatus === 'tied') return 'border-l-4 border-l-yellow-500'
+  if (row.resultStatus === 'correct') return 'border-l-4 border-l-green-500'
+  if (row.resultStatus === 'incorrect') return 'border-l-4 border-l-red-500'
   return 'border-l-4 border-l-transparent'
 }
 

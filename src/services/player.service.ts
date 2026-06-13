@@ -1,16 +1,16 @@
 import {
-  getTopScorers,
-  getTopGoalies,
-  getEnhancedTopScorers,
   getEnhancedTopGoalies,
+  getEnhancedTopScorers,
+  getTopGoalies,
+  getTopScorers,
 } from '@/data/player'
-import {
-  NHLSkaterLeader,
-  NHLGoalieLeader,
-  EnhancedSkaterStats,
-  EnhancedGoalieStats,
-} from '@/types/player'
 import { createApiError } from '@/types/errors'
+import {
+  EnhancedGoalieStats,
+  EnhancedSkaterStats,
+  NHLGoalieLeader,
+  NHLSkaterLeader,
+} from '@/types/player'
 
 export class PlayerService {
   private static instance: PlayerService

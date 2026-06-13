@@ -1,28 +1,28 @@
 'use client'
 
-import { DateTime } from 'luxon'
-import { PropsWithChildren } from 'react'
 import { NHLGame, NHLGameDay } from '@/types/game'
+import {
+  GamePrediction,
+  GamePredictionSerialized,
+  deserializeGamePrediction,
+} from '@/types/gamePrediction'
+import { DateTime } from 'luxon'
 import Image from 'next/image'
-import { SerializedPrediction } from '@/utils/converters/prediction'
-import { deserializePrediction } from '@/utils/converters/prediction'
-import { getPredictedWinnerFromPrediction } from '@/utils/prediction'
-import { Prediction } from '@/models/prediction'
+import { PropsWithChildren } from 'react'
 
 interface GameBannerClientProps {
   gamesThisWeek: NHLGameDay[]
-  predictions: SerializedPrediction[]
+  predictions: GamePredictionSerialized[]
 }
 
 export function GameBannerClient({
   gamesThisWeek,
   predictions,
 }: GameBannerClientProps) {
-  // Create a map of gameId -> prediction
   const predictionsMap = new Map(
     predictions.map((p) => {
-      const deserialized = deserializePrediction(p)
-      return [deserialized.gameId, deserialized]
+      const d = deserializeGamePrediction(p)
+      return [d.gameId, d]
     })
   )
 
@@ -45,7 +45,7 @@ export function GameBannerClient({
 interface TodaysGamesProps {
   games: NHLGame[]
   date: string
-  predictionsMap: Map<number, Prediction>
+  predictionsMap: Map<number, GamePrediction>
 }
 
 function TodaysGames(props: TodaysGamesProps) {
@@ -66,11 +66,10 @@ function TodaysGames(props: TodaysGamesProps) {
 
 interface BannerGameProps {
   game: NHLGame
-  prediction?: Prediction
+  prediction?: GamePrediction
 }
 
-function BannerGame(props: BannerGameProps) {
-  const { game, prediction } = props
+function BannerGame({ game, prediction }: BannerGameProps) {
   const homeScore = game.homeTeam.score
   const awayScore = game.awayTeam.score
 
@@ -78,19 +77,17 @@ function BannerGame(props: BannerGameProps) {
     game.venueTimezone
   )
 
-  // Determine border color based on prediction correctness
   let borderClass = ''
   if (prediction && game.gameState !== 'FUT') {
-    const predictedWinner = getPredictedWinnerFromPrediction(prediction)
-    let actualWinner = null
-
-    if (homeScore !== awayScore) {
-      actualWinner =
-        homeScore > awayScore ? prediction.homeTeam : prediction.awayTeam
-    }
+    const { predictedWinner } = prediction
+    const actualWinner =
+      homeScore !== awayScore
+        ? homeScore > awayScore
+          ? prediction.homeTeam
+          : prediction.awayTeam
+        : null
 
     if (actualWinner === null) {
-      // Game is tied
       borderClass = 'border-b-1 border-yellow-500'
     } else if (actualWinner === predictedWinner) {
       borderClass = 'border-b-1 border-green-500'
@@ -139,8 +136,13 @@ function GameTeam(props: PropsWithChildren) {
 }
 
 function TeamName(props: PropsWithChildren<{ isWinning: boolean }>) {
-  const textColor = props.isWinning ? 'text-slate-300' : 'text-slate-400'
-  return <div className={`${textColor} px-2`}>{props.children}</div>
+  return (
+    <div
+      className={`${props.isWinning ? 'text-slate-300' : 'text-slate-400'} px-2`}
+    >
+      {props.children}
+    </div>
+  )
 }
 
 function Score(props: PropsWithChildren) {
@@ -151,14 +153,8 @@ function Score(props: PropsWithChildren) {
   )
 }
 
-interface GameDateProps {
-  date: string
-}
-
-function GameDate(props: GameDateProps) {
-  const { date } = props
+function GameDate({ date }: { date: string }) {
   const ldate = DateTime.fromISO(date)
-
   return (
     <div className="text-slate-300 mx-4 text-center font-bold">
       <p>{ldate.toFormat('MMM')}</p>

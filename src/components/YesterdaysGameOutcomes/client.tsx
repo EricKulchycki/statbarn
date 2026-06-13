@@ -1,17 +1,17 @@
 'use client'
 
-import { GameELO } from '@/models/gameElo'
-import { Team } from '@/types/team'
 import { GameScheduleTable } from '@/components/GameScheduleTable'
-import { toScheduleRowFromGameElo } from '@/utils/gameSchedule'
+import { GamePrediction } from '@/types/gamePrediction'
+import { Team } from '@/types/team'
+import { toScheduleRowFromCompletedGame } from '@/utils/gameSchedule'
 
 interface Props {
-  gameElos: GameELO[]
+  games: GamePrediction[]
   teams: Team[]
 }
 
-export function YesterdaysGameOutcomes({ gameElos, teams }: Props) {
-  const rows = gameElos.map(toScheduleRowFromGameElo)
+export function YesterdaysGameOutcomes({ games, teams }: Props) {
+  const rows = games.map(toScheduleRowFromCompletedGame)
 
   return <GameScheduleTable rows={rows} teams={teams} interactive={false} />
 }

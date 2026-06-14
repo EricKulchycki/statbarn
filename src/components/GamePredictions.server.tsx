@@ -1,4 +1,4 @@
-import { getTeams } from '@/data/teams'
+import { getTeams } from '@/data/teamsCache'
 import { getTimezoneFromCookie } from '@/lib/time'
 import { predictionsService } from '@/services/predictions.service'
 import { scheduleService } from '@/services/schedule.service'

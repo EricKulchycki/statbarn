@@ -1,4 +1,4 @@
-import { getTeams } from '@/data/teams'
+import { getTeams } from '@/data/teamsCache'
 import { Database } from '@/lib/db'
 import { eloService } from '@/services/elo.service'
 import { TeamsRankings } from '@/components/TeamsRankings'

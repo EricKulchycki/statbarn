@@ -1,5 +1,5 @@
-import mongoose from 'mongoose'
 import { DB_CONFIG } from '@/constants'
+import mongoose from 'mongoose'
 
 class Database {
   private static instance: Database

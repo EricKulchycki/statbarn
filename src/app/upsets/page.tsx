@@ -1,5 +1,5 @@
 import { upsetService } from '@/services/upset.service'
-import { getTeams } from '@/data/teams'
+import { getTeams } from '@/data/teamsCache'
 import { DateTime } from 'luxon'
 import Image from 'next/image'
 import React from 'react'

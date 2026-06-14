@@ -9,6 +9,10 @@
     "migrate:toTeamModel": "tsx scripts/migrateToTeamModel.ts",
     "seed:populateTeams": "tsx scripts/populateTeams.ts",
     "seed:predictionsForDate": "tsx scripts/seedPredictionForDate.ts",
+    "seed:lastSeasonPredictions": "tsx scripts/seedLastSeasonPredictions.ts",
+    "seed:initialElo": "tsx scripts/seedInitialElo.ts",
+    "reset:seasonElo": "tsx scripts/resetSeasonElo.ts",
+    "process:outcomes": "tsx scripts/processGameOutcomes.ts",
     "start": "next start",
     "lint": "eslint"
   },
@@ -43,6 +47,7 @@
     "eslint-plugin-prettier": "^5.5.4",
     "prettier": "^3.6.2",
     "tailwindcss": "^4",
+    "tsx": "^4.22.4",
     "typescript": "^5",
     "vitest": "^3.2.4"
   }

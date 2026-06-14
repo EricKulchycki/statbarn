@@ -1,5 +1,5 @@
 import { CollapsibleSection } from '@/components/CollapsibleSection'
-import { getTeams } from '@/data/teams'
+import { getTeams } from '@/data/teamsCache'
 import { getYesterdayGamesSummary } from '@/lib/yesterdayGames'
 import { YesterdaysGameOutcomes as YesterdaysGameOutcomesClient } from './client'
 

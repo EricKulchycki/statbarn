@@ -1,89 +1,106 @@
 import mongoose from 'mongoose'
 import { Database } from '../src/lib/db'
-import { Team } from '../src/types/team'
 import { TeamModel } from '../src/models/team'
-import { getTeams } from '../src/data/teams'
+import { Conference, Division } from '../src/types/team'
 
-async function fetchTeamInfo(teamId: string) {
-  const url = `https://api.nhle.com/stats/rest/en/team/id/${teamId}`
-  const response = await fetch(url)
+interface NHLTeamRecord {
+  id: number
+  franchiseId: number
+  fullName: string
+  leagueId: number
+  rawTricode: string
+  triCode: string
+}
+
+const conferenceDivisionMap: Record<
+  string,
+  { conference: Conference; division: Division }
+> = {
+  ANA: { conference: Conference.WESTERN, division: Division.PACIFIC },
+  BOS: { conference: Conference.EASTERN, division: Division.ATLANTIC },
+  BUF: { conference: Conference.EASTERN, division: Division.ATLANTIC },
+  CGY: { conference: Conference.WESTERN, division: Division.PACIFIC },
+  CAR: { conference: Conference.EASTERN, division: Division.METROPOLITAN },
+  CHI: { conference: Conference.WESTERN, division: Division.CENTRAL },
+  COL: { conference: Conference.WESTERN, division: Division.CENTRAL },
+  CBJ: { conference: Conference.EASTERN, division: Division.METROPOLITAN },
+  DAL: { conference: Conference.WESTERN, division: Division.CENTRAL },
+  DET: { conference: Conference.EASTERN, division: Division.ATLANTIC },
+  EDM: { conference: Conference.WESTERN, division: Division.PACIFIC },
+  FLA: { conference: Conference.EASTERN, division: Division.ATLANTIC },
+  LAK: { conference: Conference.WESTERN, division: Division.PACIFIC },
+  MIN: { conference: Conference.WESTERN, division: Division.CENTRAL },
+  MTL: { conference: Conference.EASTERN, division: Division.ATLANTIC },
+  NSH: { conference: Conference.WESTERN, division: Division.CENTRAL },
+  NJD: { conference: Conference.EASTERN, division: Division.METROPOLITAN },
+  NYI: { conference: Conference.EASTERN, division: Division.METROPOLITAN },
+  NYR: { conference: Conference.EASTERN, division: Division.METROPOLITAN },
+  OTT: { conference: Conference.EASTERN, division: Division.ATLANTIC },
+  PHI: { conference: Conference.EASTERN, division: Division.METROPOLITAN },
+  PIT: { conference: Conference.EASTERN, division: Division.METROPOLITAN },
+  SJS: { conference: Conference.WESTERN, division: Division.PACIFIC },
+  SEA: { conference: Conference.WESTERN, division: Division.PACIFIC },
+  STL: { conference: Conference.WESTERN, division: Division.CENTRAL },
+  TBL: { conference: Conference.EASTERN, division: Division.ATLANTIC },
+  TOR: { conference: Conference.EASTERN, division: Division.ATLANTIC },
+  UTA: { conference: Conference.WESTERN, division: Division.CENTRAL },
+  VAN: { conference: Conference.WESTERN, division: Division.PACIFIC },
+  VGK: { conference: Conference.WESTERN, division: Division.PACIFIC },
+  WSH: { conference: Conference.EASTERN, division: Division.METROPOLITAN },
+  WPG: { conference: Conference.WESTERN, division: Division.CENTRAL },
+}
+
+async function fetchAllNHLTeams(): Promise<NHLTeamRecord[]> {
+  const response = await fetch('https://api.nhle.com/stats/rest/en/team')
   if (!response.ok)
-    throw new Error(`Failed to fetch team ${teamId}: ${response.statusText}`)
+    throw new Error(`Failed to fetch teams: ${response.statusText}`)
   const data = await response.json()
-  return data
+  return data.data as NHLTeamRecord[]
 }
 
 async function main() {
   const db = Database.getInstance()
-
   await db.connect()
 
-  const allTeams = await getTeams()
-
-  // Manual mapping for conference and division
-  const conferenceDivisionMap: {
-    [abbrev: string]: { conference: string; division: string }
-  } = {
-    ANA: { conference: 'western', division: 'pacific' },
-    ARI: { conference: 'western', division: 'central' },
-    BOS: { conference: 'eastern', division: 'atlantic' },
-    BUF: { conference: 'eastern', division: 'atlantic' },
-    CGY: { conference: 'western', division: 'pacific' },
-    CAR: { conference: 'eastern', division: 'metropolitan' },
-    CHI: { conference: 'western', division: 'central' },
-    COL: { conference: 'western', division: 'central' },
-    CBJ: { conference: 'eastern', division: 'metropolitan' },
-    DAL: { conference: 'western', division: 'central' },
-    DET: { conference: 'eastern', division: 'atlantic' },
-    EDM: { conference: 'western', division: 'pacific' },
-    FLA: { conference: 'eastern', division: 'atlantic' },
-    LAK: { conference: 'western', division: 'pacific' },
-    MIN: { conference: 'western', division: 'central' },
-    MTL: { conference: 'eastern', division: 'atlantic' },
-    NSH: { conference: 'western', division: 'central' },
-    NJD: { conference: 'eastern', division: 'metropolitan' },
-    NYI: { conference: 'eastern', division: 'metropolitan' },
-    NYR: { conference: 'eastern', division: 'metropolitan' },
-    OTT: { conference: 'eastern', division: 'atlantic' },
-    PHI: { conference: 'eastern', division: 'metropolitan' },
-    PIT: { conference: 'eastern', division: 'metropolitan' },
-    SJS: { conference: 'western', division: 'pacific' },
-    SEA: { conference: 'western', division: 'pacific' },
-    STL: { conference: 'western', division: 'central' },
-    TBL: { conference: 'eastern', division: 'atlantic' },
-    TOR: { conference: 'eastern', division: 'atlantic' },
-    VAN: { conference: 'western', division: 'pacific' },
-    VGK: { conference: 'western', division: 'pacific' },
-    WSH: { conference: 'eastern', division: 'metropolitan' },
-    UTA: { conference: 'western', division: 'central' },
-    WPG: { conference: 'western', division: 'central' },
-  }
-
-  console.log(`Populating ${allTeams.length} teams...`)
-
+  const allTeams = await fetchAllNHLTeams()
+  // Filter to current teams and deduplicate by triCode, keeping the highest id
+  // (the NHL API returns historical entries; rebrands get new ids)
+  const byTriCode = new Map<string, NHLTeamRecord>()
   for (const team of allTeams) {
-    try {
-      const teamInfo = await fetchTeamInfo(team.id.toString())
-      const confDiv = conferenceDivisionMap[team.triCode]
-      if (!confDiv) {
-        console.warn(`No conference/division mapping for team: ${team.triCode}`)
-        continue
-      }
-      await TeamModel.updateOne(
-        { id: team.id },
-        {
-          $set: {
-            ...teamInfo,
-            conference: confDiv.conference,
-            division: confDiv.division,
-          },
+    if (!(team.triCode in conferenceDivisionMap)) continue
+    const existing = byTriCode.get(team.triCode)
+    if (!existing || team.id > existing.id) byTriCode.set(team.triCode, team)
+  }
+  const activeTeams = Array.from(byTriCode.values())
+
+  console.log(`Seeding ${activeTeams.length} teams...`)
+
+  for (const team of activeTeams) {
+    const confDiv = conferenceDivisionMap[team.triCode]
+    const logo = `https://assets.nhle.com/logos/nhl/svg/${team.triCode}_light.svg`
+
+    await TeamModel.updateOne(
+      { id: team.id },
+      {
+        $set: {
+          id: team.id,
+          franchiseId: team.franchiseId,
+          fullName: team.fullName,
+          leagueId: team.leagueId,
+          rawTricode: team.rawTricode,
+          triCode: team.triCode,
+          conference: confDiv.conference,
+          division: confDiv.division,
+          logo,
         },
-        { upsert: true }
-      )
-      console.log(`Upserted team: ${team.id} (${team.triCode})`)
-    } catch (err) {
-      console.error(`Error for team ${team.id}:`, err)
-    }
+        $setOnInsert: {
+          eloResets: [],
+          seasons: [],
+        },
+      },
+      { upsert: true }
+    )
+    console.log(`Upserted: ${team.triCode} — ${team.fullName}`)
   }
 
   await mongoose.disconnect()

@@ -5,22 +5,16 @@ import { toDomainTeam } from '@/utils/converters/team'
 import { getCurrentNHLSeason } from '@/utils/currentSeason'
 import { DateTime } from 'luxon'
 import { PipelineStage } from 'mongoose'
-import { unstable_cache } from 'next/cache'
-
 export interface LatestELO {
   abbrev: string
   elo: number
   season: number
 }
 
-export const getTeams = unstable_cache(
-  async (): Promise<Team[]> => {
-    const teamModel = await TeamModel.find().exec()
-    return teamModel.map(toDomainTeam)
-  },
-  ['teams'],
-  { revalidate: 86400, tags: ['teams'] }
-)
+export async function getTeams(): Promise<Team[]> {
+  const teamModel = await TeamModel.find().exec()
+  return teamModel.map(toDomainTeam)
+}
 
 export async function getTeamById(id: number): Promise<Team | null> {
   const team = await TeamModel.findOne({ id }).exec()

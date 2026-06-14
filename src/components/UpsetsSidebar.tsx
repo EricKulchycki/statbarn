@@ -1,5 +1,5 @@
 import { upsetService } from '@/services/upset.service'
-import { getTeams } from '@/data/teams'
+import { getTeams } from '@/data/teamsCache'
 import Image from 'next/image'
 import { getTeamFullName, getTeamLogo } from '@/utils/team'
 import { eloService } from '@/services/elo.service'

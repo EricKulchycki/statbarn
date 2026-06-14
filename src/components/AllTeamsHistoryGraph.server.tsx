@@ -1,4 +1,4 @@
-import { getTeams } from '@/data/teams'
+import { getTeams } from '@/data/teamsCache'
 import { eloService } from '@/services/elo.service'
 import { TeamSeasonGame } from '@/types/team'
 import {

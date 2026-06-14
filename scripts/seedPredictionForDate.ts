@@ -1,7 +1,8 @@
-import { scheduleService } from '../src/services/schedule.service'
+import { Database } from '../src/lib/db'
 import { eloService } from '../src/services/elo.service'
 import { predictionsService } from '../src/services/predictions.service'
-import { Database } from '../src/lib/db'
+import { scheduleService } from '../src/services/schedule.service'
+import { NHLGame } from '../src/types/game'
 
 async function seedPredictionsForDate(date: string) {
   const db = Database.getInstance()
@@ -10,7 +11,7 @@ async function seedPredictionsForDate(date: string) {
 
   const schedule = await scheduleService.getScheduleByDate(date)
   const games = (schedule.gameWeek[0]?.games || []).filter(
-    (g) => g.gameType === 2
+    (g: NHLGame) => g.gameType === 2
   )
 
   if (games.length === 0) {

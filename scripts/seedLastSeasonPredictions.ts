@@ -5,8 +5,17 @@ import { TeamModel } from '../src/models/team'
 import { predictorService } from '../src/services/predictor.service'
 
 const INITIAL_ELO = ELO_CONFIG.initialRating
-const SEASON = 20252026
-const SEASON_START = '2025-10-07'
+
+const seasonArg = process.argv[2]
+if (!seasonArg || !/^\d{8}$/.test(seasonArg)) {
+  console.error(
+    'Usage: tsx scripts/seedLastSeasonPredictions.ts <YYYYYYY> (e.g. 20242025)'
+  )
+  process.exit(1)
+}
+
+const SEASON = parseInt(seasonArg)
+const SEASON_START = `${seasonArg.slice(0, 4)}-10-01`
 
 interface ScheduleWeek {
   nextStartDate: string
@@ -59,7 +68,8 @@ async function saveTeamSeasonPredictions(
     (s: { season: number }) => s.season === season
   )
   if (!seasonDoc) {
-    team.seasons.push({ season, startElo: INITIAL_ELO, games: [] })
+    const startElo = team.currentElo ?? INITIAL_ELO
+    team.seasons.push({ season, startElo, games: [] })
     seasonDoc = team.seasons[team.seasons.length - 1]
   }
 

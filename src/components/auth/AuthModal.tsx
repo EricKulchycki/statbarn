@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 
@@ -59,9 +60,9 @@ export function AuthModal({
     }
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-slate-800 rounded-lg shadow-xl w-full max-w-md mx-4 p-6 relative">
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="bg-slate-800 rounded-lg shadow-xl w-full max-w-md p-6 relative">
         {/* Close button */}
         <button
           onClick={onClose}
@@ -197,6 +198,7 @@ export function AuthModal({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

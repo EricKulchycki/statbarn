@@ -9,7 +9,7 @@ import { Nav } from '@/components/layout/Header.client'
 import { GameBanner } from '@/components/GameBanner.server'
 import { Suspense } from 'react'
 import { Database } from '@/lib/db'
-import { getCachedAccuracyStats } from '@/lib/cache'
+import { SeasonAccuracyChip } from '@/components/layout/SeasonAccuracyChip.server'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -59,9 +59,12 @@ async function NavWrapper() {
   const db = Database.getInstance()
   await db.connect()
 
-  const { percentage } = await getCachedAccuracyStats(20252026)
-
-  return <Nav accuracyPercentage={percentage} />
+  return (
+    <Nav
+      desktopChip={<SeasonAccuracyChip className="hidden sm:inline-flex" />}
+      mobileChip={<SeasonAccuracyChip compact />}
+    />
+  )
 }
 
 function NavSkeleton() {

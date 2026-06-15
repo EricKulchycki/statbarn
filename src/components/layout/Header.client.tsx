@@ -6,29 +6,29 @@ import { cn } from '@heroui/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { AccuracyBadge } from './AccuracyBadge'
 import { isNavItemActive, NAV_ITEMS } from './navConfig'
 
 interface Props {
-  accuracyPercentage: number
+  desktopChip: React.ReactNode
+  mobileChip: React.ReactNode
 }
 
-export function Nav({ accuracyPercentage }: Props) {
+export function Nav({ desktopChip, mobileChip }: Props) {
   const isMobile = useIsMobile()
 
   if (isMobile) {
     return (
       <>
-        <MobileTopBar percentage={accuracyPercentage} />
+        <MobileTopBar chip={mobileChip} />
         <MobileBottomNav />
       </>
     )
   }
 
-  return <DesktopHeader percentage={accuracyPercentage} />
+  return <DesktopHeader chip={desktopChip} />
 }
 
-function DesktopHeader({ percentage }: { percentage: number }) {
+function DesktopHeader({ chip }: { chip: React.ReactNode }) {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md">
       <div className="flex h-14 items-center gap-4 px-4 sm:px-6">
@@ -48,10 +48,7 @@ function DesktopHeader({ percentage }: { percentage: number }) {
         </div>
 
         <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
-          <AccuracyBadge
-            percentage={percentage}
-            className="hidden sm:inline-flex"
-          />
+          {chip}
           <UserButton />
         </div>
       </div>
@@ -90,7 +87,7 @@ function DesktopNavLinks() {
   )
 }
 
-function MobileTopBar({ percentage }: { percentage: number }) {
+function MobileTopBar({ chip }: { chip: React.ReactNode }) {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md md:hidden">
       <div className="flex h-14 items-center justify-between gap-3 px-4">
@@ -105,7 +102,7 @@ function MobileTopBar({ percentage }: { percentage: number }) {
           />
         </Link>
         <div className="flex items-center gap-2">
-          <AccuracyBadge percentage={percentage} compact />
+          {chip}
           <UserButton />
         </div>
       </div>

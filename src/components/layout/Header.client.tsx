@@ -34,7 +34,7 @@ function DesktopHeader({ chip }: { chip: React.ReactNode }) {
       <div className="flex h-14 items-center gap-4 px-4 sm:px-6">
         <Link href="/" className="flex  transition-opacity hover:opacity-90">
           <Image
-            src="/statbarn_logo.png"
+            src="/statbarnwords.png"
             alt="Stat Barn"
             width={120}
             height={90}

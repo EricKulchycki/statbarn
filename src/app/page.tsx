@@ -1,7 +1,7 @@
 import { CollapsibleSection } from '@/components/CollapsibleSection'
 import { DashboardHeader } from '@/components/DashboardHeader.server'
 import { GamePredictionsWrapper } from '@/components/GamePredictions.server'
-import { PlayerStatsWrapper } from '@/components/PlayerStats.server'
+import { PredictionsSidebar } from '@/components/PredictionsSidebar.server'
 import { YesterdaysGameOutcomes } from '@/components/YesterdaysGameOutcomes/server'
 import { Suspense } from 'react'
 
@@ -39,12 +39,12 @@ export default async function Index() {
 
         <div className="lg:col-span-1 lg:order-2">
           <CollapsibleSection
-            title="Player Stats"
+            title="Predictions"
             defaultOpen={false}
             alwaysOpenOnDesktop={true}
           >
             <Suspense fallback={<LoadingSkeleton />}>
-              <PlayerStatsWrapper />
+              <PredictionsSidebar />
             </Suspense>
           </CollapsibleSection>
         </div>

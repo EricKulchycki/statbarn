@@ -11,6 +11,65 @@ export interface LatestELO {
   season: number
 }
 
+export interface TeamAccuracyStat {
+  triCode: string
+  correct: number
+  total: number
+  accuracy: number
+}
+
+export async function getTeamAccuracyBySeason(
+  season: number
+): Promise<TeamAccuracyStat[]> {
+  const results = await TeamModel.aggregate([
+    { $match: { 'seasons.season': season } },
+    { $unwind: '$seasons' },
+    { $match: { 'seasons.season': season } },
+    { $unwind: '$seasons.games' },
+    {
+      $match: {
+        'seasons.games.outcome': { $exists: true },
+        'seasons.games.prediction': { $exists: true },
+      },
+    },
+    {
+      $group: {
+        _id: '$triCode',
+        correct: {
+          $sum: {
+            $cond: [
+              {
+                $eq: [
+                  '$seasons.games.prediction.predictedWin',
+                  '$seasons.games.outcome.actualWin',
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
+        total: { $sum: 1 },
+      },
+    },
+    {
+      $project: {
+        triCode: '$_id',
+        correct: 1,
+        total: 1,
+        accuracy: { $divide: ['$correct', '$total'] },
+      },
+    },
+    { $sort: { accuracy: -1 } },
+  ])
+  return results.map((r) => ({
+    triCode: r.triCode,
+    correct: r.correct,
+    total: r.total,
+    accuracy: r.accuracy,
+  }))
+}
+
 export async function getTeams(): Promise<Team[]> {
   const teamModel = await TeamModel.find().exec()
   return teamModel.map(toDomainTeam)

@@ -2,7 +2,6 @@ import { getTimezoneFromCookie } from '@/lib/time'
 import { getYesterdayGamesSummary } from '@/lib/yesterdayGames'
 import { scheduleService } from '@/services/schedule.service'
 import { DateTime } from 'luxon'
-import Link from 'next/link'
 
 export async function DashboardHeader() {
   const localTimezone = await getTimezoneFromCookie()
@@ -44,15 +43,7 @@ export async function DashboardHeader() {
       ) : (
         <p className="text-sm text-gray-500 mt-2">No games played yesterday.</p>
       )}
-      <p className="text-xs text-gray-500 mt-3">
-        Predictions update nightly.{' '}
-        <Link
-          href="/model-confidence"
-          className="text-blue-400 hover:text-blue-300 underline"
-        >
-          How it works
-        </Link>
-      </p>
+      <p className="text-xs text-gray-500 mt-3">Predictions update nightly.</p>
     </header>
   )
 }

@@ -48,11 +48,7 @@ export const GamePredictions: React.FC<GamePredictionsProps> = ({
       <section className="my-4">
         <h2 className="text-lg font-semibold text-slate-200 mb-2">Today</h2>
         <p className="text-sm text-gray-400">
-          No upcoming predictions. The season may be complete — see{' '}
-          <a href="/model-confidence" className="text-blue-400 underline">
-            model confidence
-          </a>{' '}
-          for the full record.
+          No upcoming predictions. The season may be complete.
         </p>
       </section>
     )

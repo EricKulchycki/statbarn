@@ -1,7 +1,5 @@
 import {
-  ChartBarIcon,
   HomeIcon,
-  TableCellsIcon,
   TrophyIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/outline'
@@ -22,13 +20,6 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Make Picks',
     shortLabel: 'Picks',
     icon: TrophyIcon,
-  },
-  { href: '/upsets', label: 'Upsets', icon: TableCellsIcon },
-  {
-    href: '/model-confidence',
-    label: 'Confidence',
-    shortLabel: 'Model',
-    icon: ChartBarIcon,
   },
   {
     href: '/historical',

@@ -25,7 +25,9 @@ export function SeasonSelector({ currentSeason }: { currentSeason: number }) {
         }
         onChange={(e) => {
           const selectedSeason = e.target.value.split('/').join('')
-          window.location.href = `/upsets?season=${selectedSeason}`
+          const params = new URLSearchParams(window.location.search)
+          params.set('season', selectedSeason)
+          window.location.search = params.toString()
         }}
       >
         {seasons

@@ -41,22 +41,6 @@ export function Footer({ className = '' }: FooterProps) {
               </li>
               <li>
                 <Link
-                  href="/confidence"
-                  className="text-gray-300 dark:text-gray-300 hover:text-white dark:hover:text-white transition-colors duration-200"
-                >
-                  Confidence
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/upsets"
-                  className="text-gray-300 dark:text-gray-300 hover:text-white dark:hover:text-white transition-colors duration-200"
-                >
-                  Upsets
-                </Link>
-              </li>
-              <li>
-                <Link
                   href="/historical"
                   className="text-gray-300 dark:text-gray-300 hover:text-white dark:hover:text-white transition-colors duration-200"
                 >

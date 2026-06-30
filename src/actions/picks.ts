@@ -1,12 +1,10 @@
 'use server'
 
-import { ELO_CONFIG } from '@/constants'
-import { getScheduleByDate } from '@/data/schedule'
-import { getLatestEloData } from '@/data/teams'
 import { Database } from '@/lib/db'
 import { generateMockGames } from '@/lib/mock/picks'
+import { TeamModel } from '@/models/team'
 import { UserPicksModel } from '@/models/userPicks'
-import { predictorService } from '@/services/predictor.service'
+import { getCurrentNHLSeason } from '@/utils/currentSeason'
 import { DateTime } from 'luxon'
 
 export interface CreatePickData {
@@ -39,12 +37,8 @@ export async function createPick(data: CreatePickData) {
     const db = Database.getInstance()
     await db.connect()
 
-    // Validate that the game hasn't started yet
-    const now = DateTime.now()
-    const gameTime = DateTime.fromJSDate(data.gameDate)
-
-    if (gameTime <= now) {
-      throw new Error('Cannot make picks for games that have already started')
+    if (DateTime.fromJSDate(data.gameDate) <= DateTime.now()) {
+      throw new Error('Cannot pick a game that is already in progress')
     }
 
     // Validate picked team
@@ -80,10 +74,7 @@ export async function createPick(data: CreatePickData) {
 
     await userPicks.save()
 
-    return {
-      success: true,
-      pick: userPicks.picks.find((p) => p.gameId === data.gameId),
-    }
+    return { success: true }
   } catch (error) {
     console.error('Error creating pick:', error)
     throw error
@@ -161,7 +152,10 @@ export async function getUserPicks(firebaseUid: string, filters?: PickFilters) {
       picks = picks.slice(0, filters.limit)
     }
 
-    return picks
+    return picks.map((p) => ({
+      gameId: p.gameId,
+      pickedTeam: p.pickedTeam,
+    }))
   } catch (error) {
     console.error('Error getting user picks:', error)
     throw error
@@ -169,111 +163,87 @@ export async function getUserPicks(firebaseUid: string, filters?: PickFilters) {
 }
 
 /**
- * Get upcoming games available for picks (games happening in the next 48 hours)
+ * Get upcoming games available for picks — next 7 days from the team documents.
+ * Games are sourced from stored season data (prediction set, no outcome yet),
+ * so no NHL API calls are needed.
  */
 export async function getTomorrowsGames() {
   if (process.env.USE_MOCK_GAMES === 'true') {
     return generateMockGames()
   }
 
-  try {
-    const db = Database.getInstance()
-    await db.connect()
+  const db = Database.getInstance()
+  await db.connect()
 
-    const now = DateTime.now()
-    const endTime = now.plus({ hours: 48 })
+  const now = DateTime.now()
+  const startOfToday = now.startOf('day')
+  const weekFromNow = startOfToday.plus({ days: 7 })
+  const season = Number(getCurrentNHLSeason())
 
-    // Fetch schedule from NHL API for today and tomorrow
-    const today = now.toFormat('yyyy-MM-dd')
-    const tomorrow = now.plus({ days: 1 }).toFormat('yyyy-MM-dd')
-    const dayAfter = now.plus({ days: 2 }).toFormat('yyyy-MM-dd')
+  const records = await TeamModel.aggregate([
+    { $unwind: '$seasons' },
+    { $match: { 'seasons.season': season } },
+    { $unwind: '$seasons.games' },
+    {
+      $match: {
+        'seasons.games.isHome': true,
+        'seasons.games.outcome': { $exists: false },
+        'seasons.games.prediction': { $exists: true },
+        'seasons.games.gameDate': {
+          $gte: startOfToday.toJSDate(),
+          $lte: weekFromNow.toJSDate(),
+        },
+      },
+    },
+    {
+      $project: {
+        homeAbbrev: '$triCode',
+        homeLogo: '$logo',
+        homeElo: '$seasons.games.eloBefore',
+        season: '$seasons.season',
+        gameId: '$seasons.games.gameId',
+        gameDate: '$seasons.games.gameDate',
+        opponent: '$seasons.games.opponent',
+        winProbability: '$seasons.games.prediction.winProbability',
+      },
+    },
+    { $sort: { gameDate: 1 } },
+  ])
 
-    const [todaySchedule, tomorrowSchedule, dayAfterSchedule] =
-      await Promise.all([
-        getScheduleByDate(today).catch(() => ({ gameWeek: [] })),
-        getScheduleByDate(tomorrow).catch(() => ({ gameWeek: [] })),
-        getScheduleByDate(dayAfter).catch(() => ({ gameWeek: [] })),
-      ])
+  const allTeams = await TeamModel.find(
+    {},
+    { triCode: 1, logo: 1, currentElo: 1 }
+  ).lean()
+  const teamMap = new Map(allTeams.map((t) => [t.triCode, t]))
 
-    // Combine all games from the schedules
-    const allGameDays = [
-      ...(todaySchedule.gameWeek || []),
-      ...(tomorrowSchedule.gameWeek || []),
-      ...(dayAfterSchedule.gameWeek || []),
-    ]
+  return records.map((r) => {
+    const away = teamMap.get(r.opponent)
+    const homeWinProb: number = r.winProbability ?? 0.5
+    const nhleLogoUrl = (abbrev: string) =>
+      `https://assets.nhle.com/logos/nhl/svg/${abbrev}_light.svg`
 
-    const allGames = allGameDays.flatMap((day) => day.games || [])
-
-    // Filter games that are in the next 48 hours and are regular season
-    const filteredGames = allGames.filter((game) => {
-      const gameTime = DateTime.fromISO(game.startTimeUTC)
-      return (
-        gameTime >= now &&
-        gameTime <= endTime &&
-        game.gameType === 2 && // Regular season
-        game.gameState !== 'OFF' && // Not finished
-        game.gameState !== 'FINAL' // Not final
-      )
-    })
-
-    // Remove duplicates by gameId (NHL API can return same game across multiple date queries)
-    const uniqueGamesMap = new Map()
-    filteredGames.forEach((game) => {
-      if (!uniqueGamesMap.has(game.id)) {
-        uniqueGamesMap.set(game.id, game)
-      }
-    })
-    const upcomingGames = Array.from(uniqueGamesMap.values())
-
-    const eloRatings = await getLatestEloData()
-    const eloMap = new Map(eloRatings.map((e) => [e.abbrev, e.elo]))
-
-    // Calculate expected results for each game
-    return upcomingGames
-      .map((game) => {
-        const homeElo =
-          eloMap.get(game.homeTeam.abbrev) || ELO_CONFIG.initialRating
-        const awayElo =
-          eloMap.get(game.awayTeam.abbrev) || ELO_CONFIG.initialRating
-
-        const { homeWinProbability, awayWinProbability } =
-          predictorService.predictGame({
-            homeAbbrev: game.homeTeam.abbrev,
-            awayAbbrev: game.awayTeam.abbrev,
-            homeElo,
-            awayElo,
-          })
-
-        return {
-          gameId: game.id,
-          season: game.season,
-          gameDate: game.startTimeUTC,
-          homeTeam: {
-            abbrev: game.homeTeam.abbrev,
-            logo: game.homeTeam.logo,
-            eloBefore: homeElo,
-            score: game.homeTeam.score || 0,
-          },
-          awayTeam: {
-            abbrev: game.awayTeam.abbrev,
-            logo: game.awayTeam.logo,
-            eloBefore: awayElo,
-            score: game.awayTeam.score || 0,
-          },
-          expectedResult: {
-            homeTeam: homeWinProbability,
-            awayTeam: awayWinProbability,
-          },
-        }
-      })
-      .sort(
-        (a, b) =>
-          new Date(a.gameDate).getTime() - new Date(b.gameDate).getTime()
-      )
-  } catch (error) {
-    console.error('Error getting tomorrows games:', error)
-    throw error
-  }
+    return {
+      gameId: r.gameId as number,
+      season: r.season as number,
+      gameDate: (r.gameDate as Date).toISOString(),
+      homeTeam: {
+        abbrev: r.homeAbbrev as string,
+        logo: (r.homeLogo as string | undefined) ?? nhleLogoUrl(r.homeAbbrev),
+        eloBefore: r.homeElo as number,
+        score: 0,
+      },
+      awayTeam: {
+        abbrev: r.opponent as string,
+        logo: away?.logo ?? nhleLogoUrl(r.opponent),
+        eloBefore: away?.currentElo ?? 1500,
+        score: 0,
+      },
+      expectedResult: {
+        homeTeam: homeWinProb,
+        awayTeam: 1 - homeWinProb,
+      },
+    }
+  })
 }
 
 /**
@@ -295,7 +265,6 @@ export async function getUserStats(firebaseUid: string) {
         totalPoints: 0,
         rank: undefined,
         beatStatbarnCount: 0,
-        seasonStats: [],
       }
     }
 
@@ -308,7 +277,6 @@ export async function getUserStats(firebaseUid: string) {
       totalPoints: userPicks.totalPoints,
       rank: userPicks.rank,
       beatStatbarnCount: userPicks.beatStatbarnCount,
-      seasonStats: userPicks.seasonStats,
     }
   } catch (error) {
     console.error('Error getting user stats:', error)

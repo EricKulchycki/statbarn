@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { DateTime } from 'luxon'
-import { LockClosedIcon } from '@heroicons/react/24/solid'
 import { createPick } from '@/actions/picks'
 import Image from 'next/image'
 
@@ -51,11 +50,11 @@ export function PickCard({
 
   const gameTime = DateTime.fromISO(gameDate)
   const now = DateTime.now()
-  const isLocked = gameTime <= now
   const timeUntilGame = gameTime.diff(now, ['hours', 'minutes'])
+  const gameStarted = gameTime <= now
 
   const handleTeamSelect = async (team: string) => {
-    if (isLocked || !firebaseUid) return
+    if (!firebaseUid || gameStarted) return
 
     setSelectedTeam(team)
     setError(null)
@@ -88,29 +87,25 @@ export function PickCard({
         <div className="text-sm text-gray-400">
           {gameTime.toFormat('cccc • h:mm a ZZZZ')}
         </div>
-        {isLocked && (
-          <div className="flex items-center gap-1 text-xs text-yellow-500">
-            <LockClosedIcon className="w-3 h-3" />
-            <span>Locked</span>
-          </div>
-        )}
-        {!isLocked && timeUntilGame.hours < 12 && (
+        {gameStarted ? (
+          <div className="text-xs text-gray-500">In progress</div>
+        ) : timeUntilGame.hours < 12 ? (
           <div className="text-xs text-orange-400">
             {Math.floor(timeUntilGame.hours)}h{' '}
             {Math.floor(timeUntilGame.minutes)}m until game
           </div>
-        )}
+        ) : null}
       </div>
 
       <div className="grid grid-cols-3 gap-4 mb-4">
         <button
           onClick={() => handleTeamSelect(awayTeam.abbrev)}
-          disabled={isLocked || isSubmitting || !firebaseUid}
+          disabled={isSubmitting || !firebaseUid || gameStarted}
           className={`p-4 rounded-lg border-2 transition-all flex flex-col items-center gap-2 ${
             selectedTeam === awayTeam.abbrev
               ? 'border-blue-500 bg-blue-500/20'
               : 'border-slate-600 hover:border-slate-500 bg-slate-800/50'
-          } ${isLocked || !firebaseUid ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+          } ${!firebaseUid || gameStarted ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
         >
           <Image
             width={48}
@@ -128,12 +123,12 @@ export function PickCard({
 
         <button
           onClick={() => handleTeamSelect(homeTeam.abbrev)}
-          disabled={isLocked || isSubmitting || !firebaseUid}
+          disabled={isSubmitting || !firebaseUid || gameStarted}
           className={`p-4 rounded-lg border-2 transition-all flex flex-col items-center gap-2 ${
             selectedTeam === homeTeam.abbrev
               ? 'border-blue-500 bg-blue-500/20'
               : 'border-slate-600 hover:border-slate-500 bg-slate-800/50'
-          } ${isLocked || !firebaseUid ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+          } ${!firebaseUid || gameStarted ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
         >
           <Image
             width={48}

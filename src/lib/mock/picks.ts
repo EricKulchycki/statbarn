@@ -58,43 +58,28 @@ function winProb(
   }
 }
 
-// Game times spread across today/tomorrow (UTC equivalents of common NHL start times)
-const START_TIMES_UTC = [
-  '23:00',
-  '23:30',
-  '00:00',
-  '00:30',
-  '01:00',
-  '02:00',
-  '03:00',
-]
+// Common NHL start times in UTC (ET evening slots)
+const START_TIMES_UTC = ['23:00', '23:30', '00:00', '00:30', '01:00', '02:00']
 
-export function generateMockGames(count: number = 8): Game[] {
-  const teams = [...NHL_TEAMS]
-  const today = DateTime.now().toISODate()!
-  const tomorrow = DateTime.now().plus({ days: 1 }).toISODate()!
+export function generateMockGames(count: number = 14): Game[] {
+  const shuffled = [...NHL_TEAMS].sort((a, b) => (a > b ? 1 : -1))
+  const today = DateTime.now().startOf('day')
 
+  // Build matchup pairs, cycling through teams to fill the requested count
   const matchups: Array<[string, string]> = []
-  const used = new Set<string>()
-
-  // Shuffle teams deterministically enough for development purposes
-  const shuffled = [...teams].sort((a, b) => (a > b ? 1 : -1))
-
-  for (let i = 0; i < shuffled.length - 1 && matchups.length < count; i += 2) {
-    const home = shuffled[i]
-    const away = shuffled[i + 1]
-    if (!used.has(home) && !used.has(away)) {
-      matchups.push([home, away])
-      used.add(home)
-      used.add(away)
-    }
+  for (let i = 0; matchups.length < count; i++) {
+    const homeIdx = (i * 2) % shuffled.length
+    const awayIdx = (i * 2 + 1) % shuffled.length
+    matchups.push([shuffled[homeIdx], shuffled[awayIdx]])
   }
 
+  // Distribute games evenly across 7 days, 2-3 games per day
   return matchups.slice(0, count).map(([home, away], i) => {
     const homeElo = eloFor(home)
     const awayElo = eloFor(away)
     const { home: homeProb, away: awayProb } = winProb(homeElo, awayElo)
-    const date = i % 3 === 0 ? tomorrow : today
+    const dayOffset = Math.floor(i / 2)
+    const date = today.plus({ days: dayOffset }).toISODate()!
     const time = START_TIMES_UTC[i % START_TIMES_UTC.length]
 
     return {

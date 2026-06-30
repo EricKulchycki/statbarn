@@ -4,6 +4,7 @@ import { ELO_CONFIG } from '@/constants'
 import { getScheduleByDate } from '@/data/schedule'
 import { getLatestEloData } from '@/data/teams'
 import { Database } from '@/lib/db'
+import { generateMockGames } from '@/lib/mock/picks'
 import { UserPicksModel } from '@/models/userPicks'
 import { predictorService } from '@/services/predictor.service'
 import { DateTime } from 'luxon'
@@ -171,6 +172,10 @@ export async function getUserPicks(firebaseUid: string, filters?: PickFilters) {
  * Get upcoming games available for picks (games happening in the next 48 hours)
  */
 export async function getTomorrowsGames() {
+  if (process.env.USE_MOCK_GAMES === 'true') {
+    return generateMockGames()
+  }
+
   try {
     const db = Database.getInstance()
     await db.connect()

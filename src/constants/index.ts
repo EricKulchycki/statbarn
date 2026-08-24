@@ -19,13 +19,7 @@ export const DB_CONFIG = {
   maxPoolSize: 10,
 } as const
 
-// ELO constants
-export const ELO_CONFIG = {
-  kFactor: 32,
-  initialRating: 1500,
-  homeAdvantage: 25,
-  meanRegressionFactor: 0.33,
-} as const
+export { ELO_CONFIG } from '@statbarn/prediction-core'
 
 export enum GameType {
   PRESEASON = 'preseason',

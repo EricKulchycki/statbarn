@@ -79,15 +79,14 @@ const mockEloMap = {
 }
 
 describe('calculateGameELO', () => {
-  it('should return homeTeam, awayTeam, and newElos', async () => {
+  it('should return homeTeam and awayTeam with updated ELOs', async () => {
     const result = await calculateGameELO(mockGame, mockEloMap)
     expect(result).toHaveProperty('homeTeam')
     expect(result).toHaveProperty('awayTeam')
-    expect(result).toHaveProperty('newElos')
     expect(result.homeTeam.eloBefore).toBe(1520)
     expect(result.awayTeam.eloBefore).toBe(1480)
-    expect(result.newElos['COL']).toBeGreaterThan(1520)
-    expect(result.newElos['CHI']).toBeLessThan(1480)
+    expect(result.homeTeam.eloAfter).toBeGreaterThan(1520)
+    expect(result.awayTeam.eloAfter).toBeLessThan(1480)
   })
 
   describe('matchup factor adjustments', () => {

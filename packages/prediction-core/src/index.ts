@@ -1,11 +1,15 @@
 export { ELO_CONFIG } from './constants'
+export {
+  adjustKFactor,
+  calculateELOUpdate,
+  regressToMean,
+} from './eloCalculator'
+export { predictGame } from './predictor'
 export type {
+  ELOCalculationResult,
+  ELOsByTeam,
   MatchupFactor,
   PredictionInput,
   PredictionOutput,
   TeamELOResult,
-  ELOCalculationResult,
-  ELOsByTeam,
 } from './types'
-export { predictGame } from './predictor'
-export { calculateELOUpdate, adjustKFactor, regressToMean } from './eloCalculator'

@@ -44,5 +44,7 @@ export function adjustKFactor(baseK: number, goalDiff: number): number {
 }
 
 export function regressToMean(elo: number): number {
-  return elo + (ELO_CONFIG.initialRating - elo) * ELO_CONFIG.meanRegressionFactor
+  return (
+    elo + (ELO_CONFIG.initialRating - elo) * ELO_CONFIG.meanRegressionFactor
+  )
 }

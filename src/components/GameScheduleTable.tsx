@@ -13,7 +13,7 @@ import {
   isRowLive,
 } from '@/utils/gameSchedule'
 import { getTeamLogo } from '@/utils/team'
-import { PlayIcon } from '@heroicons/react/24/solid'
+import { CheckIcon, PlayIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import { useDisclosure } from '@heroui/react'
 import Image from 'next/image'
 import React from 'react'
@@ -116,7 +116,8 @@ function ResultCell({ row }: { row: GameScheduleRow }) {
   }
 
   const isFinal = row.gameState === 'FINAL' || row.gameState === 'OFF'
-  const label = row.resultStatus === 'correct' ? '✓' : '✗'
+  const isCorrect = row.resultStatus === 'correct'
+  const Icon = isCorrect ? CheckIcon : XMarkIcon
   const suffix = isFinal
     ? ''
     : row.resultStatus === 'correct'
@@ -125,11 +126,12 @@ function ResultCell({ row }: { row: GameScheduleRow }) {
 
   return (
     <span
-      className={`font-medium text-sm ${
-        row.resultStatus === 'correct' ? 'text-green-400' : 'text-red-400'
+      className={`inline-flex items-center gap-0.5 font-medium text-sm ${
+        isCorrect ? 'text-green-400' : 'text-red-400'
       }`}
     >
-      {label}
+      <Icon className="size-4" aria-hidden />
+      <span className="sr-only">{isCorrect ? 'Correct' : 'Incorrect'}</span>
       {suffix}
     </span>
   )

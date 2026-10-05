@@ -1,5 +1,8 @@
+import type {
+  PredictionInput,
+  PredictionOutput,
+} from '@statbarn/prediction-core'
 import { predictGame } from '@statbarn/prediction-core'
-import type { PredictionInput, PredictionOutput } from '@statbarn/prediction-core'
 
 export type { PredictionInput, PredictionOutput }
 

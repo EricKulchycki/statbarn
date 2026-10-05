@@ -1,12 +1,15 @@
-import {
-  ELO_CONFIG,
-  calculateELOUpdate,
-  adjustKFactor,
-} from '@statbarn/prediction-core'
-import type { ELOCalculationResult, ELOsByTeam } from '@statbarn/prediction-core'
 import { getMatchupHistoryForTeam } from '@/data/teams'
 import { NHLGame } from '@/types/game'
 import { mapNhlGameType } from '@/utils/gameType'
+import type {
+  ELOCalculationResult,
+  ELOsByTeam,
+} from '@statbarn/prediction-core'
+import {
+  ELO_CONFIG,
+  adjustKFactor,
+  calculateELOUpdate,
+} from '@statbarn/prediction-core'
 
 export type { ELOCalculationResult, ELOsByTeam }
 

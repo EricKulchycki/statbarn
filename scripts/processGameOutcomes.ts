@@ -13,7 +13,7 @@ import { NHLGame } from '../src/types/game'
 const INITIAL_ELO = ELO_CONFIG.initialRating
 
 async function fetchSchedule(date: string): Promise<{
-  gameWeek: { games: NHLGame[] }[]
+  gameWeek: { date: string; games: NHLGame[] }[]
   nextStartDate: string
   regularSeasonEndDate?: string
 }> {
@@ -37,6 +37,7 @@ async function buildEloMap(): Promise<Record<string, number>> {
 
 async function processGames(
   games: NHLGame[],
+  scheduleDate: string,
   eloMap: Record<string, number>
 ): Promise<void> {
   const season = games[0].season
@@ -54,7 +55,13 @@ async function processGames(
       saveTeamGameOutcome(
         home,
         season,
-        { gameId: game.id, gameDate, opponent: away, isHome: true },
+        {
+          gameId: game.id,
+          gameDate,
+          scheduleDate,
+          opponent: away,
+          isHome: true,
+        },
         result.homeTeam.eloBefore,
         {
           actualWin: homeScore > awayScore,
@@ -66,7 +73,13 @@ async function processGames(
       saveTeamGameOutcome(
         away,
         season,
-        { gameId: game.id, gameDate, opponent: home, isHome: false },
+        {
+          gameId: game.id,
+          gameDate,
+          scheduleDate,
+          opponent: home,
+          isHome: false,
+        },
         result.awayTeam.eloBefore,
         {
           actualWin: awayScore > homeScore,
@@ -96,17 +109,18 @@ async function processDate(
   eloMap: Record<string, number>
 ): Promise<void> {
   const schedule = await fetchSchedule(dateStr)
-  const games = (schedule.gameWeek[0]?.games ?? []).filter(
+  const gameDay = schedule.gameWeek[0]
+  const games = (gameDay?.games ?? []).filter(
     (g) => g.gameType === 2 && g.gameState === 'OFF'
   )
 
-  if (games.length === 0) {
+  if (!gameDay || games.length === 0) {
     console.log('No completed regular season games found for this date.')
     return
   }
 
   console.log(`Found ${games.length} completed games.`)
-  await processGames(games, eloMap)
+  await processGames(games, gameDay.date, eloMap)
 }
 
 async function processSeason(season: string): Promise<void> {
@@ -133,10 +147,7 @@ async function processSeason(season: string): Promise<void> {
         (g) => g.gameType === 2 && g.gameState === 'OFF'
       )
       if (completed.length > 0) {
-        gameDays.push({
-          date: (day as unknown as { date: string }).date,
-          games: completed,
-        })
+        gameDays.push({ date: day.date, games: completed })
         totalGames += completed.length
       }
     }
@@ -156,7 +167,7 @@ async function processSeason(season: string): Promise<void> {
 
   for (const { date, games } of gameDays) {
     console.log(`\n${date} (${games.length} games)`)
-    await processGames(games, eloMap)
+    await processGames(games, date, eloMap)
   }
 }
 

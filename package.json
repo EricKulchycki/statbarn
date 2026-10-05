@@ -2,9 +2,10 @@
   "name": "statbarn",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "npm run build --prefix packages/prediction-core && next build --turbopack",
     "test": "vitest",
     "migrate:toTeamModel": "tsx --env-file=.env scripts/migrateToTeamModel.ts",
     "seed:populateTeams": "tsx --env-file=.env scripts/populateTeams.ts",
@@ -13,7 +14,8 @@
     "seed:initialElo": "tsx --env-file=.env scripts/seedInitialElo.ts",
     "reset:seasonElo": "tsx --env-file=.env scripts/resetSeasonElo.ts",
     "clear:teamSeasons": "tsx --env-file=.env scripts/clearTeamSeasons.ts",
-    "process:outcomes": "tsx --env-file=.env scripts/processGameOutcomes.ts",
+    "migrate:scheduleDate": "tsx --env-file=.env scripts/backfillScheduleDate.ts",
+    "process:outcomes":"tsx --env-file=.env scripts/processGameOutcomes.ts",
     "start": "next start",
     "lint": "eslint"
   },

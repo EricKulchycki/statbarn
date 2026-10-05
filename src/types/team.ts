@@ -37,6 +37,8 @@ export interface EloReset {
 export interface TeamSeasonGame {
   gameId: number
   gameDate: Date
+  // NHL schedule day (YYYY-MM-DD); late games keep the date they were scheduled on
+  scheduleDate: string
   opponent: string
   isHome: boolean
   eloBefore: number

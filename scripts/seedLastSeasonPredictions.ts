@@ -46,6 +46,7 @@ async function saveTeamSeasonPredictions(
   games: Array<{
     gameId: number
     gameDate: Date
+    scheduleDate: string
     opponent: string
     isHome: boolean
     eloBefore: number
@@ -80,6 +81,7 @@ async function saveTeamSeasonPredictions(
     if (existing) {
       existing.prediction = g.prediction
       existing.eloBefore = g.eloBefore
+      existing.scheduleDate = g.scheduleDate
     } else {
       seasonDoc.games.push(g)
     }
@@ -93,7 +95,10 @@ async function main() {
   const db = Database.getInstance()
   await db.connect()
 
-  const allGames: ScheduleWeek['gameWeek'][0]['games'] = []
+  const allGames: Array<{
+    game: ScheduleWeek['gameWeek'][0]['games'][0]
+    scheduleDate: string
+  }> = []
   let currentDate = SEASON_START
   let regularSeasonEnd = ''
 
@@ -110,7 +115,7 @@ async function main() {
     for (const day of week.gameWeek) {
       for (const game of day.games) {
         if (game.gameType === 2) {
-          allGames.push(game)
+          allGames.push({ game, scheduleDate: day.date })
         }
       }
     }
@@ -131,6 +136,7 @@ async function main() {
     Array<{
       gameId: number
       gameDate: Date
+      scheduleDate: string
       opponent: string
       isHome: boolean
       eloBefore: number
@@ -142,7 +148,7 @@ async function main() {
     }>
   >()
 
-  for (const game of allGames) {
+  for (const { game, scheduleDate } of allGames) {
     const home = game.homeTeam.abbrev
     const away = game.awayTeam.abbrev
     const gameDate = new Date(game.startTimeUTC)
@@ -159,6 +165,7 @@ async function main() {
     byTeam.get(home)!.push({
       gameId: game.id,
       gameDate,
+      scheduleDate,
       opponent: away,
       isHome: true,
       eloBefore: INITIAL_ELO,
@@ -173,6 +180,7 @@ async function main() {
     byTeam.get(away)!.push({
       gameId: game.id,
       gameDate,
+      scheduleDate,
       opponent: home,
       isHome: false,
       eloBefore: INITIAL_ELO,

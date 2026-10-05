@@ -10,11 +10,10 @@ async function seedPredictionsForDate(date: string) {
   console.log(`Seeding predictions for date: ${date}`)
 
   const schedule = await scheduleService.getScheduleByDate(date)
-  const games = (schedule.gameWeek[0]?.games || []).filter(
-    (g: NHLGame) => g.gameType === 2
-  )
+  const gameDay = schedule.gameWeek[0]
+  const games = (gameDay?.games || []).filter((g: NHLGame) => g.gameType === 2)
 
-  if (games.length === 0) {
+  if (!gameDay || games.length === 0) {
     console.log('No regular season games found for this date.')
     return
   }
@@ -22,7 +21,7 @@ async function seedPredictionsForDate(date: string) {
   const latestElos = await eloService.getLatestElos()
   const eloMap = Object.fromEntries(latestElos.map((e) => [e.abbrev, e.elo]))
 
-  await predictionsService.predictGames(games, eloMap)
+  await predictionsService.predictGames(games, gameDay.date, eloMap)
   console.log(`Seeded predictions for ${games.length} games on ${date}`)
 }
 

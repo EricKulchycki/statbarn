@@ -52,6 +52,7 @@ const teamSchema: Schema = new Schema(
           {
             gameId: { type: Number, required: true },
             gameDate: { type: Date, required: true },
+            scheduleDate: { type: String },
             opponent: { type: String, required: true },
             isHome: { type: Boolean, required: true },
             eloBefore: { type: Number, required: true },

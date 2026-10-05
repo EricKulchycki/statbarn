@@ -2,7 +2,7 @@ export { ELO_CONFIG } from './constants'
 export {
   adjustKFactor,
   calculateELOUpdate,
-  regressToMean
+  regressToMean,
 } from './eloCalculator'
 export { predictGame } from './predictor'
 export type {
@@ -11,6 +11,5 @@ export type {
   MatchupFactor,
   PredictionInput,
   PredictionOutput,
-  TeamELOResult
+  TeamELOResult,
 } from './types'
-

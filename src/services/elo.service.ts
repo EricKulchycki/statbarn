@@ -66,9 +66,11 @@ export class EloService {
     }
   }
 
-  async getLastEloGamesForDate(date: Date): Promise<GamePrediction[]> {
+  async getLastEloGamesForDate(
+    scheduleDate: string
+  ): Promise<GamePrediction[]> {
     try {
-      return await getCompletedGamesForDate(date)
+      return await getCompletedGamesForDate(scheduleDate)
     } catch (error) {
       throw createApiError(
         'getLastEloGamesForDate',

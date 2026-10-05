@@ -3,7 +3,6 @@ import { GamePrediction } from '@/types/gamePrediction'
 import { Team, TeamSeasonGame } from '@/types/team'
 import { toDomainTeam } from '@/utils/converters/team'
 import { getCurrentNHLSeason } from '@/utils/currentSeason'
-import { DateTime } from 'luxon'
 import { PipelineStage } from 'mongoose'
 export interface LatestELO {
   abbrev: string
@@ -184,12 +183,8 @@ export async function getGamePredictionsForGameIds(
 }
 
 export async function getCompletedGamesForDate(
-  date: Date
+  scheduleDate: string
 ): Promise<GamePrediction[]> {
-  const dateStr = DateTime.fromJSDate(date).toISODate()
-  const start = new Date(`${dateStr}T00:00:00Z`)
-  const end = new Date(`${dateStr}T23:59:59Z`)
-
   const results = await TeamModel.aggregate([
     { $unwind: '$seasons' },
     { $unwind: '$seasons.games' },
@@ -197,7 +192,7 @@ export async function getCompletedGamesForDate(
       $match: {
         'seasons.games.isHome': true,
         'seasons.games.outcome': { $exists: true },
-        'seasons.games.gameDate': { $gte: start, $lte: end },
+        'seasons.games.scheduleDate': scheduleDate,
       },
     },
     { $project: { triCode: 1, game: '$seasons.games' } },
@@ -297,6 +292,7 @@ export async function saveTeamGameOutcome(
   gameInfo: {
     gameId: number
     gameDate: Date
+    scheduleDate: string
     opponent: string
     isHome: boolean
   },
@@ -315,6 +311,7 @@ export async function saveTeamGameOutcome(
         currentElo: outcome.eloAfter,
         'seasons.$[s].games.$[g].outcome': outcome,
         'seasons.$[s].games.$[g].eloBefore': eloBefore,
+        'seasons.$[s].games.$[g].scheduleDate': gameInfo.scheduleDate,
       },
     },
     {
@@ -386,6 +383,7 @@ export async function saveTeamSeasonPredictions(
   games: Array<{
     gameId: number
     gameDate: Date
+    scheduleDate: string
     opponent: string
     isHome: boolean
     eloBefore: number
@@ -413,6 +411,7 @@ export async function saveTeamSeasonPredictions(
     if (existing) {
       existing.prediction = g.prediction
       existing.eloBefore = g.eloBefore
+      existing.scheduleDate = g.scheduleDate
     } else {
       seasonDoc.games.push(g)
     }

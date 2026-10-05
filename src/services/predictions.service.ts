@@ -39,20 +39,20 @@ export class PredictionsService {
     const tomorrow = new Date().toISOString().slice(0, 10)
 
     const gameWeek = await scheduleService.getScheduleByDate(tomorrow)
-    const games = (gameWeek.gameWeek[0]?.games || []).filter(
-      (g) => g.gameType === 2
-    )
+    const gameDay = gameWeek.gameWeek[0]
+    const games = (gameDay?.games || []).filter((g) => g.gameType === 2)
 
-    if (games.length === 0) return
+    if (!gameDay || games.length === 0) return
 
     const latestElos = await eloService.getLatestElos()
     const eloMap = Object.fromEntries(latestElos.map((e) => [e.abbrev, e.elo]))
 
-    await this.predictGames(games, eloMap)
+    await this.predictGames(games, gameDay.date, eloMap)
   }
 
   async predictGames(
     games: NHLGame[],
+    scheduleDate: string,
     currentElos: ELOsByTeam,
     modelVersion = 'v1'
   ): Promise<void> {
@@ -61,6 +61,7 @@ export class PredictionsService {
       Array<{
         gameId: number
         gameDate: Date
+        scheduleDate: string
         opponent: string
         isHome: boolean
         eloBefore: number
@@ -76,6 +77,7 @@ export class PredictionsService {
       Array<{
         gameId: number
         gameDate: Date
+        scheduleDate: string
         opponent: string
         isHome: boolean
         eloBefore: number
@@ -108,6 +110,7 @@ export class PredictionsService {
       byHomeTeam.get(homeAbbrev)!.push({
         gameId: game.id,
         gameDate,
+        scheduleDate,
         opponent: awayAbbrev,
         isHome: true,
         eloBefore: homeElo,
@@ -122,6 +125,7 @@ export class PredictionsService {
       byAwayTeam.get(awayAbbrev)!.push({
         gameId: game.id,
         gameDate,
+        scheduleDate,
         opponent: homeAbbrev,
         isHome: false,
         eloBefore: awayElo,

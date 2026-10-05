@@ -18,7 +18,13 @@ export async function GET() {
   const gameWeek = await scheduleService.getScheduleByDate(
     yesterday.toISODate()!
   )
-  const games = (gameWeek.gameWeek[0]?.games || []).filter(
+  const gameDay = gameWeek.gameWeek[0]
+  if (!gameDay) {
+    return NextResponse.json({ success: true, processed: 0 })
+  }
+
+  const scheduleDate = gameDay.date
+  const games = gameDay.games.filter(
     (g) => g.gameType === 2 && g.gameState === 'OFF'
   )
 
@@ -39,6 +45,7 @@ export async function GET() {
         {
           gameId: game.id,
           gameDate,
+          scheduleDate,
           opponent: game.awayTeam.abbrev,
           isHome: true,
         },
@@ -56,6 +63,7 @@ export async function GET() {
         {
           gameId: game.id,
           gameDate,
+          scheduleDate,
           opponent: game.homeTeam.abbrev,
           isHome: false,
         },

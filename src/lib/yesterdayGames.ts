@@ -11,17 +11,18 @@ export interface YesterdayGamesSummary {
   dateLabel: string
 }
 
+export function getYesterdayInZone(timezone: string, now: DateTime): DateTime {
+  const local = now.setZone(timezone)
+  return (local.isValid ? local : now).minus({ days: 1 })
+}
+
 export async function getYesterdayGamesSummary(): Promise<YesterdayGamesSummary> {
   const localTimezone = await getTimezoneFromCookie()
-  const localDate = DateTime.now().setZone(localTimezone).toISODate()
-  const yesterday =
-    localDate != null && localDate !== ''
-      ? DateTime.fromISO(localDate).minus({ days: 1 })
-      : DateTime.now().minus({ days: 1 })
+  const yesterday = getYesterdayInZone(localTimezone, DateTime.now())
 
   let games: GamePrediction[] = []
   try {
-    games = await eloService.getLastEloGamesForDate(yesterday.toJSDate())
+    games = await eloService.getLastEloGamesForDate(yesterday.toISODate()!)
   } catch (error) {
     console.error('Error fetching yesterday games:', error)
   }

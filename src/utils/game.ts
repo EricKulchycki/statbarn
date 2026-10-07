@@ -8,3 +8,7 @@ export function isLive(status: GameStatus): boolean {
     (status === 'CRIT' || status === 'LIVE')
   )
 }
+
+export function isFinal(status: GameStatus): boolean {
+  return status === 'FINAL' || status === 'OFF'
+}

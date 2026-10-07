@@ -1,0 +1,1 @@
+export { MatchupModal } from './MatchupModal'

@@ -19,10 +19,18 @@ async function main() {
 
   const result = await TeamModel.updateMany(
     {},
-    { $set: { seasons: [], eloResets: [], currentElo: ELO_CONFIG.initialRating } }
+    {
+      $set: {
+        seasons: [],
+        eloResets: [],
+        currentElo: ELO_CONFIG.initialRating,
+      },
+    }
   )
 
-  console.log(`Cleared seasons and eloResets, reset currentElo to ${ELO_CONFIG.initialRating} on ${result.modifiedCount} teams.`)
+  console.log(
+    `Cleared seasons and eloResets, reset currentElo to ${ELO_CONFIG.initialRating} on ${result.modifiedCount} teams.`
+  )
   await mongoose.disconnect()
 }
 

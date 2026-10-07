@@ -15,10 +15,13 @@ import { TeamModel } from '../src/models/team'
 // Static imports are hoisted, but the connect call is inside migrate() so
 // process.env is already populated by the time it runs.
 try {
-  const lines = readFileSync(resolve(process.cwd(), '.env'), 'utf-8').split('\n')
+  const lines = readFileSync(resolve(process.cwd(), '.env'), 'utf-8').split(
+    '\n'
+  )
   for (const line of lines) {
     const m = line.match(/^([^=#\s][^=]*?)\s*=\s*(.*)$/)
-    if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, '')
+    if (m && !process.env[m[1]])
+      process.env[m[1]] = m[2].replace(/^["']|["']$/g, '')
   }
 } catch {
   // no .env present — rely on real env vars
@@ -33,8 +36,18 @@ interface OldGameELO {
   gameId: number
   season: number
   gameDate: Date | string
-  homeTeam: { abbrev: string; eloBefore: number; eloAfter: number; score: number }
-  awayTeam: { abbrev: string; eloBefore: number; eloAfter: number; score: number }
+  homeTeam: {
+    abbrev: string
+    eloBefore: number
+    eloAfter: number
+    score: number
+  }
+  awayTeam: {
+    abbrev: string
+    eloBefore: number
+    eloAfter: number
+    score: number
+  }
   eloChange: { homeTeam: number; awayTeam: number }
   modelVersion?: string
 }
@@ -72,7 +85,11 @@ interface GameEntry {
   opponent: string
   isHome: boolean
   eloBefore: number
-  prediction?: { winProbability: number; predictedWin: boolean; modelVersion: string }
+  prediction?: {
+    winProbability: number
+    predictedWin: boolean
+    modelVersion: string
+  }
   outcome?: {
     actualWin: boolean
     eloAfter: number
@@ -94,7 +111,9 @@ async function migrate() {
   if (!rawDb) throw new Error('No active DB connection')
 
   // 1. Discover collections
-  const collections = (await rawDb.listCollections().toArray()).map((c) => c.name)
+  const collections = (await rawDb.listCollections().toArray()).map(
+    (c) => c.name
+  )
   console.log('Collections found:', collections.join(', '))
 
   const gameEloName = collections.find((n) => /gameelo/.test(n))
@@ -153,7 +172,8 @@ async function migrate() {
 
   const ensureBucket = (abbrev: string, season: number) => {
     if (!teamGames.has(abbrev)) teamGames.set(abbrev, new Map())
-    if (!teamGames.get(abbrev)!.has(season)) teamGames.get(abbrev)!.set(season, [])
+    if (!teamGames.get(abbrev)!.has(season))
+      teamGames.get(abbrev)!.set(season, [])
     return teamGames.get(abbrev)!.get(season)!
   }
 
@@ -166,8 +186,7 @@ async function migrate() {
     // Determine if the game has been played: a non-zero ELO change is definitive;
     // both sides having the same ELO before/after means the record was written for
     // a future game (ELO change = 0).
-    const isCompleted =
-      g.eloChange.homeTeam !== 0 || g.eloChange.awayTeam !== 0
+    const isCompleted = g.eloChange.homeTeam !== 0 || g.eloChange.awayTeam !== 0
 
     const homeBucket = ensureBucket(homeAbbrev, g.season)
     const awayBucket = ensureBucket(awayAbbrev, g.season)
@@ -248,13 +267,18 @@ async function migrate() {
       const totalGames = seasons.reduce((s, sn) => s + sn.games.length, 0)
       console.log(
         `[dry-run] ${abbrev}: ${seasons.length} season(s), ${totalGames} game entries` +
-          (currentElo !== undefined ? `, currentElo=${currentElo.toFixed(1)}` : '')
+          (currentElo !== undefined
+            ? `, currentElo=${currentElo.toFixed(1)}`
+            : '')
       )
       updated++
       continue
     }
 
-    const result = await TeamModel.updateOne({ triCode: abbrev }, { $set: update })
+    const result = await TeamModel.updateOne(
+      { triCode: abbrev },
+      { $set: update }
+    )
 
     if (result.matchedCount === 0) {
       console.warn(`  Team not found in teams collection: ${abbrev}`)

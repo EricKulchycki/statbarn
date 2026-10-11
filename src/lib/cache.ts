@@ -8,15 +8,17 @@ export const getCachedAccuracyStats = unstable_cache(
   async (season: number) => {
     const { eloService } = await import('@/services/elo.service')
 
-    const [totalGames, correctPredictions] = await Promise.all([
+    const [totalGames, correctPredictions, brierScore] = await Promise.all([
       eloService.countSeasonsGames(season),
       eloService.countSeasonsCorrectPredictions(season),
+      eloService.getSeasonBrierScore(season),
     ])
 
     return {
       totalGames,
       correctPredictions,
       percentage: totalGames > 0 ? (correctPredictions / totalGames) * 100 : 0,
+      brierScore,
     }
   },
   ['accuracy-stats'],

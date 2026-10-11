@@ -1,6 +1,7 @@
 import { TeamModel } from '@/models/team'
 import { GamePrediction } from '@/types/gamePrediction'
 import { Team, TeamSeasonGame } from '@/types/team'
+import { ForecastOutcome } from '@/utils/brierScore'
 import { toDomainTeam } from '@/utils/converters/team'
 import { getCurrentNHLSeason } from '@/utils/currentSeason'
 import { PipelineStage } from 'mongoose'
@@ -256,6 +257,30 @@ export async function countSeasonCorrectPredictions(
     { $count: 'total' },
   ])
   return result[0]?.total ?? 0
+}
+
+export async function getSeasonForecastOutcomes(
+  season: number
+): Promise<ForecastOutcome[]> {
+  return TeamModel.aggregate<ForecastOutcome>([
+    { $unwind: '$seasons' },
+    { $match: { 'seasons.season': season } },
+    { $unwind: '$seasons.games' },
+    {
+      $match: {
+        'seasons.games.isHome': true,
+        'seasons.games.outcome': { $exists: true },
+        'seasons.games.prediction.winProbability': { $exists: true },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        probability: '$seasons.games.prediction.winProbability',
+        occurred: '$seasons.games.outcome.actualWin',
+      },
+    },
+  ])
 }
 
 function teamGameToGamePrediction(

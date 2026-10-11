@@ -20,6 +20,7 @@ export async function SeasonAccuracyChip({ compact, className }: Props) {
   return (
     <AccuracyBadge
       percentage={stats.percentage}
+      brierScore={stats.brierScore}
       compact={compact}
       className={className}
     />

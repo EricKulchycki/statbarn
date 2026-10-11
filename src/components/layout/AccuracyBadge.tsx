@@ -2,12 +2,14 @@ import { cn } from '@heroui/react'
 
 interface AccuracyBadgeProps {
   percentage: number
+  brierScore?: number | null
   compact?: boolean
   className?: string
 }
 
 export function AccuracyBadge({
   percentage,
+  brierScore = null,
   compact = false,
   className,
 }: AccuracyBadgeProps) {
@@ -47,6 +49,17 @@ export function AccuracyBadge({
       <span className={cn('text-sm font-bold tabular-nums', colorClass)}>
         {percentage.toFixed(1)}%
       </span>
+      {brierScore !== null && (
+        <span
+          className="border-l border-slate-700 pl-2 text-xs text-slate-400"
+          title="Brier score: how well our confidence matched results. Lower is better; always guessing 50% scores 0.250."
+        >
+          Brier{' '}
+          <span className="font-bold tabular-nums text-slate-200">
+            {brierScore.toFixed(3)}
+          </span>
+        </span>
+      )}
     </div>
   )
 }

@@ -6,11 +6,13 @@ import {
   getLatestEloData,
   getLeagueGameHistoryByTeam,
   getMatchupHistoryForTeam,
+  getSeasonForecastOutcomes,
   getTeamSeasonGames,
   LatestELO,
 } from '@/data/teams'
 import { GamePrediction } from '@/types/gamePrediction'
 import { TeamSeasonGame } from '@/types/team'
+import { brierScore } from '@/utils/brierScore'
 import { getCurrentNHLSeason } from '@/utils/currentSeason'
 import { createApiError } from '../types/errors'
 
@@ -125,6 +127,17 @@ export class EloService {
       throw createApiError(
         'countSeasonsGames',
         `Failed to count season games: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
+    }
+  }
+
+  async getSeasonBrierScore(season: number): Promise<number | null> {
+    try {
+      return brierScore(await getSeasonForecastOutcomes(season))
+    } catch (error) {
+      throw createApiError(
+        'getSeasonBrierScore',
+        `Failed to calculate season Brier score: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }

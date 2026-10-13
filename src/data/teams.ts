@@ -1,3 +1,4 @@
+import { Database } from '@/lib/db'
 import { TeamModel } from '@/models/team'
 import { GamePrediction } from '@/types/gamePrediction'
 import { Team, TeamSeasonGame } from '@/types/team'
@@ -5,6 +6,10 @@ import { ForecastOutcome } from '@/utils/brierScore'
 import { toDomainTeam } from '@/utils/converters/team'
 import { getCurrentNHLSeason } from '@/utils/currentSeason'
 import { PipelineStage } from 'mongoose'
+
+// Every query awaits this so callers never depend on a layout having connected
+const connectDatabase = () => Database.getInstance().connect()
+
 export interface LatestELO {
   abbrev: string
   elo: number
@@ -21,6 +26,7 @@ export interface TeamAccuracyStat {
 export async function getTeamAccuracyBySeason(
   season: number
 ): Promise<TeamAccuracyStat[]> {
+  await connectDatabase()
   const results = await TeamModel.aggregate([
     { $match: { 'seasons.season': season } },
     { $unwind: '$seasons' },
@@ -71,21 +77,25 @@ export async function getTeamAccuracyBySeason(
 }
 
 export async function getTeams(): Promise<Team[]> {
+  await connectDatabase()
   const teamModel = await TeamModel.find().exec()
   return teamModel.map(toDomainTeam)
 }
 
 export async function getTeamById(id: number): Promise<Team | null> {
+  await connectDatabase()
   const team = await TeamModel.findOne({ id }).exec()
   return team ? toDomainTeam(team) : null
 }
 
 export async function getTeamByAbbrev(abbrev: string): Promise<Team | null> {
+  await connectDatabase()
   const team = await TeamModel.findOne({ triCode: abbrev }).exec()
   return team ? toDomainTeam(team) : null
 }
 
 export async function getLatestEloData(): Promise<LatestELO[]> {
+  await connectDatabase()
   const currentSeason = Number(getCurrentNHLSeason())
   const teams = await TeamModel.find(
     { currentElo: { $exists: true } },
@@ -103,6 +113,7 @@ export async function getTeamSeasonGames(
   season: number,
   limit?: number
 ): Promise<TeamSeasonGame[]> {
+  await connectDatabase()
   const pipeline: PipelineStage[] = [
     { $match: { triCode: abbrev } },
     { $unwind: '$seasons' },
@@ -119,6 +130,7 @@ export async function getLeagueGameHistoryByTeam(
   season: number,
   limit: number
 ): Promise<{ [abbrev: string]: TeamSeasonGame[] }> {
+  await connectDatabase()
   const teams = await TeamModel.find(
     { 'seasons.season': season },
     { triCode: 1, 'seasons.$': 1 }
@@ -148,6 +160,7 @@ export async function getMatchupHistoryForTeam(
   limit: number,
   season?: number
 ): Promise<TeamSeasonGame[]> {
+  await connectDatabase()
   const pipeline: PipelineStage[] = [
     { $match: { triCode: teamA } },
     { $unwind: '$seasons' },
@@ -169,6 +182,7 @@ export async function getMatchupHistoryForTeam(
 export async function getGamePredictionsForGameIds(
   gameIds: number[]
 ): Promise<GamePrediction[]> {
+  await connectDatabase()
   const results = await TeamModel.aggregate([
     { $unwind: '$seasons' },
     { $unwind: '$seasons.games' },
@@ -186,6 +200,7 @@ export async function getGamePredictionsForGameIds(
 export async function getCompletedGamesForDate(
   scheduleDate: string
 ): Promise<GamePrediction[]> {
+  await connectDatabase()
   const results = await TeamModel.aggregate([
     { $unwind: '$seasons' },
     { $unwind: '$seasons.games' },
@@ -204,6 +219,7 @@ export async function getCompletedGamesForDate(
 export async function getAllGamePredictionsForSeason(
   season: number
 ): Promise<GamePrediction[]> {
+  await connectDatabase()
   const results = await TeamModel.aggregate([
     { $unwind: '$seasons' },
     { $match: { 'seasons.season': season } },
@@ -220,6 +236,7 @@ export async function getAllGamePredictionsForSeason(
 }
 
 export async function countSeasonGames(season: number): Promise<number> {
+  await connectDatabase()
   const result = await TeamModel.aggregate([
     { $unwind: '$seasons' },
     { $match: { 'seasons.season': season } },
@@ -238,6 +255,7 @@ export async function countSeasonGames(season: number): Promise<number> {
 export async function countSeasonCorrectPredictions(
   season: number
 ): Promise<number> {
+  await connectDatabase()
   const result = await TeamModel.aggregate([
     { $unwind: '$seasons' },
     { $match: { 'seasons.season': season } },
@@ -262,6 +280,7 @@ export async function countSeasonCorrectPredictions(
 export async function getSeasonForecastOutcomes(
   season: number
 ): Promise<ForecastOutcome[]> {
+  await connectDatabase()
   return TeamModel.aggregate<ForecastOutcome>([
     { $unwind: '$seasons' },
     { $match: { 'seasons.season': season } },
@@ -324,6 +343,7 @@ export async function saveTeamGameOutcome(
   eloBefore: number,
   outcome: NonNullable<TeamSeasonGame['outcome']>
 ): Promise<void> {
+  await connectDatabase()
   await TeamModel.updateOne(
     { triCode: abbrev, 'seasons.season': { $ne: season } },
     { $push: { seasons: { season, startElo: eloBefore, games: [] } } }
@@ -363,6 +383,7 @@ export async function recalculatePredictionsForTeam(
   currentElos: { [abbrev: string]: number },
   modelVersion = 'v1'
 ): Promise<void> {
+  await connectDatabase()
   const { predictorService } = await import('@/services/predictor.service')
   const { ELO_CONFIG } = await import('@/constants')
 
@@ -416,6 +437,7 @@ export async function saveTeamSeasonPredictions(
   }>
 ): Promise<void> {
   if (games.length === 0) return
+  await connectDatabase()
 
   const team = await TeamModel.findOne({ triCode: abbrev })
   if (!team) return

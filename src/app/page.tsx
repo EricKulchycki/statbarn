@@ -1,4 +1,3 @@
-import { CollapsibleSection } from '@/components/CollapsibleSection'
 import { DayNav, DayNavSkeleton } from '@/components/DayNav.server'
 import { DaySlate } from '@/components/DaySlate.server'
 import { PredictionsSidebar } from '@/components/PredictionsSidebar.server'
@@ -42,15 +41,9 @@ export default async function Index({ searchParams }: Props) {
           </div>
 
           <div className="lg:col-span-1 lg:order-2">
-            <CollapsibleSection
-              title="Predictions"
-              defaultOpen={false}
-              alwaysOpenOnDesktop={true}
-            >
-              <Suspense fallback={<LoadingSkeleton />}>
-                <PredictionsSidebar />
-              </Suspense>
-            </CollapsibleSection>
+            <Suspense fallback={<LoadingSkeleton />}>
+              <PredictionsSidebar />
+            </Suspense>
           </div>
         </div>
       </div>

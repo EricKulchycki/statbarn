@@ -1,9 +1,14 @@
 import { DB_CONFIG } from '@/constants'
 import mongoose from 'mongoose'
 
+// Held on globalThis so Next.js hot reloads, which re-evaluate this module,
+// share one in-flight connection instead of opening another
+const globalForDb = globalThis as typeof globalThis & {
+  dbConnectPromise?: Promise<typeof mongoose> | null
+}
+
 class Database {
   private static instance: Database
-  private connection: mongoose.Connection | null = null
 
   private constructor() {}
 
@@ -14,30 +19,36 @@ class Database {
     return Database.instance
   }
 
+  // Safe to call before every query: concurrent callers share one attempt,
+  // and a failed or dropped connection is retried on the next call
   public async connect(): Promise<void> {
-    if (this.connection) {
-      console.log('Already connected to the database.')
-      return
+    const { readyState } = mongoose.connection
+    if (readyState === mongoose.ConnectionStates.connected) return
+    if (readyState === mongoose.ConnectionStates.disconnected) {
+      globalForDb.dbConnectPromise = null
     }
 
-    try {
-      await mongoose.connect(DB_CONFIG.connectionString, {
-        dbName: DB_CONFIG.dbName,
-      })
-      this.connection = mongoose.connection
-      console.log('Connected to the database.')
-    } catch (error) {
-      console.error('Error connecting to the database:', error)
-      throw error
+    if (!globalForDb.dbConnectPromise) {
+      globalForDb.dbConnectPromise = mongoose
+        .connect(DB_CONFIG.connectionString, { dbName: DB_CONFIG.dbName })
+        .then((connected) => {
+          console.log('Connected to the database.')
+          return connected
+        })
+        .catch((error) => {
+          globalForDb.dbConnectPromise = null
+          console.error('Error connecting to the database:', error)
+          throw error
+        })
     }
+
+    await globalForDb.dbConnectPromise
   }
 
   public disconnect(): void {
-    if (this.connection) {
-      mongoose.disconnect()
-      this.connection = null
-      console.log('Disconnected from the database.')
-    }
+    globalForDb.dbConnectPromise = null
+    mongoose.disconnect()
+    console.log('Disconnected from the database.')
   }
 }
 

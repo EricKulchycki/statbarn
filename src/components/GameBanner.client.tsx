@@ -8,6 +8,7 @@ import {
 } from '@/types/gamePrediction'
 import { DateTime } from 'luxon'
 import Image from 'next/image'
+import { StartTime } from './GameSlate/StartTime'
 import { PropsWithChildren } from 'react'
 
 interface GameBannerClientProps {
@@ -73,10 +74,6 @@ function BannerGame({ game, prediction }: BannerGameProps) {
   const homeScore = game.homeTeam.score
   const awayScore = game.awayTeam.score
 
-  const startTime = DateTime.fromISO(game.startTimeUTC).setZone(
-    game.venueTimezone
-  )
-
   let borderClass = ''
   if (prediction && game.gameState !== 'FUT') {
     const { predictedWinner } = prediction
@@ -98,8 +95,8 @@ function BannerGame({ game, prediction }: BannerGameProps) {
 
   return (
     <div className={`px-2 pb-2 w-fit ${borderClass}`}>
-      <p className="text-xs text-slate-300">
-        <b>{startTime.toLocaleString(DateTime.TIME_SIMPLE)}</b>
+      <p className="text-xs">
+        <StartTime startTimeUTC={game.startTimeUTC} className="font-bold" />
       </p>
       <GameTeam>
         <Image

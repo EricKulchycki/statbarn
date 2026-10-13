@@ -1,15 +1,14 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 
-import './globals.css'
 import { Footer } from '@/components/layout/Footer'
+import './globals.css'
 
-import { Providers } from './providers'
-import { Nav } from '@/components/layout/Header.client'
 import { GameBanner } from '@/components/GameBanner.server'
-import { Suspense } from 'react'
-import { Database } from '@/lib/db'
+import { Nav } from '@/components/layout/Header.client'
 import { SeasonAccuracyChip } from '@/components/layout/SeasonAccuracyChip.server'
+import { Suspense } from 'react'
+import { Providers } from './providers'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -55,10 +54,7 @@ export default function RootLayout({
   )
 }
 
-async function NavWrapper() {
-  const db = Database.getInstance()
-  await db.connect()
-
+function NavWrapper() {
   return (
     <Nav
       desktopChip={<SeasonAccuracyChip className="hidden sm:inline-flex" />}

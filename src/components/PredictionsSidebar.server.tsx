@@ -58,7 +58,7 @@ async function EloRankings() {
                   alt={entry.abbrev}
                   width={24}
                   height={24}
-                  className="rounded-full bg-white/5"
+                  className="size-6 shrink-0 rounded-full bg-white/5 object-contain"
                 />
               )}
               <span className="flex-1 text-sm text-slate-200 font-medium">
@@ -139,7 +139,7 @@ async function ConfidenceLeaders() {
                     alt={p.awayTeam}
                     width={20}
                     height={20}
-                    className="rounded-full bg-white/5 shrink-0"
+                    className="size-5 shrink-0 rounded-full bg-white/5 object-contain"
                   />
                 )}
                 <span className="text-xs text-slate-400">{p.awayTeam}</span>
@@ -150,7 +150,7 @@ async function ConfidenceLeaders() {
                     alt={p.homeTeam}
                     width={20}
                     height={20}
-                    className="rounded-full bg-white/5 shrink-0"
+                    className="size-5 shrink-0 rounded-full bg-white/5 object-contain"
                   />
                 )}
                 <span className="text-xs text-slate-400">{p.homeTeam}</span>
@@ -224,7 +224,7 @@ async function TeamAccuracy() {
             alt={triCode}
             width={20}
             height={20}
-            className="rounded-full bg-white/5 shrink-0"
+            className="size-5 shrink-0 rounded-full bg-white/5 object-contain"
           />
         )}
         <span className="flex-1 text-xs text-slate-300">{triCode}</span>

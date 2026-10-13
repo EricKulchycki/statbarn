@@ -23,7 +23,7 @@ const teamSchema: Schema = new Schema(
     fullName: { type: String, required: true },
     leagueId: { type: Number, required: true },
     rawTricode: { type: String, required: true },
-    triCode: { type: String, required: true },
+    triCode: { type: String, required: true, unique: true },
     conference: {
       type: String,
       enum: Object.values(Conference),

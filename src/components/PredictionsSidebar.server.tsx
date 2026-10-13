@@ -1,6 +1,8 @@
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { getLatestEloData, getTeamAccuracyBySeason } from '@/data/teams'
 import { getTeams } from '@/data/teamsCache'
+import { getCachedBackToBackStats } from '@/lib/cache'
+import { TeamBackToBackStat } from '@/services/elo.service'
 import { predictionsService } from '@/services/predictions.service'
 import { scheduleService } from '@/services/schedule.service'
 import { getCurrentNHLSeason } from '@/utils/currentSeason'
@@ -259,6 +261,96 @@ async function TeamAccuracy() {
   )
 }
 
+// ---- Back-to-Back Performance ----
+
+async function BackToBacks() {
+  const { current, prev } = getSeasonWithFallback()
+  let stats = await getCachedBackToBackStats(current)
+  const season = stats.length > 0 ? current : prev
+  if (stats.length === 0) stats = await getCachedBackToBackStats(prev)
+
+  const heading = (
+    <div className="flex items-center gap-1.5 mb-1">
+      <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400">
+        Back-to-Backs
+      </h3>
+      <InfoTooltip content="How each team does on the second night of a back-to-back, compared with what our model expected. +1.5 means 1.5 more wins than predicted across those games." />
+    </div>
+  )
+
+  if (stats.length === 0) {
+    return (
+      <section>
+        {heading}
+        <p className="text-xs text-slate-500">No data yet.</p>
+      </section>
+    )
+  }
+
+  const teams = await getTeams()
+  const top5 = stats.slice(0, 5)
+  const bottom5 = stats.slice(-5).reverse()
+  const seasonLabel = `${String(season).slice(0, 4)}/${String(season).slice(4)}`
+
+  function BackToBackRow({
+    triCode,
+    games,
+    wins,
+    expectedWins,
+  }: TeamBackToBackStat) {
+    const team = teams.find((t) => t.triCode === triCode)
+    const aboveExpected = wins - expectedWins
+    const color =
+      aboveExpected >= 0.5
+        ? 'text-emerald-400'
+        : aboveExpected <= -0.5
+          ? 'text-red-400'
+          : 'text-slate-300'
+
+    return (
+      <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-800/60 transition-colors">
+        {team?.logo && (
+          <Image
+            src={team.logo}
+            alt={triCode}
+            width={20}
+            height={20}
+            className="size-5 shrink-0 rounded-full bg-white/5 object-contain"
+          />
+        )}
+        <span className="flex-1 text-xs text-slate-300">{triCode}</span>
+        <span className="text-xs text-slate-500 tabular-nums">
+          {wins}–{games - wins}
+        </span>
+        <span
+          className={`w-10 text-right text-xs font-bold tabular-nums ${color}`}
+        >
+          {aboveExpected > 0 ? '+' : ''}
+          {aboveExpected.toFixed(1)}
+        </span>
+      </div>
+    )
+  }
+
+  return (
+    <section>
+      {heading}
+      <p className="text-xs text-slate-600 mb-3">{seasonLabel} season</p>
+      <div className="space-y-0.5">
+        <p className="text-xs text-slate-500 mb-1">Handles them best</p>
+        {top5.map((s) => (
+          <BackToBackRow key={s.triCode} {...s} />
+        ))}
+        <div className="border-t border-slate-800 my-2" />
+        <p className="text-xs text-slate-500 mb-1">Struggles most</p>
+        {bottom5.map((s) => (
+          <BackToBackRow key={s.triCode} {...s} />
+        ))}
+      </div>
+    </section>
+  )
+}
+
 // ---- Sidebar ----
 
 export async function PredictionsSidebar() {
@@ -267,6 +359,7 @@ export async function PredictionsSidebar() {
       <EloRankings />
       <ConfidenceLeaders />
       <TeamAccuracy />
+      <BackToBacks />
     </div>
   )
 }

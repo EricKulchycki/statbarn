@@ -27,3 +27,19 @@ export const getCachedAccuracyStats = unstable_cache(
     tags: ['accuracy-stats'],
   }
 )
+
+/**
+ * Cache back-to-back stats for 1 hour
+ * Recomputed from stored outcomes, so it follows the nightly outcome cron
+ */
+export const getCachedBackToBackStats = unstable_cache(
+  async (season: number) => {
+    const { eloService } = await import('@/services/elo.service')
+    return eloService.getSeasonBackToBackStats(season)
+  },
+  ['b2b-stats'],
+  {
+    revalidate: 3600,
+    tags: ['b2b-stats'],
+  }
+)

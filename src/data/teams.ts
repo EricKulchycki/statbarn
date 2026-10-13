@@ -1,4 +1,5 @@
 import { Database } from '@/lib/db'
+import { MODEL_VERSION } from '@statbarn/prediction-core'
 import { TeamModel } from '@/models/team'
 import { GamePrediction } from '@/types/gamePrediction'
 import { Team, TeamSeasonGame } from '@/types/team'
@@ -277,6 +278,23 @@ export async function countSeasonCorrectPredictions(
   return result[0]?.total ?? 0
 }
 
+export interface TeamSeasonGames {
+  triCode: string
+  games: TeamSeasonGame[]
+}
+
+export async function getSeasonGamesByTeam(
+  season: number
+): Promise<TeamSeasonGames[]> {
+  await connectDatabase()
+  return TeamModel.aggregate<TeamSeasonGames>([
+    { $match: { 'seasons.season': season } },
+    { $unwind: '$seasons' },
+    { $match: { 'seasons.season': season } },
+    { $project: { _id: 0, triCode: 1, games: '$seasons.games' } },
+  ])
+}
+
 export async function getSeasonForecastOutcomes(
   season: number
 ): Promise<ForecastOutcome[]> {
@@ -315,6 +333,7 @@ function teamGameToGamePrediction(
     awayTeamWinProbability: 1 - homeWinProb,
     predictedWinner: homeWinProb >= 0.5 ? homeAbbrev : game.opponent,
     gameDate: new Date(game.gameDate),
+    // Predictions stored before versioning are the original model
     modelVersion: game.prediction?.modelVersion ?? 'v1',
     outcome: game.outcome
       ? {
@@ -381,7 +400,7 @@ export async function recalculatePredictionsForTeam(
   abbrev: string,
   season: number,
   currentElos: { [abbrev: string]: number },
-  modelVersion = 'v1'
+  modelVersion = MODEL_VERSION
 ): Promise<void> {
   await connectDatabase()
   const { predictorService } = await import('@/services/predictor.service')

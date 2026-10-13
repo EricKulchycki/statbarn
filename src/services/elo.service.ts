@@ -7,14 +7,20 @@ import {
   getLeagueGameHistoryByTeam,
   getMatchupHistoryForTeam,
   getSeasonForecastOutcomes,
+  getSeasonGamesByTeam,
   getTeamSeasonGames,
   LatestELO,
 } from '@/data/teams'
 import { GamePrediction } from '@/types/gamePrediction'
 import { TeamSeasonGame } from '@/types/team'
+import { BackToBackSummary, summarizeBackToBacks } from '@/lib/backToBack'
 import { brierScore } from '@/utils/brierScore'
 import { getCurrentNHLSeason } from '@/utils/currentSeason'
 import { createApiError } from '../types/errors'
+
+export interface TeamBackToBackStat extends BackToBackSummary {
+  triCode: string
+}
 
 export class EloService {
   private static instance: EloService
@@ -138,6 +144,27 @@ export class EloService {
       throw createApiError(
         'getSeasonBrierScore',
         `Failed to calculate season Brier score: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
+    }
+  }
+
+  // Teams ordered from best to worst back-to-back results vs. expectation
+  async getSeasonBackToBackStats(
+    season: number
+  ): Promise<TeamBackToBackStat[]> {
+    try {
+      const teams = await getSeasonGamesByTeam(season)
+      return teams
+        .map(({ triCode, games }) => ({
+          triCode,
+          ...summarizeBackToBacks(games),
+        }))
+        .filter((s) => s.games > 0)
+        .sort((a, b) => b.residual - a.residual)
+    } catch (error) {
+      throw createApiError(
+        'getSeasonBackToBackStats',
+        `Failed to calculate back-to-back stats: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }

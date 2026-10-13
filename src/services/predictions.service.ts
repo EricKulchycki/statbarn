@@ -1,4 +1,5 @@
 import { ELO_CONFIG } from '@/constants'
+import { MODEL_VERSION } from '@statbarn/prediction-core'
 import {
   getGamePredictionsForGameIds,
   saveTeamSeasonPredictions,
@@ -54,7 +55,7 @@ export class PredictionsService {
     games: NHLGame[],
     scheduleDate: string,
     currentElos: ELOsByTeam,
-    modelVersion = 'v1'
+    modelVersion = MODEL_VERSION
   ): Promise<void> {
     const byHomeTeam = new Map<
       string,

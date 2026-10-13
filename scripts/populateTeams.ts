@@ -79,8 +79,10 @@ async function main() {
     const confDiv = conferenceDivisionMap[team.triCode]
     const logo = `https://assets.nhle.com/logos/nhl/svg/${team.triCode}_light.svg`
 
+    // Match on triCode so a rebrand (new NHL id) updates the existing team and
+    // keeps its Elo history instead of creating a duplicate
     await TeamModel.updateOne(
-      { id: team.id },
+      { triCode: team.triCode },
       {
         $set: {
           id: team.id,

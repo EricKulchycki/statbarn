@@ -44,6 +44,8 @@ export interface TeamSeasonGame {
   eloBefore: number
   prediction?: {
     winProbability: number
+    // Probability before situational factors (e.g. back-to-back); absent on v1
+    baseWinProbability?: number
     predictedWin: boolean
     modelVersion: string
   }

@@ -1,7 +1,10 @@
-import { ELO_CONFIG } from './constants'
-import type { PredictionInput, PredictionOutput } from './types'
+import { DEFAULT_MODEL_PARAMS } from './constants'
+import type { ModelParams, PredictionInput, PredictionOutput } from './types'
 
-export function predictGame(input: PredictionInput): PredictionOutput {
+export function predictGame(
+  input: PredictionInput,
+  params: Pick<ModelParams, 'homeAdvantage'> = DEFAULT_MODEL_PARAMS
+): PredictionOutput {
   const {
     homeAbbrev,
     awayAbbrev,
@@ -10,7 +13,7 @@ export function predictGame(input: PredictionInput): PredictionOutput {
     matchupFactor = { homeFactor: 0, awayFactor: 0 },
   } = input
 
-  const homeAdj = homeElo + ELO_CONFIG.homeAdvantage + matchupFactor.homeFactor
+  const homeAdj = homeElo + params.homeAdvantage + matchupFactor.homeFactor
   const awayAdj = awayElo + matchupFactor.awayFactor
   const ratingDiff = awayAdj - homeAdj
   const homeWinProbability = 1 / (1 + Math.pow(10, ratingDiff / 400))

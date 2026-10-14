@@ -1,13 +1,8 @@
 import mongoose from 'mongoose'
-import { ELO_CONFIG } from '../src/constants'
+import { regressToMean } from '@statbarn/prediction-core'
 import { Database } from '../src/lib/db'
 import { TeamModel } from '../src/models/team'
-
-const { initialRating: INITIAL_ELO, meanRegressionFactor } = ELO_CONFIG
-
-function regressToMean(elo: number): number {
-  return elo + (INITIAL_ELO - elo) * meanRegressionFactor
-}
+import { getActiveModel } from '../src/services/modelVersion.service'
 
 async function main() {
   const seasonArg = process.argv[2]
@@ -20,6 +15,8 @@ async function main() {
 
   const db = Database.getInstance()
   await db.connect()
+  const { version, params } = await getActiveModel()
+  console.log(`Regressing with model ${version}`)
 
   const teams = await TeamModel.find({}, { triCode: 1, currentElo: 1 })
 
@@ -30,8 +27,8 @@ async function main() {
   let updated = 0
 
   for (const team of teams) {
-    const fromElo = team.currentElo ?? INITIAL_ELO
-    const toElo = regressToMean(fromElo)
+    const fromElo = team.currentElo ?? params.initialRating
+    const toElo = regressToMean(fromElo, params)
 
     await TeamModel.updateOne(
       { _id: team._id },
@@ -50,7 +47,7 @@ async function main() {
 
   await mongoose.disconnect()
   console.log(
-    `\nReset ${updated} teams (factor: ${meanRegressionFactor}, season: ${seasonArg})`
+    `\nReset ${updated} teams (factor: ${params.meanRegressionFactor}, season: ${seasonArg})`
   )
 }
 

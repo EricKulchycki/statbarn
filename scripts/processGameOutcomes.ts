@@ -8,7 +8,9 @@ import {
 import { Database } from '../src/lib/db'
 import { calculateGameELO } from '../src/lib/eloCalculator'
 import { TeamModel } from '../src/models/team'
+import { getActiveModel } from '../src/services/modelVersion.service'
 import { NHLGame } from '../src/types/game'
+import { ModelSnapshot } from '../src/types/modelVersion'
 
 const INITIAL_ELO = ELO_CONFIG.initialRating
 
@@ -38,7 +40,8 @@ async function buildEloMap(): Promise<Record<string, number>> {
 async function processGames(
   games: NHLGame[],
   scheduleDate: string,
-  eloMap: Record<string, number>
+  eloMap: Record<string, number>,
+  model: ModelSnapshot
 ): Promise<void> {
   const season = games[0].season
 
@@ -49,7 +52,7 @@ async function processGames(
     const awayScore = game.awayTeam.score
     const gameDate = new Date(game.startTimeUTC)
 
-    const result = await calculateGameELO(game, eloMap)
+    const result = await calculateGameELO(game, eloMap, model.params)
 
     await Promise.all([
       saveTeamGameOutcome(
@@ -65,6 +68,7 @@ async function processGames(
         result.homeTeam.eloBefore,
         {
           actualWin: homeScore > awayScore,
+          modelVersion: model.version,
           eloAfter: result.homeTeam.eloAfter,
           eloChange: result.homeTeam.eloChange,
           score: { team: homeScore, opponent: awayScore },
@@ -83,6 +87,7 @@ async function processGames(
         result.awayTeam.eloBefore,
         {
           actualWin: awayScore > homeScore,
+          modelVersion: model.version,
           eloAfter: result.awayTeam.eloAfter,
           eloChange: result.awayTeam.eloChange,
           score: { team: awayScore, opponent: homeScore },
@@ -94,8 +99,8 @@ async function processGames(
     eloMap[away] = result.awayTeam.eloAfter
 
     await Promise.all([
-      recalculatePredictionsForTeam(home, season, eloMap),
-      recalculatePredictionsForTeam(away, season, eloMap),
+      recalculatePredictionsForTeam(home, season, eloMap, model),
+      recalculatePredictionsForTeam(away, season, eloMap, model),
     ])
 
     console.log(
@@ -106,7 +111,8 @@ async function processGames(
 
 async function processDate(
   dateStr: string,
-  eloMap: Record<string, number>
+  eloMap: Record<string, number>,
+  model: ModelSnapshot
 ): Promise<void> {
   const schedule = await fetchSchedule(dateStr)
   const gameDay = schedule.gameWeek[0]
@@ -120,10 +126,13 @@ async function processDate(
   }
 
   console.log(`Found ${games.length} completed games.`)
-  await processGames(games, gameDay.date, eloMap)
+  await processGames(games, gameDay.date, eloMap, model)
 }
 
-async function processSeason(season: string): Promise<void> {
+async function processSeason(
+  season: string,
+  model: ModelSnapshot
+): Promise<void> {
   const startYear = season.slice(0, 4)
   let currentDate = `${startYear}-10-01`
   let regularSeasonEnd = ''
@@ -167,7 +176,7 @@ async function processSeason(season: string): Promise<void> {
 
   for (const { date, games } of gameDays) {
     console.log(`\n${date} (${games.length} games)`)
-    await processGames(games, date, eloMap)
+    await processGames(games, date, eloMap, model)
   }
 }
 
@@ -177,6 +186,8 @@ async function main() {
 
   const db = Database.getInstance()
   await db.connect()
+  const model = await getActiveModel()
+  console.log(`Using model ${model.version}`)
 
   if (seasonFlag !== -1) {
     const season = args[seasonFlag + 1]
@@ -184,7 +195,7 @@ async function main() {
       console.error('Usage: --season YYYYYYY (e.g. --season 20252026)')
       process.exit(1)
     }
-    await processSeason(season)
+    await processSeason(season, model)
   } else {
     const dateArg = args[0]
     const date = dateArg
@@ -199,7 +210,7 @@ async function main() {
     const dateStr = date.toISODate()!
     console.log(`Processing outcomes for: ${dateStr}`)
     const eloMap = await buildEloMap()
-    await processDate(dateStr, eloMap)
+    await processDate(dateStr, eloMap, model)
   }
 
   await mongoose.disconnect()

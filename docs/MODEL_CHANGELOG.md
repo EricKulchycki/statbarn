@@ -1,12 +1,42 @@
 # Prediction Model Changelog
 
-Every prediction stores the model that produced it in `prediction.modelVersion`.
-The current version is `MODEL_VERSION` in `packages/prediction-core/src/constants.ts`.
-When the model changes, bump that constant and add an entry here.
+Model versions are stored in the `modelVersions` collection. Each version holds
+every tunable param (`ModelParams` in `packages/prediction-core/src/types.ts`),
+notes, and its saved backtest. Exactly one version is `active`, and the nightly
+crons use that version. A version's params never change once it leaves draft;
+any change becomes a new version.
+
+Every prediction records its version in `prediction.modelVersion`. Outcomes
+processed from v2 onward record theirs in `outcome.modelVersion`. If no version
+is active, the app falls back to `DEFAULT_MODEL_PARAMS` / `MODEL_VERSION` in
+`packages/prediction-core/src/constants.ts` and logs a warning.
 
 History is **not** recalculated when the model changes. Stored ratings and
 predictions keep the version that produced them, so compare models by filtering
 on `modelVersion` and not by date range alone.
+
+## Changing the model
+
+```bash
+# 1. Try a variant against every stored game (read-only)
+npm run model:backtest -- v2 --set kFactor=6 --set homeAdvantage=35
+
+# 2. Keep it as a draft, with its backtest attached
+npm run model:backtest -- v2 --set kFactor=6 --save-as v3 --notes "why"
+
+# 3. Make it live (the next nightly runs use it); then add an entry below
+npm run model:activate -- v3
+```
+
+The backtest replays every completed game in date order, the same way the
+crons would have. The most recent completed season is the **holdout**: judge a
+change by its holdout Brier, and tune only against the train seasons. The
+in-progress season is reported but used for neither. Lower is better; always
+guessing 50% scores 0.250.
+
+Change the model rarely, ideally between seasons. Ratings are path-dependent,
+so frequent changes are hard to evaluate. `npm run model:seed` records v1 and v2
+and is safe to re-run.
 
 ---
 
@@ -18,16 +48,19 @@ are the same as v1.
 
 **Why:** v1 was overconfident. Across 2023–26, favourites the model rated at
 70–80% won only about 56–63% of the time. Ratings moved about 20 Elo per game
-(median), and the 2025–26 Brier score was 0.2572, worse than always guessing
+(median), and the 2025–26 Brier score was 0.2571, worse than always guessing
 50% (0.250).
 
 **Evidence:** a walk-forward replay of the stored scores (tuned on 2023–25,
 tested on 2025–26):
 
-| Config            | 2023–25 Brier | 2025–26 Brier (test) |
-| ----------------- | ------------- | -------------------- |
-| v1: K=32          | 0.2476        | 0.2572               |
-| v2: K=8           | 0.2390        | 0.2480               |
+| Config            | 2023–25 Brier | 2025–26 Brier (holdout) |
+| ----------------- | ------------- | ----------------------- |
+| v1: K=32          | 0.2476        | 0.2571                  |
+| v2: K=8           | 0.2390        | 0.2479                  |
+
+(These are the saved `model:backtest` results. The replay reproduces v1's stored
+2025–26 Brier exactly.)
 
 Any K from 4 to 12 performed about equally well. Results only got worse above
 K=16. Changes to home advantage and the goal-margin boost were within noise.

@@ -63,6 +63,7 @@ const teamSchema: Schema = new Schema(
             },
             outcome: {
               actualWin: { type: Boolean },
+              modelVersion: { type: String },
               eloAfter: { type: Number },
               eloChange: { type: Number },
               score: {

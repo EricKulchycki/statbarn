@@ -1,10 +1,8 @@
-import {
-  recalculatePredictionsForTeam,
-  saveTeamGameOutcome,
-} from '@/data/teams'
+import { saveTeamGameOutcome } from '@/data/teams'
 import { Database } from '@/lib/db'
 import { calculateGameELO } from '@/lib/eloCalculator'
 import { eloService } from '@/services/elo.service'
+import { getActiveModel } from '@/services/modelVersion.service'
 import { scheduleService } from '@/services/schedule.service'
 import { DateTime } from 'luxon'
 import { NextResponse } from 'next/server'
@@ -28,14 +26,17 @@ export async function GET() {
     (g) => g.gameType === 2 && g.gameState === 'OFF'
   )
 
-  const latestElos = await eloService.getLatestElos()
+  const [latestElos, model] = await Promise.all([
+    eloService.getLatestElos(),
+    getActiveModel(),
+  ])
   const eloMap = Object.fromEntries(latestElos.map((e) => [e.abbrev, e.elo]))
 
   const season = games[0]?.season ?? 0
   let processed = 0
 
   for (const game of games) {
-    const result = await calculateGameELO(game, eloMap)
+    const result = await calculateGameELO(game, eloMap, model.params)
     const gameDate = new Date(game.startTimeUTC)
 
     await Promise.all([
@@ -52,6 +53,7 @@ export async function GET() {
         result.homeTeam.eloBefore,
         {
           actualWin: game.homeTeam.score > game.awayTeam.score,
+          modelVersion: model.version,
           eloAfter: result.homeTeam.eloAfter,
           eloChange: result.homeTeam.eloChange,
           score: { team: game.homeTeam.score, opponent: game.awayTeam.score },
@@ -70,6 +72,7 @@ export async function GET() {
         result.awayTeam.eloBefore,
         {
           actualWin: game.awayTeam.score > game.homeTeam.score,
+          modelVersion: model.version,
           eloAfter: result.awayTeam.eloAfter,
           eloChange: result.awayTeam.eloChange,
           score: { team: game.awayTeam.score, opponent: game.homeTeam.score },
@@ -79,11 +82,6 @@ export async function GET() {
 
     eloMap[game.homeTeam.abbrev] = result.homeTeam.eloAfter
     eloMap[game.awayTeam.abbrev] = result.awayTeam.eloAfter
-
-    await Promise.all([
-      recalculatePredictionsForTeam(game.homeTeam.abbrev, season, eloMap),
-      recalculatePredictionsForTeam(game.awayTeam.abbrev, season, eloMap),
-    ])
 
     processed++
   }

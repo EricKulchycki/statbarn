@@ -1,7 +1,8 @@
 import { Database } from '@/lib/db'
-import { MODEL_VERSION } from '@statbarn/prediction-core'
+import type { ReplayGame } from '@/lib/modelBacktest'
 import { TeamModel } from '@/models/team'
 import { GamePrediction } from '@/types/gamePrediction'
+import { ModelSnapshot } from '@/types/modelVersion'
 import { Team, TeamSeasonGame } from '@/types/team'
 import { ForecastOutcome } from '@/utils/brierScore'
 import { toDomainTeam } from '@/utils/converters/team'
@@ -278,6 +279,32 @@ export async function countSeasonCorrectPredictions(
   return result[0]?.total ?? 0
 }
 
+// Every completed game once (home side), across all seasons, for replays
+export async function getCompletedGamesAllSeasons(): Promise<ReplayGame[]> {
+  await connectDatabase()
+  return TeamModel.aggregate<ReplayGame>([
+    { $unwind: '$seasons' },
+    { $unwind: '$seasons.games' },
+    {
+      $match: {
+        'seasons.games.isHome': true,
+        'seasons.games.outcome': { $exists: true },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        season: '$seasons.season',
+        gameDate: '$seasons.games.gameDate',
+        home: '$triCode',
+        away: '$seasons.games.opponent',
+        homeScore: '$seasons.games.outcome.score.team',
+        awayScore: '$seasons.games.outcome.score.opponent',
+      },
+    },
+  ])
+}
+
 export interface TeamSeasonGames {
   triCode: string
   games: TeamSeasonGame[]
@@ -400,11 +427,11 @@ export async function recalculatePredictionsForTeam(
   abbrev: string,
   season: number,
   currentElos: { [abbrev: string]: number },
-  modelVersion = MODEL_VERSION
+  model: ModelSnapshot
 ): Promise<void> {
   await connectDatabase()
   const { predictorService } = await import('@/services/predictor.service')
-  const { ELO_CONFIG } = await import('@/constants')
+  const { version: modelVersion, params } = model
 
   const team = await TeamModel.findOne({ triCode: abbrev })
   if (!team) return
@@ -414,18 +441,21 @@ export async function recalculatePredictionsForTeam(
   )
   if (!seasonDoc) return
 
-  const teamElo = currentElos[abbrev] ?? ELO_CONFIG.initialRating
+  const teamElo = currentElos[abbrev] ?? params.initialRating
 
   for (const game of seasonDoc.games) {
     if (game.outcome) continue
 
-    const opponentElo = currentElos[game.opponent] ?? ELO_CONFIG.initialRating
-    const result = predictorService.predictGame({
-      homeAbbrev: game.isHome ? abbrev : game.opponent,
-      awayAbbrev: game.isHome ? game.opponent : abbrev,
-      homeElo: game.isHome ? teamElo : opponentElo,
-      awayElo: game.isHome ? opponentElo : teamElo,
-    })
+    const opponentElo = currentElos[game.opponent] ?? params.initialRating
+    const result = predictorService.predictGame(
+      {
+        homeAbbrev: game.isHome ? abbrev : game.opponent,
+        awayAbbrev: game.isHome ? game.opponent : abbrev,
+        homeElo: game.isHome ? teamElo : opponentElo,
+        awayElo: game.isHome ? opponentElo : teamElo,
+      },
+      params
+    )
 
     const winProbability = game.isHome
       ? result.homeWinProbability

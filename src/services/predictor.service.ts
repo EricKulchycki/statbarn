@@ -1,4 +1,5 @@
 import type {
+  ModelParams,
   PredictionInput,
   PredictionOutput,
 } from '@statbarn/prediction-core'
@@ -18,8 +19,8 @@ export class PredictorService {
     return PredictorService.instance
   }
 
-  predictGame(input: PredictionInput): PredictionOutput {
-    return predictGame(input)
+  predictGame(input: PredictionInput, params?: ModelParams): PredictionOutput {
+    return predictGame(input, params)
   }
 }
 

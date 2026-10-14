@@ -4,11 +4,12 @@ import { makePicksService } from '@/services/makePicks.service'
 import { NextResponse } from 'next/server'
 
 /**
- * Combined cron job that runs two isolated tasks concurrently:
- * 1. Create predictions for tomorrow's games
- * 2. Make picks for the system user based on predictions
+ * Nightly cron, scheduled after the outcome cron so ratings are current:
+ * 1. Predict (or re-predict) every unstarted game in the next 3 days
+ * 2. Make picks for the system user from those predictions
  *
- * Both tasks run independently and failures in one don't block the other
+ * Picks run after predictions so they use fresh ones, and still run if
+ * predicting fails (earlier nights already predicted most of the window)
  */
 export async function GET() {
   const db = Database.getInstance()
@@ -16,12 +17,8 @@ export async function GET() {
 
   console.log('Executing predictions cron job (predictions + make picks)...')
 
-  // Run both tasks concurrently using Promise.allSettled
-  // This ensures both tasks run independently and one failure doesn't crash the other
-  const [predictionsResult, makePicksResult] = await Promise.allSettled([
-    runCreatePredictions(),
-    runMakePicks(),
-  ])
+  const [predictionsResult] = await Promise.allSettled([runCreatePredictions()])
+  const [makePicksResult] = await Promise.allSettled([runMakePicks()])
 
   // Collect results from both tasks
   const results = {
@@ -61,14 +58,14 @@ export async function GET() {
 }
 
 /**
- * Task 1: Create predictions for tomorrow's games
+ * Task 1: Predict the upcoming window
  */
 async function runCreatePredictions() {
   try {
-    console.log("[Task 1] Creating predictions for tomorrow's games...")
-    await predictionsService.createNextDayPredictions()
-    console.log('[Task 1] ✓ Predictions created successfully')
-    return { success: true, message: 'Predictions created' }
+    console.log('[Task 1] Predicting upcoming games...')
+    const stats = await predictionsService.createUpcomingPredictions()
+    console.log('[Task 1] ✓ Predictions saved:', stats)
+    return { success: true, stats }
   } catch (error) {
     console.error('[Task 1] ✗ Error creating predictions:', error)
     throw error

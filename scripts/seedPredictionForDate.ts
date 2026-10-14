@@ -1,5 +1,6 @@
 import { Database } from '../src/lib/db'
 import { eloService } from '../src/services/elo.service'
+import { getActiveModel } from '../src/services/modelVersion.service'
 import { predictionsService } from '../src/services/predictions.service'
 import { scheduleService } from '../src/services/schedule.service'
 import { NHLGame } from '../src/types/game'
@@ -18,10 +19,13 @@ async function seedPredictionsForDate(date: string) {
     return
   }
 
-  const latestElos = await eloService.getLatestElos()
+  const [latestElos, model] = await Promise.all([
+    eloService.getLatestElos(),
+    getActiveModel(),
+  ])
   const eloMap = Object.fromEntries(latestElos.map((e) => [e.abbrev, e.elo]))
 
-  await predictionsService.predictGames(games, gameDay.date, eloMap)
+  await predictionsService.predictGames(games, gameDay.date, eloMap, model)
   console.log(`Seeded predictions for ${games.length} games on ${date}`)
 }
 

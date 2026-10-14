@@ -1,13 +1,14 @@
-import { ELO_CONFIG } from '@/constants'
-import { MODEL_VERSION } from '@statbarn/prediction-core'
 import {
   getGamePredictionsForGameIds,
   saveTeamSeasonPredictions,
 } from '@/data/teams'
 import { ELOsByTeam } from '@/lib/eloCalculator'
+import { selectGamesToPredict } from '@/lib/predictionWindow'
 import { NHLGame, NHLGameWeek } from '@/types/game'
 import { GamePrediction } from '@/types/gamePrediction'
+import { ModelSnapshot } from '@/types/modelVersion'
 import { eloService } from './elo.service'
+import { getActiveModel } from './modelVersion.service'
 import { predictorService } from './predictor.service'
 import { scheduleService } from './schedule.service'
 
@@ -36,27 +37,41 @@ export class PredictionsService {
     return getGamePredictionsForGameIds(gameIds)
   }
 
-  async createNextDayPredictions(): Promise<void> {
-    const tomorrow = new Date().toISOString().slice(0, 10)
+  // Predicts every unstarted game in the window, re-predicting ones already
+  // stored so each night's ratings and active model replace older forecasts
+  async createUpcomingPredictions(): Promise<{
+    days: number
+    games: number
+  }> {
+    // Runs at 06:30 UTC, when the UTC date is tonight's North American slate
+    const today = new Date().toISOString().slice(0, 10)
 
-    const gameWeek = await scheduleService.getScheduleByDate(tomorrow)
-    const gameDay = gameWeek.gameWeek[0]
-    const games = (gameDay?.games || []).filter((g) => g.gameType === 2)
-
-    if (!gameDay || games.length === 0) return
-
-    const latestElos = await eloService.getLatestElos()
+    const [schedule, latestElos, model] = await Promise.all([
+      scheduleService.getScheduleByDate(today),
+      eloService.getLatestElos(),
+      getActiveModel(),
+    ])
     const eloMap = Object.fromEntries(latestElos.map((e) => [e.abbrev, e.elo]))
+    const days = selectGamesToPredict(schedule.gameWeek, today)
 
-    await this.predictGames(games, gameDay.date, eloMap)
+    // One day at a time: each day saves to the same team documents
+    for (const day of days) {
+      await this.predictGames(day.games, day.date, eloMap, model)
+    }
+
+    return {
+      days: days.length,
+      games: days.reduce((n, d) => n + d.games.length, 0),
+    }
   }
 
   async predictGames(
     games: NHLGame[],
     scheduleDate: string,
     currentElos: ELOsByTeam,
-    modelVersion = MODEL_VERSION
+    model: ModelSnapshot
   ): Promise<void> {
+    const { version: modelVersion, params } = model
     const byHomeTeam = new Map<
       string,
       Array<{
@@ -93,16 +108,14 @@ export class PredictionsService {
     for (const game of games) {
       const homeAbbrev = game.homeTeam.abbrev
       const awayAbbrev = game.awayTeam.abbrev
-      const homeElo = currentElos[homeAbbrev] ?? ELO_CONFIG.initialRating
-      const awayElo = currentElos[awayAbbrev] ?? ELO_CONFIG.initialRating
+      const homeElo = currentElos[homeAbbrev] ?? params.initialRating
+      const awayElo = currentElos[awayAbbrev] ?? params.initialRating
 
       const { homeWinProbability, awayWinProbability } =
-        predictorService.predictGame({
-          homeAbbrev,
-          awayAbbrev,
-          homeElo,
-          awayElo,
-        })
+        predictorService.predictGame(
+          { homeAbbrev, awayAbbrev, homeElo, awayElo },
+          params
+        )
 
       const gameDate = new Date(game.startTimeUTC)
       const season = game.season

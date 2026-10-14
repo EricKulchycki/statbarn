@@ -51,6 +51,8 @@ export interface TeamSeasonGame {
   }
   outcome?: {
     actualWin: boolean
+    // Model whose Elo settings produced eloAfter; absent before versioning
+    modelVersion?: string
     eloAfter: number
     eloChange: number
     score: { team: number; opponent: number }

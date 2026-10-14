@@ -16,6 +16,9 @@
     "clear:teamSeasons": "tsx --env-file=.env scripts/clearTeamSeasons.ts",
     "migrate:scheduleDate": "tsx --env-file=.env scripts/backfillScheduleDate.ts",
     "process:outcomes":"tsx --env-file=.env scripts/processGameOutcomes.ts",
+    "model:seed": "tsx --env-file=.env scripts/seedModelVersions.ts",
+    "model:backtest": "tsx --env-file=.env scripts/backtestModel.ts",
+    "model:activate": "tsx --env-file=.env scripts/activateModel.ts",
     "start": "next start",
     "lint": "eslint"
   },

@@ -26,6 +26,7 @@ export async function DaySlate({ requestedDate }: Props) {
       gamesById={gamesById}
       predictionsById={predictionsById}
       teams={teams}
+      todayIso={todayIso}
     />
   )
 }

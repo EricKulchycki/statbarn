@@ -1,4 +1,4 @@
-import { DaySlate } from '@/lib/daySlate'
+import { DaySlate } from '@/lib/daySlateModel'
 import { cn } from '@heroui/react'
 import { buildStatTiles, StatTileModel, Tone } from './presentation'
 

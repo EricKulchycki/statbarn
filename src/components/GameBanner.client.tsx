@@ -1,5 +1,7 @@
 'use client'
 
+import { useLiveGames } from '@/hooks/useLiveGames'
+import { applyLiveGame } from '@/lib/liveGames'
 import { NHLGame, NHLGameDay } from '@/types/game'
 import {
   GamePrediction,
@@ -20,6 +22,16 @@ export function GameBannerClient({
   gamesThisWeek,
   predictions,
 }: GameBannerClientProps) {
+  const live = useLiveGames(
+    gamesThisWeek.flatMap((day) =>
+      day.games.map((g) => ({
+        id: g.id,
+        startTimeUTC: g.startTimeUTC,
+        gameState: g.gameState,
+      }))
+    )
+  )
+
   const predictionsMap = new Map(
     predictions.map((p) => {
       const d = deserializeGamePrediction(p)
@@ -34,7 +46,7 @@ export function GameBannerClient({
         .map((gw) => (
           <TodaysGames
             key={gw.date}
-            games={gw.games}
+            games={gw.games.map((g) => applyLiveGame(g, live.get(g.id)))}
             date={gw.date}
             predictionsMap={predictionsMap}
           />

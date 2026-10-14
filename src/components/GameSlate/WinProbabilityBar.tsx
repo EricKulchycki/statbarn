@@ -1,4 +1,4 @@
-import { SlateGame } from '@/lib/daySlate'
+import { SlateGame } from '@/lib/daySlateModel'
 import { getWinProbability } from './presentation'
 
 export function WinProbabilityBar({ game }: { game: SlateGame }) {

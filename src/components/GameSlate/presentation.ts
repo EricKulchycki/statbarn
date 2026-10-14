@@ -1,6 +1,6 @@
 // Pure view-model helpers for the game slate. Components only map these
 // results to markup, so every display decision is unit-testable.
-import { DaySlate, PickStatus, SlateGame, SlateTeam } from '@/lib/daySlate'
+import { DaySlate, PickStatus, SlateGame, SlateTeam } from '@/lib/daySlateModel'
 
 export type Tone = 'neutral' | 'positive' | 'negative'
 export type BadgeIcon = 'up' | 'down' | 'check' | 'cross'

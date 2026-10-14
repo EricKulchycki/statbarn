@@ -1,4 +1,4 @@
-import { SlateGame } from '@/lib/daySlate'
+import { SlateGame } from '@/lib/daySlateModel'
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import { cn } from '@heroui/react'
 import { ReactNode } from 'react'

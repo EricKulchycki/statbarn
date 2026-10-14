@@ -1,4 +1,4 @@
-import { SlateGame } from '@/lib/daySlate'
+import { SlateGame } from '@/lib/daySlateModel'
 import { cn } from '@heroui/react'
 import Image from 'next/image'
 import { PickBadge } from './PickBadge'

@@ -1,6 +1,7 @@
 'use client'
 
-import { DaySlate } from '@/lib/daySlate'
+import { useLiveGames } from '@/hooks/useLiveGames'
+import { applyLiveGames, DaySlate } from '@/lib/daySlateModel'
 import { NHLGame } from '@/types/game'
 import { GamePrediction } from '@/types/gamePrediction'
 import { Team } from '@/types/team'
@@ -16,13 +17,28 @@ interface Props {
   gamesById: Map<number, NHLGame>
   predictionsById: Map<number, GamePrediction>
   teams: Team[]
+  todayIso: string
 }
 
-export function GameSlate({ slate, gamesById, predictionsById, teams }: Props) {
+export function GameSlate({
+  slate: initialSlate,
+  gamesById,
+  predictionsById,
+  teams,
+  todayIso,
+}: Props) {
   const { openMatchup, modalProps } = useMatchupModal(
     gamesById,
     predictionsById
   )
+  const live = useLiveGames(
+    initialSlate.games.map((g) => ({
+      id: g.id,
+      startTimeUTC: g.startTimeUTC,
+      gameState: gamesById.get(g.id)?.gameState ?? 'FUT',
+    }))
+  )
+  const slate = applyLiveGames(initialSlate, live, todayIso)
   const sections = buildSections(slate)
 
   return (

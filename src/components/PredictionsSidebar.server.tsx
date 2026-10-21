@@ -2,11 +2,9 @@ import { InfoTooltip } from '@/components/InfoTooltip'
 import { getLatestEloData, getTeamAccuracyBySeason } from '@/data/teams'
 import { getTeams } from '@/data/teamsCache'
 import { getCachedBackToBackStats } from '@/lib/cache'
+import { getDaySlates, topPicks } from '@/lib/daySlate'
 import { TeamBackToBackStat } from '@/services/elo.service'
-import { predictionsService } from '@/services/predictions.service'
-import { scheduleService } from '@/services/schedule.service'
 import { getCurrentNHLSeason } from '@/utils/currentSeason'
-import { DateTime } from 'luxon'
 import Image from 'next/image'
 
 function getSeasonWithFallback(): { current: number; prev: number } {
@@ -80,21 +78,12 @@ async function EloRankings() {
 // ---- Today's Confidence Leaders ----
 
 async function ConfidenceLeaders() {
-  const today = DateTime.now().toISODate() ?? ''
-  const schedule = await scheduleService.getScheduleByDate(today)
-  const predictions =
-    await predictionsService.getUpcomingGamePredictions(schedule)
+  // Same per-request slates as the game list, so "today" matches the
+  // viewer's timezone
+  const { slates, todayIso } = await getDaySlates()
+  const picks = topPicks(slates, todayIso)
 
-  const withConfidence = predictions
-    .filter((p) => !p.outcome)
-    .map((p) => ({
-      ...p,
-      confidence: Math.abs(p.homeTeamWinProbability - 0.5) * 2,
-    }))
-    .sort((a, b) => b.confidence - a.confidence)
-    .slice(0, 5)
-
-  if (withConfidence.length === 0) {
+  if (picks.length === 0) {
     return (
       <section>
         <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-3">
@@ -105,23 +94,14 @@ async function ConfidenceLeaders() {
     )
   }
 
-  const teams = await getTeams()
-
   return (
     <section>
       <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-3">
         Today&apos;s Top Picks
       </h3>
       <div className="space-y-2">
-        {withConfidence.map((p) => {
-          const homeTeam = teams.find((t) => t.triCode === p.homeTeam)
-          const awayTeam = teams.find((t) => t.triCode === p.awayTeam)
-          const favoured =
-            p.homeTeamWinProbability >= 0.5 ? p.homeTeam : p.awayTeam
-          const winPct = Math.max(
-            p.homeTeamWinProbability,
-            p.awayTeamWinProbability
-          )
+        {picks.map((game) => {
+          const winPct = game.pickProbability ?? 0
           const confidenceColor =
             winPct >= 0.7
               ? 'text-emerald-400'
@@ -131,35 +111,35 @@ async function ConfidenceLeaders() {
 
           return (
             <div
-              key={p.gameId}
+              key={game.id}
               className="flex items-center gap-2 px-2 py-2 rounded-lg bg-slate-800/40"
             >
               <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                {awayTeam?.logo && (
-                  <Image
-                    src={awayTeam.logo}
-                    alt={p.awayTeam}
-                    width={20}
-                    height={20}
-                    className="size-5 shrink-0 rounded-full bg-white/5 object-contain"
-                  />
-                )}
-                <span className="text-xs text-slate-400">{p.awayTeam}</span>
+                <Image
+                  src={game.away.logo}
+                  alt={game.away.abbrev}
+                  width={20}
+                  height={20}
+                  className="size-5 shrink-0 rounded-full bg-white/5 object-contain"
+                />
+                <span className="text-xs text-slate-400">
+                  {game.away.abbrev}
+                </span>
                 <span className="text-xs text-slate-600">@</span>
-                {homeTeam?.logo && (
-                  <Image
-                    src={homeTeam.logo}
-                    alt={p.homeTeam}
-                    width={20}
-                    height={20}
-                    className="size-5 shrink-0 rounded-full bg-white/5 object-contain"
-                  />
-                )}
-                <span className="text-xs text-slate-400">{p.homeTeam}</span>
+                <Image
+                  src={game.home.logo}
+                  alt={game.home.abbrev}
+                  width={20}
+                  height={20}
+                  className="size-5 shrink-0 rounded-full bg-white/5 object-contain"
+                />
+                <span className="text-xs text-slate-400">
+                  {game.home.abbrev}
+                </span>
               </div>
               <div className="text-right shrink-0">
                 <span className="text-xs font-semibold text-slate-300">
-                  {favoured}
+                  {game.pick}
                 </span>
                 <span
                   className={`ml-1.5 text-xs font-bold tabular-nums ${confidenceColor}`}

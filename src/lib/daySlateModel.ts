@@ -251,3 +251,19 @@ export function resolveSelectedDate(
   if (dates.includes(todayIso)) return todayIso
   return dates[0]
 }
+
+// Today's most confident picks. Reads only today's slate, since stored
+// predictions now run several days ahead
+export function topPicks(
+  slates: DaySlate[],
+  todayIso: string,
+  limit = 5
+): SlateGame[] {
+  const today = slates.find((s) => s.date === todayIso)
+  if (!today) return []
+
+  return today.games
+    .filter((g) => g.pick !== null && g.pickProbability !== null)
+    .sort((a, b) => (b.pickProbability ?? 0) - (a.pickProbability ?? 0))
+    .slice(0, limit)
+}

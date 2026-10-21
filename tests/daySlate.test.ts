@@ -4,6 +4,7 @@ import {
   resolveSelectedDate,
   summarizeDay,
   tallyRecord,
+  topPicks,
   toSlateGame,
 } from '../src/lib/daySlate'
 import {
@@ -221,5 +222,44 @@ describe('resolveSelectedDate', () => {
     expect(resolveSelectedDate(undefined, slates, '2026-12-25')).toBe(
       '2026-10-05'
     )
+  })
+})
+
+describe('topPicks', () => {
+  const TOMORROW = '2026-10-07'
+  const withHome = (gameId: number, home: number) => ({
+    ...makeHomeFavoredPrediction(gameId),
+    homeTeamWinProbability: home,
+    awayTeamWinProbability: 1 - home,
+  })
+
+  const slates = buildDaySlates(
+    [
+      makeDay(TODAY, [
+        makeGame(1, 'FUT'),
+        makeGame(2, 'FUT'),
+        makeGame(3, 'FUT'),
+      ]),
+      makeDay(TOMORROW, [makeGame(4, 'FUT')]),
+    ],
+    new Map([
+      [1, withHome(1, 0.55)],
+      [2, withHome(2, 0.7)],
+      // Game 3 has no prediction; game 4 is tomorrow's most confident pick
+      [4, withHome(4, 0.9)],
+    ]),
+    TODAY
+  )
+
+  it("ranks only today's predicted games, most confident first", () => {
+    expect(topPicks(slates, TODAY).map((g) => g.id)).toEqual([2, 1])
+  })
+
+  it('respects the limit', () => {
+    expect(topPicks(slates, TODAY, 1).map((g) => g.id)).toEqual([2])
+  })
+
+  it('is empty when today has no slate', () => {
+    expect(topPicks(slates, '2026-10-08')).toEqual([])
   })
 })

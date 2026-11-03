@@ -125,6 +125,24 @@ describe('backtestModel', () => {
     // AAA's sweep raises its expected score, so it gains less from winning
     expect(adjusted[2].probability).toBeLessThan(plain[2].probability)
   })
+
+  it("returns each team's rating after the last game", () => {
+    const { ratings } = backtestModel(
+      [game(1, 1, 'AAA', 'BBB', true), game(2, 2, 'AAA', 'CCC', true)],
+      params,
+      noSplit
+    )
+
+    // Season 1: AAA 1510, BBB 1490. Regressed a third of the way to 1500
+    // for season 2, then AAA (1506.7) beats CCC (1500)
+    const aaaStart = 1500 + 10 * (1 - params.meanRegressionFactor)
+    const aaaExpected = 1 / (1 + 10 ** ((1500 - aaaStart) / 400))
+    expect(ratings.AAA).toBeCloseTo(aaaStart + 20 * (1 - aaaExpected))
+    expect(ratings.BBB).toBeCloseTo(
+      1500 - 10 * (1 - params.meanRegressionFactor)
+    )
+    expect(ratings.CCC).toBeCloseTo(1500 - 20 * (1 - aaaExpected))
+  })
 })
 
 describe('calibrationBuckets', () => {

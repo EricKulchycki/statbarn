@@ -2,7 +2,7 @@ import type { ModelParams } from './types'
 
 // Fallback model when no active version is stored in the database. Versions
 // themselves live in the modelVersions collection; see docs/MODEL_CHANGELOG.md
-export const MODEL_VERSION = 'v2'
+export const MODEL_VERSION = 'v3'
 
 export const DEFAULT_MODEL_PARAMS: ModelParams = {
   // Hockey results are noisy; walk-forward backtests over 2023-26 put the
@@ -12,7 +12,9 @@ export const DEFAULT_MODEL_PARAMS: ModelParams = {
   homeAdvantage: 25,
   meanRegressionFactor: 0.33,
   marginOfVictory: { enabled: true, goalDiffCap: 4, scale: 0.3, maxK: 100 },
-  matchupMaxAdjustment: 8,
+  // The last-5 head-to-head Elo nudge (v1–v2 used 8) made no measurable
+  // difference in backtests, so v3 turns it off
+  matchupMaxAdjustment: 0,
 }
 
 export const ELO_CONFIG = {

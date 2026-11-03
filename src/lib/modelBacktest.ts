@@ -6,6 +6,7 @@ import {
   matchupFactorFromRecord,
   predictGame,
   regressToMean,
+  type ELOsByTeam,
   type ModelParams,
 } from '@statbarn/prediction-core'
 
@@ -25,6 +26,8 @@ export interface SeasonForecast extends ForecastOutcome {
 export interface BacktestRun {
   backtest: ModelBacktest
   forecasts: SeasonForecast[]
+  // Each team's rating after the last replayed game
+  ratings: ELOsByTeam
 }
 
 const MATCHUP_HISTORY = 5
@@ -117,6 +120,7 @@ export function backtestModel(
   return {
     backtest: summarize(forecasts, holdoutSeason, currentSeason),
     forecasts,
+    ratings: Object.fromEntries(ratings),
   }
 }
 

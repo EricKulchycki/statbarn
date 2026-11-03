@@ -40,6 +40,58 @@ and is safe to re-run.
 
 ---
 
+## v3 (2026-11-03)
+
+**Change:** the last-5 head-to-head adjustment is off (`matchupMaxAdjustment`
+8 → 0). Nothing else changed.
+
+**Why:** turning it off made no measurable difference. It only ever affected
+Elo updates (never published predictions), and at K=8 it moved ratings by a
+fraction of a point per game. It also cost a database query for every game in
+the nightly outcome run.
+
+| Config                 | 2023–25 Brier | 2025–26 Brier (holdout) |
+| ---------------------- | ------------- | ----------------------- |
+| v2: head-to-head ±8    | 0.2390        | 0.2479                  |
+| v3: head-to-head off   | 0.2390        | 0.2480                  |
+
+The same check found that turning off home advantage made Brier clearly worse
+(train +0.0024), and turning off the goal-margin boost was mixed (train +0.0004,
+holdout −0.0003). Both were kept.
+
+**Code:** the setting remains so v1 and v2 can still be replayed exactly. When
+it is 0, the outcome run skips the head-to-head query.
+
+**Rollout:** current ratings were rebuilt under v3 straight after activation
+(`eloResets` reason `rebuild-v3`; largest change 1.0 Elo, COL). Stored history
+is unchanged.
+
+## v2 ratings rebuild (2026-11-02)
+
+**Change:** every team's current rating was rebuilt by replaying all 4,108
+completed games (2023–24 onward) under v2, as if v2 had been used from the
+start. Nothing about the model itself changed.
+
+**Why:** v2 was rolled out forward only, so it was working from ratings that
+three seasons of K=32 had spread too wide (SD from 1500: 58.8 live vs 41.8
+rebuilt). At K=8 those would take a long time to settle. Biggest moves: CGY
++64.7, DET +57.2, PHI +52.0, EDM −42.7, NYR −42.2.
+
+**Caveat:** the rebuild was suggested after seeing that a v2 replay scored 61.0%
+on this season's first 213 games, against 55.4% live. Don't read that gap as
+the expected gain; 213 games is too few to tell, and v2 scored 52.9% on the
+2025–26 holdout.
+
+**What changed in the data:**
+- `currentElo` on all 32 teams. The old values are logged in `eloResets` with
+  reason `rebuild-v2`, so they can be restored.
+- Stored games, outcomes, predictions and accuracy are unchanged. A team's
+  history graph will show a jump between its last game's `eloAfter` and its
+  next game's `eloBefore`.
+- Upcoming predictions and system picks update in the next nightly run.
+
+Rerun with `npm run model:rebuild-ratings` (dry run) and `-- --apply`.
+
 ## v2 (2026-10-12)
 
 **Change:** Elo K-factor lowered from **32 to 8**. Nothing else changed: the

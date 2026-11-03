@@ -19,6 +19,7 @@
     "model:seed": "tsx --env-file=.env scripts/seedModelVersions.ts",
     "model:backtest": "tsx --env-file=.env scripts/backtestModel.ts",
     "model:activate": "tsx --env-file=.env scripts/activateModel.ts",
+    "model:rebuild-ratings": "tsx --env-file=.env scripts/rebuildRatings.ts",
     "start": "next start",
     "lint": "eslint"
   },

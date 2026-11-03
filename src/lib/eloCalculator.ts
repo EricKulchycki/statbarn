@@ -16,6 +16,8 @@ import {
 
 export type { ELOCalculationResult, ELOsByTeam }
 
+const NO_MATCHUP_FACTOR: MatchupFactor = { homeFactor: 0, awayFactor: 0 }
+
 export async function calculateGameELO(
   game: NHLGame,
   currentElos: ELOsByTeam,
@@ -27,10 +29,11 @@ export async function calculateGameELO(
   const homeElo = currentElos[homeAbbrev] ?? params.initialRating
   const awayElo = currentElos[awayAbbrev] ?? params.initialRating
 
-  const matchupFactor = await getLast5MatchupFactor(
-    game,
-    params.matchupMaxAdjustment
-  )
+  // Off from v3; skip the history query when it can't change anything
+  const matchupFactor =
+    params.matchupMaxAdjustment > 0
+      ? await getLast5MatchupFactor(game, params.matchupMaxAdjustment)
+      : NO_MATCHUP_FACTOR
 
   const isInFuture = new Date(game.startTimeUTC) > new Date()
   const goalDiff = Math.abs(game.homeTeam.score - game.awayTeam.score)

@@ -423,6 +423,29 @@ export async function saveTeamGameOutcome(
   }
 }
 
+// Sets a team's rating outside the nightly run, logging the change in
+// eloResets. Stored games, outcomes and predictions are left as they are.
+export async function resetTeamElo(
+  triCode: string,
+  toElo: number,
+  reason: string,
+  date: Date
+): Promise<void> {
+  await connectDatabase()
+  const team = await TeamModel.findOne({ triCode }, { currentElo: 1 }).lean()
+  if (!team) throw new Error(`No team "${triCode}"`)
+
+  await TeamModel.updateOne(
+    { triCode },
+    {
+      $set: { currentElo: toElo },
+      $push: {
+        eloResets: { date, reason, fromElo: team.currentElo ?? toElo, toElo },
+      },
+    }
+  )
+}
+
 export async function recalculatePredictionsForTeam(
   abbrev: string,
   season: number,
